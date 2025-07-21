@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import VideoPlayer from '../components/VideoPlayer.vue';
+import VideoPlayer from '@/components/VideoPlayer.vue';
 
 export default {
   name: 'VideoPlayerPage',

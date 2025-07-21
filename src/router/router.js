@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import VideoPlayerPage from '../sites/VideoPlayerPage.vue'
-import App from '../sites/App.vue'
+import VideoPlayerPage from '@/sites/VideoPlayerPage.vue'
+import App from '@/sites/App.vue'
 
 const routes = [
   {
