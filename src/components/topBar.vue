@@ -1,20 +1,22 @@
 <template>
+   <header class="top-bar">
     <div class="top-bar-left">
-        <a href="/">
-          <img src="@/assets/logo.svg" alt="首页" class="home-icon" />
-        </a>
-      </div>
-      <div class="top-bar-right">
-        <div class="user-dropdown">
-          <button class="user-button">
-            用户名 ▼
-          </button>
-          <div class="dropdown-content">
-            <a href="/profile">个人资料</a>
-            <a href="/logout">退出登录</a>
-          </div>
+      <a href="/">
+        <img src="@/assets/logo.svg" alt="首页" class="home-icon" />
+      </a>
+    </div>
+    <div class="top-bar-right">
+      <div class="user-dropdown">
+        <button class="user-button">
+          用户名 ▼
+        </button>
+        <div class="dropdown-content">
+          <a href="/profile">个人资料</a>
+          <a href="/logout">退出登录</a>
         </div>
       </div>
+    </div>
+  </header>
 </template>
 
 <style scoped>
