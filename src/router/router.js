@@ -4,11 +4,6 @@ import App from '@/sites/App.vue'
 
 const routes = [
   {
-    path: '/',
-    name: 'App',
-    component: App
-  },
-  {
     path: '/video',
     name: 'VideoPlayer',
     component: VideoPlayerPage

@@ -11,7 +11,11 @@ import HelloWorld from '@/components/HelloWorld.vue'
       <img src="@/assets/vue.svg" class="logo vue" alt="Vue logo" />
     </a>
   </div>
-  <HelloWorld msg="Vite + Vue" />
+  <div id="app">
+    <!-- 必须有这个标签，否则路由页面不会显示 -->
+    <router-view />
+  </div>
+  
 </template>
 
 <style scoped>
