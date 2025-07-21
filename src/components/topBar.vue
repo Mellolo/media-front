@@ -1,12 +1,5 @@
-<script setup>
-import HelloWorld from '@/components/HelloWorld.vue'
-</script>
-
 <template>
-  <div>
-    <!-- 顶部栏 -->
-    <header class="top-bar">
-      <div class="top-bar-left">
+    <div class="top-bar-left">
         <a href="/">
           <img src="@/assets/logo.svg" alt="首页" class="home-icon" />
         </a>
@@ -22,13 +15,6 @@ import HelloWorld from '@/components/HelloWorld.vue'
           </div>
         </div>
       </div>
-    </header>
-
-    <!-- 原始内容 -->
-    <div id="app">
-      <router-view />
-    </div>
-  </div>
 </template>
 
 <style scoped>
@@ -71,7 +57,7 @@ import HelloWorld from '@/components/HelloWorld.vue'
 .dropdown-content {
   display: none;
   position: absolute;
-  background-color: #ffffff;
+  background-color: lch(63.77% 58.17 148.07);
   min-width: 120px;
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
   z-index: 1;

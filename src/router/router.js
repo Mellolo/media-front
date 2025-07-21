@@ -1,8 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import VideoPlayerPage from '@/sites/VideoPlayerPage.vue'
-import App from '@/sites/App.vue'
 
 const routes = [
+  {
+    path: '/',
+    name: 'VideoPlayer',
+    component: VideoPlayerPage
+  },
   {
     path: '/video',
     name: 'VideoPlayer',
