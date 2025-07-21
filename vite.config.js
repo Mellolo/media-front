@@ -9,5 +9,12 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src') // 设置 @ 指向 src 目录
     }
+  },
+  optimizeDeps: {
+    include: [
+      'video.js',
+      'primevue/menubar',
+      'vue-easy-lightbox'
+    ]
   }
 })
