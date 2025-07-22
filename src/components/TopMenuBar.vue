@@ -12,7 +12,7 @@
         </button>
         <div class="dropdown-content">
           <a href="/profile">个人资料</a>
-          <a href="/logout">退出登录</a>
+          <a href="/logout" @click.prevent="logout">退出登录</a>
         </div>
       </div>
     </div>
@@ -20,7 +20,26 @@
 </template>
 
 <script setup>
-// 这里可以添加交互逻辑（如点击菜单、动态路由等）
+import { ref } from 'vue';
+
+const logout = async () => {
+  try {
+    const response = await fetch('http://localhost:8080/', {
+      method: 'POST',
+      credentials: 'include' // 如果需要携带 Cookie
+    });
+
+    if (response.ok) {
+      // 退出成功，跳转到登录页或首页
+      window.location.href = '/';
+    } else {
+      alert('退出失败，请重试');
+    }
+  } catch (error) {
+    console.error('Logout error:', error);
+    alert('网络错误，请检查连接');
+  }
+};
 </script>
 
 <style scoped>
