@@ -28,13 +28,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffffff;
+  background-color: #43d6b4;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 0.5em 1em;
   position: fixed;
   width: 100%;
+  left: 0;
   top: 0;
   z-index: 1000;
+  box-sizing: border-box;
+}
+
+.menu-bar-left {
+  min-width: 0;
 }
 
 .menu-bar-left .home-icon {
@@ -45,11 +51,13 @@
 .menu-bar-right {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .user-dropdown {
   position: relative;
   display: inline-block;
+  white-space: nowrap;
 }
 
 .user-button {
@@ -63,7 +71,7 @@
 .dropdown-content {
   display: none;
   position: absolute;
-  background-color: #ffffff;
+  background-color: #9cf3ff;
   min-width: 120px;
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
   z-index: 1;
@@ -81,7 +89,7 @@
 }
 
 .dropdown-content a:hover {
-  background-color: #f4f4f4;
+  background-color: #b9cdff;
 }
 
 .user-dropdown:hover .dropdown-content {

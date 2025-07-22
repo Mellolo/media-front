@@ -1,7 +1,13 @@
 <template>
   <div class="video-player">
-    <video controls class="video-element">
-      <source :src="src" type="video/mp4">
+    <video
+      controls
+      class="video-element"
+      oncontextmenu="return false"
+      controlsList="nodownload"
+      :onloadedmetadata="() => {}"
+    >
+      <source :src="src" type="video/mp4" />
       您的浏览器不支持视频播放。
     </video>
   </div>
