@@ -13,8 +13,6 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       'video.js',
-      'primevue/menubar',
-      'vue-easy-lightbox'
     ]
   }
 })
