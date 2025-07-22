@@ -1,33 +1,50 @@
-<script setup>
-import { ref } from 'vue';
-import Menubar from 'primevue/menubar';
-</script>
-
 <template>
-  <Menubar :model="[]">
-    <template #start>
+  <header class="top-menu-bar">
+    <div class="menu-bar-left">
       <a href="/">
         <img src="@/assets/logo.svg" alt="首页" class="home-icon" />
       </a>
-    </template>
-    <template #end>
+    </div>
+    <div class="menu-bar-right">
       <div class="user-dropdown">
         <button class="user-button">
-          用户名 <i class="pi pi-chevron-down"></i>
+          用户名 ▼
         </button>
         <div class="dropdown-content">
           <a href="/profile">个人资料</a>
           <a href="/logout">退出登录</a>
         </div>
       </div>
-    </template>
-  </Menubar>
+    </div>
+  </header>
 </template>
 
+<script setup>
+// 这里可以添加交互逻辑（如点击菜单、动态路由等）
+</script>
+
 <style scoped>
-.home-icon {
+.top-menu-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0.5em 1em;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+}
+
+.menu-bar-left .home-icon {
   height: 2em;
   cursor: pointer;
+}
+
+.menu-bar-right {
+  display: flex;
+  align-items: center;
 }
 
 .user-dropdown {
