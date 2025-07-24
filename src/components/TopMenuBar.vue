@@ -44,7 +44,7 @@ const checkLoginStatus = async () => {
       const data = await response.json();
       if (data.loggedIn) {
         isLoggedIn.value = true;
-        username.value = data.username || '用户';
+        username.value = data.profile.username || '用户';
       } else {
         isLoggedIn.value = false;
         username.value = '未登录';
