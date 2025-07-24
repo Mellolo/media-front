@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import VideoPlayerPage from '@/sites/VideoPlayerPage.vue'
+import VideoPlayerPage from '@/views/VideoPlayerPage.vue'
 
 const routes = [
   {
