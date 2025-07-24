@@ -9,11 +9,16 @@
     <div class="menu-bar-right">
       <div class="user-dropdown">
         <button class="user-button">
-          用户名 ▼
+          {{ username }} ▼
         </button>
         <div class="dropdown-content">
-          <a href="/profile">个人资料</a>
-          <a @click.prevent="logout">退出登录</a>
+          <template v-if="isLoggedIn">
+            <a href="/profile">个人资料</a>
+            <a @click.prevent="logout">退出登录</a>
+          </template>
+          <template v-else>
+            <a href="/login">登录</a>
+          </template>
         </div>
       </div>
     </div>
@@ -22,7 +27,38 @@
 
 <script setup>
 import API_CONFIG from '@/config/api.js';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+
+const isLoggedIn = ref(false);
+const username = ref('未登录');
+
+// 检查登录状态
+const checkLoginStatus = async () => {
+  try {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/user/login/status`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.loggedIn) {
+        isLoggedIn.value = true;
+        username.value = data.username || '用户';
+      } else {
+        isLoggedIn.value = false;
+        username.value = '未登录';
+      }
+    } else {
+      isLoggedIn.value = false;
+      username.value = '未登录';
+    }
+  } catch (error) {
+    console.error('检查登录状态失败:', error);
+    isLoggedIn.value = false;
+    username.value = '未登录';
+  }
+};
 
 const logout = async () => {
   try {
@@ -42,6 +78,11 @@ const logout = async () => {
     alert('网络错误，请检查连接');
   }
 };
+
+// 组件挂载时检查登录状态
+onMounted(() => {
+  checkLoginStatus();
+});
 </script>
 
 <style scoped>
