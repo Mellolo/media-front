@@ -5,6 +5,7 @@
         <img src="@/assets/logo.svg" alt="首页" class="home-icon" />
       </a>
     </div>
+
     <div class="menu-bar-right">
       <div class="user-dropdown">
         <button class="user-button">
@@ -12,7 +13,7 @@
         </button>
         <div class="dropdown-content">
           <a href="/profile">个人资料</a>
-          <a href="/logout" @click.prevent="logout">退出登录</a>
+          <a @click.prevent="logout">退出登录</a>
         </div>
       </div>
     </div>
@@ -20,12 +21,13 @@
 </template>
 
 <script setup>
+import API_CONFIG from '@/config/api.js';
 import { ref } from 'vue';
 
 const logout = async () => {
   try {
-    const response = await fetch('http://localhost:8080/', {
-      method: 'POST',
+    const response = await fetch(`${API_CONFIG.BASE_URL}/userAuth/logout`, {
+      method: 'GET',
       credentials: 'include' // 如果需要携带 Cookie
     });
 
