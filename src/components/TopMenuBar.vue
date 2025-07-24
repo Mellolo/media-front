@@ -52,6 +52,7 @@
 
 <script setup>
 import API_CONFIG from '@/config/api.js';
+import api from '@/utils/api.js';
 import { ref, onMounted } from 'vue';
 
 const isLoggedIn = ref(false);
@@ -65,20 +66,11 @@ const loginForm = ref({
 // 检查登录状态
 const checkLoginStatus = async () => {
   try {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/user/login/status`, {
-      method: 'GET',
-      credentials: 'include'
-    });
+    const response = await api.get('/user/login/status');
 
-    if (response.ok) {
-      const data = await response.json();
-      if (data.loggedIn) {
-        isLoggedIn.value = true;
-        username.value = data.profile.username || '用户';
-      } else {
-        isLoggedIn.value = false;
-        username.value = '未登录';
-      }
+    if (response.data.loggedIn) {
+      isLoggedIn.value = true;
+      username.value = response.data.username || '用户';
     } else {
       isLoggedIn.value = false;
       username.value = '未登录';
@@ -106,46 +98,42 @@ const closeModal = () => {
 // 处理登录
 const handleLogin = async () => {
   try {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/user/login`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify(loginForm.value)
-    });
+    const response = await api.post('/user/login', loginForm.value);
 
-    if (response.ok) {
-      // 登录成功，关闭模态框并刷新用户状态
-      closeModal();
-      checkLoginStatus();
-    } else {
-      const data = await response.json();
-      alert('登录失败，请检查用户名和密码'+data.message);
+    // 如果后端返回token，则保存token
+    if (response.data.token) {
+      localStorage.setItem('authToken', response.data.token);
     }
+    
+    // 登录成功，关闭模态框并刷新用户状态
+    closeModal();
+    checkLoginStatus();
   } catch (error) {
     console.error('Login error:', error);
-    alert('网络错误，请检查连接');
+    if (error.response && error.response.data) {
+      alert('登录失败，请检查用户名和密码: ' + error.response.data.message);
+    } else {
+      alert('网络错误，请检查连接');
+    }
   }
 };
 
 const logout = async () => {
   try {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/userAuth/logout`, {
-      method: 'GET',
-      credentials: 'include' // 如果需要携带 Cookie
-    });
-
-    if (response.ok) {
-      // 退出成功，跳转到登录页或首页
-      window.location.href = '/';
-    } else {
-      alert('退出失败，请重试');
-    }
+    await api.get('/userAuth/logout');
+    
+    // 清除token
+    localStorage.removeItem('authToken');
+    
+    // 更新本地状态
+    isLoggedIn.value = false;
+    username.value = '未登录';
+    
+    // 退出成功，跳转到首页
+    window.location.href = '/';
   } catch (error) {
     console.error('Logout error:', error);
-    alert('网络错误，请检查连接');
+    alert('退出失败，请重试');
   }
 };
 
