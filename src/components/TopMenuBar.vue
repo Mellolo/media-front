@@ -51,7 +51,6 @@
 </template>
 
 <script setup>
-import API_CONFIG from '@/config/api.js';
 import api from '@/utils/api.js';
 import { ref, onMounted } from 'vue';
 
@@ -68,9 +67,9 @@ const checkLoginStatus = async () => {
   try {
     const response = await api.get('/user/login/status');
 
-    if (response.data.loggedIn) {
+    if (response.data.data.loggedIn) {
       isLoggedIn.value = true;
-      username.value = response.data.username || '用户';
+      username.value = response.data.data.username || '用户';
     } else {
       isLoggedIn.value = false;
       username.value = '未登录';

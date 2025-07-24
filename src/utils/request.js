@@ -39,7 +39,7 @@ class RequestHandler {
 
     // 如果存在token，则添加到Authorization头部
     if (this.token) {
-      config.headers.Authorization = `Bearer ${this.token}`;
+      config.headers.Authorization = `${this.token}`;
     }
 
     // 发送请求
