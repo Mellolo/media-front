@@ -112,7 +112,6 @@ const handleLogin = async () => {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
       },
       body: JSON.stringify(loginForm.value)
     });
@@ -122,7 +121,8 @@ const handleLogin = async () => {
       closeModal();
       checkLoginStatus();
     } else {
-      alert('登录失败，请检查用户名和密码');
+      const data = await response.json();
+      alert('登录失败，请检查用户名和密码'+data.message);
     }
   } catch (error) {
     console.error('Login error:', error);
