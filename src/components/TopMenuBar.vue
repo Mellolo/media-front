@@ -101,8 +101,8 @@ const handleLogin = async () => {
     const response = await api.post('/user/login', loginForm.value);
 
     // 如果后端返回token，则保存token
-    if (response.data.token) {
-      localStorage.setItem('authToken', response.data.token);
+    if (response.data.data) {
+      localStorage.setItem('authToken', response.data.data);
     }
     
     // 登录成功，关闭模态框并刷新用户状态
