@@ -9,9 +9,10 @@ const routes = [
     component: HomePage
   },
   {
-    path: '/video',
+    path: '/video/:id',
     name: 'VideoPlayer',
-    component: VideoPlayerPage
+    component: VideoPlayerPage,
+    props: true
   }
 ]
 
