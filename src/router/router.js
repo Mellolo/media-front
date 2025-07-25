@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import VideoPlayerPage from '@/views/VideoPlayerPage.vue'
+import HomePage from '@/views/HomePage.vue'
 
 const routes = [
   {
     path: '/',
-    name: 'VideoPlayer',
-    component: VideoPlayerPage
+    name: 'Home',
+    component: HomePage
   },
   {
     path: '/video',
