@@ -21,7 +21,7 @@
         <div class="actor-image-section">
           <div class="image-frame">
             <div class="image-frame-header">
-              <span class="image-frame-title">演员封面</span>
+              <span class="image-frame-title">封面</span>
             </div>
             <div class="image-frame-content">
               <div class="image-preview" v-if="actor.id">
