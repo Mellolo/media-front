@@ -147,8 +147,8 @@ const handleSubmit = async () => {
     if (response.data) {
       alert('演员创建成功');
       resetForm();
-      // 可以选择跳转到演员列表或其他页面
-      // router.push('/actors');
+      // 跳转到演员展示页面
+      router.push({ name: 'ActorProfile', params: { id: response.data.data } });
     }
   } catch (error) {
     console.error('创建演员失败:', error);

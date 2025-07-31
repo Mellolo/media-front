@@ -36,7 +36,7 @@ api.interceptors.response.use(
     // 如果是401错误（未授权），则清除token并重定向到登录页
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('authToken');
-      window.location.href = '/login';
+      window.location.href = '/user/login';
     }
     
     return Promise.reject(error);
