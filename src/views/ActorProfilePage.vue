@@ -76,10 +76,10 @@ onMounted(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 60px);
-  padding: 50px;
+  min-height: calc(80vh - 60px);
+  padding: 100px;
   background: white;
-  border-radius: 15px;
+  border-radius: 80px;
   width: 100%;
   max-width: 2000px;
   margin: 0 auto;
