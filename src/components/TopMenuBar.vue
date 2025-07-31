@@ -28,7 +28,7 @@
 
 <script setup>
 import api from '@/utils/api.js';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 
 const isLoggedIn = ref(false);
 const username = ref('未登录');
@@ -82,9 +82,21 @@ const logout = async () => {
   }
 };
 
+// 处理login事件
+const handleLoginEvent = () => {
+  checkLoginStatus();
+};
+
 // 组件挂载时检查登录状态
 onMounted(() => {
   checkLoginStatus();
+  // 添加login事件监听器
+  window.addEventListener('login', handleLoginEvent);
+});
+
+// 组件卸载时移除事件监听器
+onUnmounted(() => {
+  window.removeEventListener('login', handleLoginEvent);
 });
 
 // 点击其他地方隐藏下拉菜单

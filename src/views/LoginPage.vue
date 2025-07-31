@@ -62,7 +62,10 @@ const handleLogin = async () => {
       localStorage.setItem('authToken', response.data.data);
     }
     
-    // 登录成功，跳转到首页
+    // 登录成功，发送login事件通知TopMenuBar更新状态
+    window.dispatchEvent(new CustomEvent('login'));
+    
+    // 跳转到首页
     router.push('/');
   } catch (error) {
     console.error('Login error:', error);
