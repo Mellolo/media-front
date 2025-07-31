@@ -1,25 +1,39 @@
 <template>
-    <div class="login-container">
-      <div class="login-header">
-        <h2>用户登录</h2>
-      </div>
-      <div class="login-form">
-        <form @submit.prevent="handleLogin">
-          <div class="form-group">
-            <input type="text" id="username" v-model="loginForm.username" placeholder="用户名" required>
-          </div>
-          <div class="form-group">
-            <input type="password" id="password" v-model="loginForm.password" placeholder="密码" required>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="login-button">登录</button>
-          </div>
-        </form>
-        <div class="login-footer">
-          <p>还没有账户？<a href="/register">立即注册</a></p>
+  <div class="login-container">
+    <div class="login-header">
+      <h2>用户登录</h2>
+    </div>
+    <div class="login-form">
+      <form @submit.prevent="handleLogin">
+        <div class="form-group">
+          <input 
+            type="text" 
+            id="username" 
+            v-model="loginForm.username" 
+            placeholder="用户名" 
+            :class="{ 'input-error': usernameError }"
+          >
+          <div v-if="usernameError" class="error-message">请输入用户名</div>
         </div>
+        <div class="form-group">
+          <input 
+            type="password" 
+            id="password" 
+            v-model="loginForm.password" 
+            placeholder="密码" 
+            :class="{ 'input-error': passwordError }"
+          >
+          <div v-if="passwordError" class="error-message">请输入密码</div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="login-button">登录</button>
+        </div>
+      </form>
+      <div class="login-footer">
+        <p>还没有账户？<a href="/register">立即注册</a></p>
       </div>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -33,6 +47,10 @@ const loginForm = ref({
   username: '',
   password: ''
 });
+
+// 错误状态
+const usernameError = ref(false);
+const passwordError = ref(false);
 
 // 检查是否已经登录
 const checkLoginStatus = async () => {
@@ -50,6 +68,28 @@ const checkLoginStatus = async () => {
 
 // 处理登录
 const handleLogin = async () => {
+  // 重置错误状态
+  usernameError.value = false;
+  passwordError.value = false;
+  
+  // 验证表单
+  let isValid = true;
+  
+  if (!loginForm.value.username.trim()) {
+    usernameError.value = true;
+    isValid = false;
+  }
+  
+  if (!loginForm.value.password.trim()) {
+    passwordError.value = true;
+    isValid = false;
+  }
+  
+  // 如果验证失败，不提交表单
+  if (!isValid) {
+    return;
+  }
+  
   try {
     const response = await api.post('/user/login', loginForm.value);
 
@@ -220,5 +260,18 @@ onMounted(() => {
 
 .login-footer a:hover::after {
   width: 100%;
+}
+
+/* 错误状态下的输入框样式 */
+.form-group input.input-error {
+  border-color: #ff4757;
+}
+
+/* 错误提示文字样式 */
+.error-message {
+  color: #ff4757;
+  font-size: 14px;
+  margin-top: 8px;
+  text-align: left;
 }
 </style>
