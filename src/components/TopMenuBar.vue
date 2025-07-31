@@ -6,6 +6,12 @@
       </a>
     </div>
 
+    <div class="menu-bar-center">
+      <nav class="main-nav">
+        <router-link to="/actor/create">创建演员</router-link>
+      </nav>
+    </div>
+
     <div class="menu-bar-right">
       <div class="user-dropdown">
         <button class="user-button">
@@ -119,7 +125,7 @@ const handleLogin = async () => {
 
 const logout = async () => {
   try {
-    await api.get('/userAuth/logout');
+    await api.get('/auth/user/logout');
     
     // 清除token
     localStorage.removeItem('authToken');
@@ -149,70 +155,97 @@ onMounted(() => {
   align-items: center;
   background-color: #43d6b4;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 0.5em 1em;
+  padding: 0 20px;
+  height: 60px;
   position: fixed;
-  width: 100%;
-  left: 0;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
-  box-sizing: border-box;
-}
-
-.menu-bar-left {
-  min-width: 0;
 }
 
 .menu-bar-left .home-icon {
-  height: 2em;
-  cursor: pointer;
+  height: 40px;
+}
+
+.menu-bar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.main-nav {
+  display: flex;
+  gap: 20px;
+}
+
+.main-nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.main-nav a:hover,
+.main-nav a.router-link-exact-active {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .menu-bar-right {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
 }
 
 .user-dropdown {
   position: relative;
   display: inline-block;
-  white-space: nowrap;
 }
 
 .user-button {
-  background: none;
+  background-color: transparent;
+  color: white;
+  padding: 10px 15px;
   border: none;
-  font-size: 1em;
+  border-radius: 4px;
   cursor: pointer;
-  padding: 0.5em;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.user-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .dropdown-content {
   display: none;
   position: absolute;
-  background-color: #9cf3ff;
-  min-width: 120px;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-  z-index: 1;
   right: 0;
-  top: 100%;
+  background-color: white;
+  min-width: 160px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   border-radius: 4px;
-  overflow: hidden;
-}
-
-.dropdown-content a {
-  color: #333;
-  padding: 0.5em 1em;
-  text-decoration: none;
-  display: block;
-}
-
-.dropdown-content a:hover {
-  background-color: #b9cdff;
+  z-index: 1;
+  margin-top: 5px;
 }
 
 .user-dropdown:hover .dropdown-content {
   display: block;
+}
+
+.dropdown-content a {
+  color: #333;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+}
+
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
 }
 
 /* 登录模态框样式 */
@@ -232,31 +265,36 @@ onMounted(() => {
 .modal-content {
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  width: 400px;
-  max-width: 90%;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: 20px 20px 10px;
   border-bottom: 1px solid #eee;
 }
 
 .modal-header h3 {
   margin: 0;
   color: #333;
-  text-align: left;
 }
 
 .close-button {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 24px;
   cursor: pointer;
   color: #999;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .close-button:hover {
@@ -264,46 +302,52 @@ onMounted(() => {
 }
 
 .modal-body {
-  padding: 1rem;
+  padding: 20px;
 }
 
 .form-group {
-  margin-bottom: 1rem;
-  text-align: left;
+  margin-bottom: 20px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
-  color: #333;
-  text-align: left;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #555;
 }
 
 .form-group input {
   width: 100%;
-  padding: 0.5rem;
+  padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 16px;
   box-sizing: border-box;
-  text-align: left;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #43d6b4;
+  box-shadow: 0 0 0 2px rgba(67, 214, 180, 0.2);
 }
 
 .form-actions {
-  text-align: center;
-  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
 }
 
 .login-button {
   background-color: #43d6b4;
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
+  padding: 12px 30px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 16px;
+  transition: background-color 0.3s;
 }
 
 .login-button:hover {
-  background-color: #3ab89c;
+  background-color: #38b8a0;
 }
 </style>
