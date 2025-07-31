@@ -80,6 +80,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px);
+  padding-top: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
 
 .login-container {
   background: rgba(255, 255, 255, 0.95);
@@ -90,13 +98,7 @@ onMounted(() => {
   backdrop-filter: blur(10px);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  transform: translateY(0);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.login-container:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  /* 移除了transform和transition属性，鼠标悬停时不再移动 */
 }
 
 .login-header {
@@ -109,7 +111,8 @@ onMounted(() => {
   margin: 0;
   font-size: 28px;
   font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* 将标题颜色改为绿色系 */
+  background: linear-gradient(135deg, #43d6b4 0%, #38b8a0 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -129,6 +132,8 @@ onMounted(() => {
   box-sizing: border-box;
   transition: all 0.3s ease;
   background-color: #f8f9fa;
+  /* 将输入框文字颜色改为黑色 */
+  color: #000;
 }
 
 .form-group input::placeholder {
@@ -138,10 +143,10 @@ onMounted(() => {
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #43d6b4;
   background-color: #fff;
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
-  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(67, 214, 180, 0.1);
+  /* 移除了transform属性，聚焦时不再移动 */
 }
 
 .form-actions {
@@ -151,7 +156,8 @@ onMounted(() => {
 }
 
 .login-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* 将按钮颜色改为绿色系 */
+  background: linear-gradient(135deg, #43d6b4 0%, #38b8a0 100%);
   color: white;
   border: none;
   padding: 16px 30px;
@@ -163,16 +169,16 @@ onMounted(() => {
   width: 100%;
   letter-spacing: 1px;
   text-transform: uppercase;
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 5px 15px rgba(67, 214, 180, 0.3);
 }
 
 .login-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  /* 移除了transform属性，鼠标悬停时不再移动 */
+  box-shadow: 0 8px 20px rgba(67, 214, 180, 0.4);
 }
 
 .login-button:active {
-  transform: translateY(-1px);
+  /* 移除了transform属性，激活时不再移动 */
 }
 
 .login-footer {
@@ -186,7 +192,8 @@ onMounted(() => {
 }
 
 .login-footer a {
-  color: #667eea;
+  /* 将链接颜色改为绿色系 */
+  color: #43d6b4;
   text-decoration: none;
   font-size: 16px;
   font-weight: 500;
@@ -195,7 +202,8 @@ onMounted(() => {
 }
 
 .login-footer a:hover {
-  color: #764ba2;
+  /* 将链接悬停颜色改为深绿色 */
+  color: #38b8a0;
   text-decoration: none;
 }
 
@@ -206,7 +214,7 @@ onMounted(() => {
   height: 1px;
   bottom: -2px;
   left: 0;
-  background-color: #764ba2;
+  background-color: #38b8a0;
   transition: width 0.3s ease;
 }
 
