@@ -1,11 +1,12 @@
 <template>
   <div class="actor-profile-container">
-    <div class="actor-profile-header">
-      <h1>演员信息</h1>
-    </div>
     <div class="actor-profile-content">
       <div class="actor-profile-layout">
         <div class="actor-info">
+          <div class="actor-profile-header">
+            <h1>演员信息</h1>
+          </div>
+
           <div class="info-group">
             <label class="info-label">名称</label>
             <div class="info-value">{{ actor.name || '暂无' }}</div>
@@ -89,8 +90,9 @@ onMounted(() => {
 }
 
 .actor-profile-header {
-  text-align: center;
-  margin-bottom: 40px;
+  text-align: left;
+  margin-top: 20px;
+  margin-bottom: 20px;
   width: 100%;
 }
 
@@ -116,10 +118,11 @@ onMounted(() => {
 }
 
 .actor-info {
-  flex: 1;
+  width: 400px;
   display: flex;
   flex-direction: column;
   gap: 25px;
+  flex-shrink: 0;
 }
 
 .info-group {
@@ -145,9 +148,10 @@ onMounted(() => {
 }
 
 .actor-image-section {
-  width: 35%;
+  width: 400px;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
 }
 
 .image-frame {
@@ -182,6 +186,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 .image-preview img {
@@ -209,6 +214,10 @@ onMounted(() => {
   }
   
   .actor-image-section {
+    width: 100%;
+  }
+  
+  .image-frame {
     width: 100%;
   }
 }
