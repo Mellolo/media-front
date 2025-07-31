@@ -17,8 +17,8 @@
 
         <div class="form-group">
           <label class="form-label">封面图</label>
-          <div class="image-preview" v-if="actor.coverImageUrl">
-            <img :src="actor.coverImageUrl" :alt="actor.name" />
+          <div class="image-preview" v-if="actor.id">
+            <img :src="`${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`" :alt="actor.name" />
           </div>
           <div v-else class="no-image">暂无封面图</div>
         </div>
@@ -31,6 +31,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/utils/api.js';
+import API_CONFIG from '@/config/api.js';
 
 const route = useRoute();
 const actor = ref({
