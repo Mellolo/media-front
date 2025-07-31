@@ -191,7 +191,8 @@ onMounted(() => {
 
 .image-preview img {
   max-width: 100%;
-  max-height: 300px;
+  max-height: 1000px;
+  max-height: 1000px;
   border-radius: 5px;
   object-fit: cover;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
