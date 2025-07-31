@@ -1,38 +1,39 @@
 <template>
-  <div class="create-actor-page">
-    <div class="container">
+  <div class="create-actor-container">
+    <div class="create-actor-header">
       <h1>创建演员</h1>
+    </div>
+    <div class="create-actor-form">
       <form @submit.prevent="handleSubmit" class="actor-form">
         <div class="form-group">
-          <label for="name">演员名称 *</label>
           <input 
             type="text" 
             id="name" 
             v-model="actorForm.name" 
-            required
-            placeholder="请输入演员名称"
+            placeholder="演员名称 *"
+            :class="{ 'input-error': nameError }"
           />
+          <div v-if="nameError" class="error-message">请输入演员名称</div>
         </div>
 
         <div class="form-group">
-          <label for="description">描述</label>
           <textarea 
             id="description" 
             v-model="actorForm.description" 
             rows="4"
-            placeholder="请输入演员描述（可选）"
+            placeholder="描述"
           ></textarea>
         </div>
 
         <div class="form-group">
-          <label for="coverImage">封面图 *</label>
           <input 
             type="file" 
             id="coverImage" 
             @change="handleFileChange" 
             accept="image/*"
-            required
+            :class="{ 'input-error': coverImageError }"
           />
+          <div v-if="coverImageError" class="error-message">请选择封面图</div>
           <div v-if="previewImage" class="image-preview">
             <img :src="previewImage" alt="预览图片" />
           </div>
@@ -67,6 +68,10 @@ const actorForm = reactive({
 const isSubmitting = ref(false);
 const previewImage = ref('');
 
+// 错误状态
+const nameError = ref(false);
+const coverImageError = ref(false);
+
 // 处理文件选择
 const handleFileChange = (event) => {
   const file = event.target.files[0];
@@ -92,12 +97,33 @@ const resetForm = () => {
   if (fileInput) {
     fileInput.value = '';
   }
+  
+  // 重置错误状态
+  nameError.value = false;
+  coverImageError.value = false;
 };
 
 // 提交表单
 const handleSubmit = async () => {
-  if (!actorForm.name || !actorForm.coverImage) {
-    alert('请填写必填项');
+  // 重置错误状态
+  nameError.value = false;
+  coverImageError.value = false;
+  
+  // 验证表单
+  let isValid = true;
+  
+  if (!actorForm.name.trim()) {
+    nameError.value = true;
+    isValid = false;
+  }
+  
+  if (!actorForm.coverImage) {
+    coverImageError.value = true;
+    isValid = false;
+  }
+  
+  // 如果验证失败，不提交表单
+  if (!isValid) {
     return;
   }
 
@@ -135,121 +161,213 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-.create-actor-page {
-  padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.container {
+.create-actor-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px);
+  padding: 50px;
   background: white;
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  width: 90%;
+  max-width: 1000px;
+  margin: 0 auto;
+  margin-top: 60px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-sizing: border-box;
 }
 
-h1 {
+.create-actor-header {
   text-align: center;
+  margin-bottom: 40px;
+  width: 100%;
+}
+
+.create-actor-header h1 {
   color: #333;
-  margin-bottom: 30px;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #43d6b4 0%, #38b8a0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.create-actor-form {
+  width: 100%;
 }
 
 .actor-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 25px;
+  width: 100%;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 25px;
+  position: relative;
+  width: 100%;
 }
 
-label {
-  font-weight: bold;
-  margin-bottom: 5px;
-  color: #555;
-}
-
-input,
-textarea {
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 15px 20px;
+  border: 2px solid #e1e1e1;
+  border-radius: 10px;
   font-size: 16px;
-  transition: border-color 0.3s;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+  color: #000;
 }
 
-input:focus,
-textarea:focus {
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #aaa;
+  font-size: 16px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
   outline: none;
   border-color: #43d6b4;
-  box-shadow: 0 0 0 2px rgba(67, 214, 180, 0.2);
+  background-color: #fff;
+  box-shadow: 0 5px 15px rgba(67, 214, 180, 0.1);
 }
 
-input[type="file"] {
-  padding: 10px 0;
+.form-group textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* 文件输入框样式 */
+.form-group input[type="file"] {
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+.form-group input[type="file"]::-webkit-file-upload-button {
+  background-color: #43d6b4;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form-group input[type="file"]::-webkit-file-upload-button:hover {
+  background-color: #38b8a0;
+}
+
+/* 错误状态下的输入框样式 */
+.form-group input.input-error,
+.form-group textarea.input-error,
+.form-group input[type="file"].input-error {
+  border-color: #ff4757;
+  background-color: #fff0f0;
+}
+
+/* 错误提示文字样式 */
+.error-message {
+  color: #ff4757;
+  font-size: 14px;
+  margin-top: 8px;
+  text-align: left;
+  font-weight: 500;
+  display: block;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* 添加淡入动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .image-preview {
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 .image-preview img {
-  max-width: 200px;
-  max-height: 200px;
-  border-radius: 4px;
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 10px;
   object-fit: cover;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .form-actions {
   display: flex;
-  gap: 10px;
+  gap: 15px;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 30px;
+  width: 100%;
 }
 
 .submit-button,
 .reset-button {
-  padding: 12px 30px;
+  padding: 16px 30px;
   border: none;
-  border-radius: 4px;
-  font-size: 16px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  flex: 1;
 }
 
 .submit-button {
-  background-color: #43d6b4;
+  background: linear-gradient(135deg, #43d6b4 0%, #38b8a0 100%);
   color: white;
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: #38b8a0;
+  box-shadow: 0 8px 20px rgba(67, 214, 180, 0.4);
+  transform: translateY(-2px);
 }
 
 .submit-button:disabled {
-  background-color: #ccc;
+  background: linear-gradient(135deg, #cccccc 0%, #999999 100%);
   cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .reset-button {
-  background-color: #f5f5f5;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
   color: #333;
 }
 
 .reset-button:hover {
-  background-color: #e0e0e0;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {
-  .container {
-    padding: 20px;
-    margin: 10px;
+  .create-actor-container {
+    padding: 30px;
+    margin: 20px auto;
+    width: 95%;
   }
   
   .form-actions {
     flex-direction: column;
+  }
+  
+  .submit-button,
+  .reset-button {
+    width: 100%;
   }
 }
 </style>
