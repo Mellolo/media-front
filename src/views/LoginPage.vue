@@ -6,12 +6,10 @@
       <div class="login-form">
         <form @submit.prevent="handleLogin">
           <div class="form-group">
-            <label for="username">用户名</label>
-            <input type="text" id="username" v-model="loginForm.username" required>
+            <input type="text" id="username" v-model="loginForm.username" placeholder="用户名" required>
           </div>
           <div class="form-group">
-            <label for="password">密码</label>
-            <input type="password" id="password" v-model="loginForm.password" required>
+            <input type="password" id="password" v-model="loginForm.password" placeholder="密码" required>
           </div>
           <div class="form-actions">
             <button type="submit" class="login-button">登录</button>
@@ -122,14 +120,6 @@ onMounted(() => {
   position: relative;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: #444;
-  font-size: 15px;
-}
-
 .form-group input {
   width: 100%;
   padding: 15px 20px;
@@ -139,6 +129,11 @@ onMounted(() => {
   box-sizing: border-box;
   transition: all 0.3s ease;
   background-color: #f8f9fa;
+}
+
+.form-group input::placeholder {
+  color: #aaa;
+  font-size: 16px;
 }
 
 .form-group input:focus {
