@@ -6,12 +6,6 @@
       </a>
     </div>
 
-    <div class="menu-bar-center">
-      <nav class="main-nav">
-        <router-link to="/actor/create">创建演员</router-link>
-      </nav>
-    </div>
-
     <div class="menu-bar-right">
       <div class="user-dropdown">
         <button class="user-button">
@@ -167,31 +161,6 @@ onMounted(() => {
 
 .menu-bar-left .home-icon {
   height: 40px;
-}
-
-.menu-bar-center {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-}
-
-.main-nav {
-  display: flex;
-  gap: 20px;
-}
-
-.main-nav a {
-  color: white;
-  text-decoration: none;
-  font-weight: 500;
-  padding: 8px 16px;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-}
-
-.main-nav a:hover,
-.main-nav a.router-link-exact-active {
-  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .menu-bar-right {
