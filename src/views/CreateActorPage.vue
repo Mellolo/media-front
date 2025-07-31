@@ -6,6 +6,7 @@
     <div class="create-actor-form">
       <form @submit.prevent="handleSubmit" class="actor-form">
         <div class="form-group">
+          <label for="name" class="form-label">演员名称</label>
           <input 
             type="text" 
             id="name" 
@@ -17,6 +18,7 @@
         </div>
 
         <div class="form-group">
+          <label for="description" class="form-label">描述</label>
           <textarea 
             id="description" 
             v-model="actorForm.description" 
@@ -26,6 +28,7 @@
         </div>
 
         <div class="form-group">
+          <label for="coverImage" class="form-label">封面图</label>
           <input 
             type="file" 
             id="coverImage" 
@@ -211,6 +214,15 @@ const handleSubmit = async () => {
   margin-bottom: 25px;
   position: relative;
   width: 100%;
+}
+
+.form-label {
+  display: block;
+  text-align: left;
+  color: #38b8a0;
+  font-weight: 500;
+  margin-bottom: 8px;
+  font-size: 16px;
 }
 
 .form-group input,
