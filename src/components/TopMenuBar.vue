@@ -19,6 +19,7 @@
         </button>
         <div class="dropdown-content">
           <template v-if="isLoggedIn">
+            <a href="/actor/create">创建演员</a>
             <a href="/profile">个人资料</a>
             <a @click.prevent="logout">退出登录</a>
           </template>
