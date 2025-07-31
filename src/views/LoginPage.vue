@@ -1,5 +1,4 @@
 <template>
-  <div class="login-page">
     <div class="login-container">
       <div class="login-header">
         <h2>用户登录</h2>
@@ -7,11 +6,11 @@
       <div class="login-form">
         <form @submit.prevent="handleLogin">
           <div class="form-group">
-            <label for="username">用户名:</label>
+            <label for="username">用户名</label>
             <input type="text" id="username" v-model="loginForm.username" required>
           </div>
           <div class="form-group">
-            <label for="password">密码:</label>
+            <label for="password">密码</label>
             <input type="password" id="password" v-model="loginForm.password" required>
           </div>
           <div class="form-actions">
@@ -23,7 +22,6 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -84,58 +82,71 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.login-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 60px);
-  padding-top: 60px;
-  background-color: #f5f5f5;
-}
 
 .login-container {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 90%;
-  max-width: 400px;
-  padding: 30px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  width: 95%;
+  max-width: 550px;
+  padding: 50px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: translateY(0);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
 .login-header h2 {
   color: #333;
   margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  position: relative;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
   font-weight: 500;
-  color: #555;
+  color: #444;
+  font-size: 15px;
 }
 
 .form-group input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 15px 20px;
+  border: 2px solid #e1e1e1;
+  border-radius: 10px;
   font-size: 16px;
   box-sizing: border-box;
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #43d6b4;
-  box-shadow: 0 0 0 2px rgba(67, 214, 180, 0.2);
+  border-color: #667eea;
+  background-color: #fff;
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
 }
 
 .form-actions {
@@ -145,32 +156,66 @@ onMounted(() => {
 }
 
 .login-button {
-  background-color: #43d6b4;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 12px 30px;
-  border-radius: 4px;
+  padding: 16px 30px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
+  font-size: 18px;
+  font-weight: 600;
+  transition: all 0.3s ease;
   width: 100%;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
 
 .login-button:hover {
-  background-color: #38b8a0;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.login-button:active {
+  transform: translateY(-1px);
 }
 
 .login-footer {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 30px;
+}
+
+.login-footer p {
+  color: #666;
+  font-size: 15px;
 }
 
 .login-footer a {
-  color: #43d6b4;
+  color: #667eea;
   text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
 }
 
 .login-footer a:hover {
-  text-decoration: underline;
+  color: #764ba2;
+  text-decoration: none;
+}
+
+.login-footer a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1px;
+  bottom: -2px;
+  left: 0;
+  background-color: #764ba2;
+  transition: width 0.3s ease;
+}
+
+.login-footer a:hover::after {
+  width: 100%;
 }
 </style>
