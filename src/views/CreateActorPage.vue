@@ -6,15 +6,15 @@
     <div class="create-actor-form">
       <form @submit.prevent="handleSubmit" class="actor-form">
         <div class="form-group">
-          <label for="name" class="form-label">演员名称</label>
+          <label for="name" class="form-label">名称</label>
           <input 
             type="text" 
             id="name" 
             v-model="actorForm.name" 
-            placeholder="演员名称 *"
+            placeholder="名称 *"
             :class="{ 'input-error': nameError }"
           />
-          <div v-if="nameError" class="error-message">请输入演员名称</div>
+          <div v-if="nameError" class="error-message">请输入名称</div>
         </div>
 
         <div class="form-group">

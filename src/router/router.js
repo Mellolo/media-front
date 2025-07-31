@@ -3,6 +3,7 @@ import VideoPlayerPage from '@/views/VideoPlayerPage.vue'
 import HomePage from '@/views/HomePage.vue'
 import CreateActorPage from '@/views/CreateActorPage.vue'
 import LoginPage from '@/views/LoginPage.vue'
+import ActorProfilePage from '@/views/ActorProfilePage.vue'
 
 const routes = [
   {
@@ -20,6 +21,12 @@ const routes = [
     path: '/actor/create',
     name: 'CreateActor',
     component: CreateActorPage
+  },
+  {
+    path: '/actor/profile/:id',
+    name: 'ActorProfile',
+    component: ActorProfilePage,
+    props: true
   },
   {
     path: '/user/login',
