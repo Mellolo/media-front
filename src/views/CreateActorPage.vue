@@ -170,8 +170,8 @@ const handleSubmit = async () => {
   padding: 50px;
   background: white;
   border-radius: 15px;
-  width: 90%;
-  max-width: 1000px;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
   margin-top: 60px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
@@ -216,6 +216,7 @@ const handleSubmit = async () => {
 .form-group input,
 .form-group textarea {
   width: 100%;
+  min-width: 300px;
   padding: 15px 20px;
   border: 2px solid #e1e1e1;
   border-radius: 10px;
@@ -242,6 +243,7 @@ const handleSubmit = async () => {
 
 .form-group textarea {
   min-height: 120px;
+  min-width: 500px;
   resize: vertical;
 }
 
