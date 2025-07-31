@@ -18,7 +18,7 @@
             <a @click.prevent="logout">退出登录</a>
           </template>
           <template v-else>
-            <a href="/login">登录</a>
+            <a href="/user/login">登录</a>
           </template>
         </div>
       </div>

@@ -22,7 +22,7 @@ const routes = [
     component: CreateActorPage
   },
   {
-    path: '/login',
+    path: '/user/login',
     name: 'Login',
     component: LoginPage
   }
