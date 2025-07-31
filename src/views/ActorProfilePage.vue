@@ -6,14 +6,14 @@
     <div class="actor-profile-content">
       <div class="actor-profile-layout">
         <div class="actor-info">
-          <div class="form-group">
-            <label class="form-label">名称</label>
-            <div class="form-value">{{ actor.name }}</div>
+          <div class="info-group">
+            <label class="info-label">名称</label>
+            <div class="info-value">{{ actor.name || '暂无' }}</div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">描述</label>
-            <div class="form-value">{{ actor.description }}</div>
+          <div class="info-group">
+            <label class="info-label">描述</label>
+            <div class="info-value">{{ actor.description || '暂无描述' }}</div>
           </div>
         </div>
         
@@ -122,31 +122,26 @@ onMounted(() => {
   gap: 25px;
 }
 
-.form-group {
+.info-group {
   margin-bottom: 25px;
-  position: relative;
   width: 100%;
 }
 
-.form-label {
+.info-label {
   display: block;
   text-align: left;
   color: #000;
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 8px;
   font-size: 16px;
 }
 
-.form-value {
-  width: 100%;
-  padding: 15px 20px;
-  border: 2px solid #e1e1e1;
-  border-radius: 10px;
+.info-value {
   font-size: 16px;
-  box-sizing: border-box;
-  background-color: #f8f9fa;
-  color: #000;
-  min-height: 56px;
+  color: #333;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  text-align: left;
 }
 
 .actor-image-section {
@@ -161,6 +156,8 @@ onMounted(() => {
   overflow: hidden;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   background: #fff;
+  min-width: 500px;
+  min-height: 500px;
 }
 
 .image-frame-header {
@@ -180,7 +177,8 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 200px;
+  min-width: 400px;
+  min-height: 400px;
 }
 
 .image-preview {
