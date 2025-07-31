@@ -18,37 +18,12 @@
             <a @click.prevent="logout">退出登录</a>
           </template>
           <template v-else>
-            <a @click.prevent="showLoginModal">登录</a>
+            <a href="/login">登录</a>
           </template>
         </div>
       </div>
     </div>
   </header>
-
-  <!-- 登录模态框 -->
-  <div v-if="showModal" class="modal-overlay" @click="closeModal">
-    <div class="modal-content" @click.stop>
-      <div class="modal-header">
-        <h3>用户登录</h3>
-        <button class="close-button" @click="closeModal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <form @submit.prevent="handleLogin">
-          <div class="form-group">
-            <label for="username">用户名:</label>
-            <input type="text" id="username" v-model="loginForm.username" required>
-          </div>
-          <div class="form-group">
-            <label for="password">密码:</label>
-            <input type="password" id="password" v-model="loginForm.password" required>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="login-button">登录</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script setup>
@@ -57,12 +32,7 @@ import { ref, onMounted } from 'vue';
 
 const isLoggedIn = ref(false);
 const username = ref('未登录');
-const showModal = ref(false);
 const showDropdown = ref(false); // 控制下拉菜单显示状态
-const loginForm = ref({
-  username: '',
-  password: ''
-});
 
 // 检查登录状态
 const checkLoginStatus = async () => {
@@ -91,43 +61,6 @@ const toggleDropdown = () => {
 // 隐藏下拉菜单
 const hideDropdown = () => {
   showDropdown.value = false;
-};
-
-// 显示登录模态框
-const showLoginModal = () => {
-  hideDropdown(); // 隐藏下拉菜单
-  showModal.value = true;
-};
-
-// 关闭登录模态框
-const closeModal = () => {
-  showModal.value = false;
-  // 清空表单
-  loginForm.value.username = '';
-  loginForm.value.password = '';
-};
-
-// 处理登录
-const handleLogin = async () => {
-  try {
-    const response = await api.post('/user/login', loginForm.value);
-
-    // 如果后端返回token，则保存token
-    if (response.data.data) {
-      localStorage.setItem('authToken', response.data.data);
-    }
-    
-    // 登录成功，关闭模态框并刷新用户状态
-    closeModal();
-    checkLoginStatus();
-  } catch (error) {
-    console.error('Login error:', error);
-    if (error.response && error.response.data) {
-      alert('登录失败，请检查用户名和密码: ' + error.response.data.message);
-    } else {
-      alert('网络错误，请检查连接');
-    }
-  }
 };
 
 const logout = async () => {
@@ -217,151 +150,24 @@ document.addEventListener('click', (event) => {
   background-color: white;
   min-width: 160px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  z-index: 1000;
-  margin-top: 8px;
-  overflow: hidden;
-  border: 1px solid #e0e0e0;
-  padding: 4px 0;
+  border-radius: 4px;
+  z-index: 1;
+  margin-top: 5px;
 }
 
 .dropdown-content.show {
   display: block;
-  animation: fadeIn 0.2s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .dropdown-content a {
   color: #333;
-  padding: 10px 20px;
+  padding: 12px 16px;
   text-decoration: none;
   display: block;
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
 }
 
 .dropdown-content a:hover {
-  background-color: #f5f5f5;
-  color: #43d6b4;
-}
-
-.dropdown-content a:last-child {
-  border-top: 1px solid #eee;
-  margin-top: 4px;
-  padding-top: 12px;
-  color: #e74c3c;
-}
-
-.dropdown-content a:last-child:hover {
-  background-color: #fef1f0;
-  color: #c0392b;
-}
-
-/* 登录模态框样式 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-}
-
-.modal-content {
-  background-color: white;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 20px 10px;
-  border-bottom: 1px solid #eee;
-}
-
-.modal-header h3 {
-  margin: 0;
-  color: #333;
-}
-
-.close-button {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #999;
-  padding: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.close-button:hover {
-  color: #333;
-}
-
-.modal-body {
-  padding: 20px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: #555;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
-  box-sizing: border-box;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #43d6b4;
-  box-shadow: 0 0 0 2px rgba(67, 214, 180, 0.2);
-}
-
-.form-actions {
-  display: flex;
-  justify-content: center;
-}
-
-.login-button {
-  background-color: #43d6b4;
-  color: white;
-  border: none;
-  padding: 12px 30px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-}
-
-.login-button:hover {
-  background-color: #38b8a0;
+  background-color: #f1f1f1;
 }
 </style>
