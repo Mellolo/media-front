@@ -79,8 +79,8 @@ onMounted(() => {
   padding: 50px;
   background: white;
   border-radius: 15px;
-  width: 95%;
-  max-width: 1200px;
+  width: 100%;
+  max-width: 2000px;
   margin: 0 auto;
   margin-top: 60px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
@@ -156,8 +156,7 @@ onMounted(() => {
   overflow: hidden;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   background: #fff;
-  min-width: 500px;
-  min-height: 500px;
+  width: 400px;
 }
 
 .image-frame-header {
@@ -177,22 +176,18 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 400px;
-  min-height: 400px;
 }
 
 .image-preview {
-  width: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .image-preview img {
-  max-width: 100%;
-  max-height: 1000px;
-  max-height: 1000px;
+  width: 100%;
+  height: auto;
   border-radius: 5px;
-  object-fit: cover;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -201,6 +196,11 @@ onMounted(() => {
   font-style: italic;
   padding: 20px;
   text-align: center;
+  min-height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
