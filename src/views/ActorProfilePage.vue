@@ -4,23 +4,31 @@
       <h1>演员信息</h1>
     </div>
     <div class="actor-profile-content">
-      <div class="actor-info">
-        <div class="form-group">
-          <label class="form-label">演员名称</label>
-          <div class="form-value">{{ actor.name }}</div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">描述</label>
-          <div class="form-value">{{ actor.description }}</div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">封面图</label>
-          <div class="image-preview" v-if="actor.id">
-            <img :src="`${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`" :alt="actor.name" />
+      <div class="actor-profile-layout">
+        <div class="actor-info">
+          <div class="form-group">
+            <label class="form-label">名称</label>
+            <div class="form-value">{{ actor.name }}</div>
           </div>
-          <div v-else class="no-image">暂无封面图</div>
+
+          <div class="form-group">
+            <label class="form-label">描述</label>
+            <div class="form-value">{{ actor.description }}</div>
+          </div>
+        </div>
+        
+        <div class="actor-image-section">
+          <div class="image-frame">
+            <div class="image-frame-header">
+              <span class="image-frame-title">演员封面</span>
+            </div>
+            <div class="image-frame-content">
+              <div class="image-preview" v-if="actor.id">
+                <img :src="`${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`" :alt="actor.name" />
+              </div>
+              <div v-else class="no-image">暂无封面图</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -71,7 +79,7 @@ onMounted(() => {
   padding: 50px;
   background: white;
   border-radius: 15px;
-  width: 100%;
+  width: 95%;
   max-width: 1200px;
   margin: 0 auto;
   margin-top: 60px;
@@ -101,11 +109,17 @@ onMounted(() => {
   width: 100%;
 }
 
+.actor-profile-layout {
+  display: flex;
+  gap: 30px;
+  width: 100%;
+}
+
 .actor-info {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 25px;
-  width: 100%;
 }
 
 .form-group {
@@ -135,21 +149,68 @@ onMounted(() => {
   min-height: 56px;
 }
 
+.actor-image-section {
+  width: 35%;
+  display: flex;
+  flex-direction: column;
+}
+
+.image-frame {
+  border: 1px solid #e1e1e1;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  background: #fff;
+}
+
+.image-frame-header {
+  background: linear-gradient(135deg, #43d6b4 0%, #38b8a0 100%);
+  padding: 12px 20px;
+  text-align: center;
+}
+
+.image-frame-title {
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.image-frame-content {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
 .image-preview {
-  margin-top: 15px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .image-preview img {
   max-width: 100%;
   max-height: 300px;
-  border-radius: 10px;
+  border-radius: 5px;
   object-fit: cover;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .no-image {
   color: #666;
   font-style: italic;
-  padding: 15px;
+  padding: 20px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .actor-profile-layout {
+    flex-direction: column;
+  }
+  
+  .actor-image-section {
+    width: 100%;
+  }
 }
 </style>
