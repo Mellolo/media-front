@@ -8,10 +8,10 @@
 
     <div class="menu-bar-right">
       <div class="user-dropdown">
-        <button class="user-button">
+        <button class="user-button" @click="toggleDropdown">
           {{ username }} ▼
         </button>
-        <div class="dropdown-content">
+        <div class="dropdown-content" :class="{ show: showDropdown }">
           <template v-if="isLoggedIn">
             <a href="/actor/create">创建演员</a>
             <a href="/profile">个人资料</a>
@@ -58,6 +58,7 @@ import { ref, onMounted } from 'vue';
 const isLoggedIn = ref(false);
 const username = ref('未登录');
 const showModal = ref(false);
+const showDropdown = ref(false); // 控制下拉菜单显示状态
 const loginForm = ref({
   username: '',
   password: ''
@@ -82,8 +83,19 @@ const checkLoginStatus = async () => {
   }
 };
 
+// 切换下拉菜单显示状态
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value;
+};
+
+// 隐藏下拉菜单
+const hideDropdown = () => {
+  showDropdown.value = false;
+};
+
 // 显示登录模态框
 const showLoginModal = () => {
+  hideDropdown(); // 隐藏下拉菜单
   showModal.value = true;
 };
 
@@ -141,6 +153,14 @@ const logout = async () => {
 onMounted(() => {
   checkLoginStatus();
 });
+
+// 点击其他地方隐藏下拉菜单
+document.addEventListener('click', (event) => {
+  const dropdown = document.querySelector('.user-dropdown');
+  if (dropdown && !dropdown.contains(event.target)) {
+    hideDropdown();
+  }
+});
 </script>
 
 <style scoped>
@@ -197,25 +217,49 @@ onMounted(() => {
   background-color: white;
   min-width: 160px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  z-index: 1;
-  margin-top: 5px;
+  border-radius: 8px;
+  z-index: 1000;
+  margin-top: 8px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  padding: 4px 0;
 }
 
-.user-dropdown:hover .dropdown-content {
+.dropdown-content.show {
   display: block;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .dropdown-content a {
   color: #333;
-  padding: 12px 16px;
+  padding: 10px 20px;
   text-decoration: none;
   display: block;
   cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
 }
 
 .dropdown-content a:hover {
-  background-color: #f1f1f1;
+  background-color: #f5f5f5;
+  color: #43d6b4;
+}
+
+.dropdown-content a:last-child {
+  border-top: 1px solid #eee;
+  margin-top: 4px;
+  padding-top: 12px;
+  color: #e74c3c;
+}
+
+.dropdown-content a:last-child:hover {
+  background-color: #fef1f0;
+  color: #c0392b;
 }
 
 /* 登录模态框样式 */
