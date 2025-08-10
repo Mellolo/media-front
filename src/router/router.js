@@ -4,6 +4,7 @@ import HomePage from '@/views/HomePage.vue'
 import CreateActorPage from '@/views/CreateActorPage.vue'
 import LoginPage from '@/views/LoginPage.vue'
 import ActorProfilePage from '@/views/ActorProfilePage.vue'
+import ActorListPage from '@/views/ActorListPage.vue'
 
 const routes = [
   {
@@ -27,6 +28,11 @@ const routes = [
     name: 'ActorProfile',
     component: ActorProfilePage,
     props: true
+  },
+  {
+    path: '/actor/list',
+    name: 'ActorList',
+    component: ActorListPage
   },
   {
     path: '/user/login',
