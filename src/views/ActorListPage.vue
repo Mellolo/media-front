@@ -1,4 +1,5 @@
 <template>
+  <div class="actor-list-container">
     <div class="actor-list-header">
       <h1>演员列表</h1>
     </div>
@@ -44,6 +45,7 @@
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -100,6 +102,22 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.actor-list-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 60px);
+  padding: 50px 20px;
+  background: white;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-top: 60px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-sizing: border-box;
+}
 
 .actor-list-header {
   text-align: center;
@@ -180,6 +198,7 @@ onMounted(() => {
   padding: 40px;
   font-size: 18px;
   color: #666;
+  grid-column: 1 / -1; /* 占据整行 */
 }
 
 .actors-grid {
@@ -197,6 +216,7 @@ onMounted(() => {
   background: #fff;
   cursor: pointer;
   transition: all 0.3s ease;
+  height: 100%;
 }
 
 .actor-card:hover {
@@ -255,6 +275,11 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .actor-list-content {
+    padding: 30px 15px;
+    margin-top: 60px;
+  }
+  
   .form-group {
     flex-direction: column;
   }
@@ -265,6 +290,13 @@ onMounted(() => {
   
   .actors-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .actors-grid {
+    grid-template-columns: 1fr;
     gap: 20px;
   }
 }
