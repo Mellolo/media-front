@@ -1,5 +1,4 @@
 <template>
-  <div class="actor-list-container">
     <div class="actor-list-header">
       <h1>演员列表</h1>
     </div>
@@ -18,34 +17,33 @@
       </form>
     </div>
     
-    <div class="actor-list-content">
+    <div class="actors-grid">
       <div v-if="loading" class="loading">搜索中...</div>
       <div v-else-if="actors.length === 0" class="no-results">暂无演员信息</div>
-      <div v-else class="actors-grid">
-        <div 
-          v-for="actor in actors" 
-          :key="actor.id" 
-          class="actor-card"
-          @click="goToActorProfile(actor.id)"
-        >
-          <div class="actor-card-content">
-            <div class="actor-image">
-              <img 
-                v-if="actor.id" 
-                :src="`${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`" 
-                :alt="actor.name"
-                @error="handleImageError"
-              />
-              <div v-else class="no-image">暂无图片</div>
-            </div>
-            <div class="actor-info">
-              <h3 class="actor-name">{{ actor.name }}</h3>
-            </div>
+      <div 
+        v-else
+        v-for="actor in actors" 
+        :key="actor.id" 
+        class="actor-card"
+        @click="goToActorProfile(actor.id)"
+      >
+        <div class="actor-card-content">
+          <div class="actor-image">
+            <img 
+              v-if="actor.id" 
+              :src="`${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`" 
+              :alt="actor.name"
+              @error="handleImageError"
+            />
+            <div v-else class="no-image">暂无图片</div>
+          </div>
+          <div class="actor-info">
+            <h3 class="actor-name">{{ actor.name }}</h3>
+            <p class="actor-description">{{ actor.description || '暂无描述' }}</p>
           </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -102,23 +100,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.actor-list-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 60px);
-  padding: 50px 20px;
-  background: white;
-  border-radius: 15px;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  margin-top: 60px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-sizing: border-box;
-}
 
 .actor-list-header {
   text-align: center;
@@ -192,10 +173,6 @@ onMounted(() => {
 .search-button:hover {
   box-shadow: 0 5px 15px rgba(67, 214, 180, 0.3);
   transform: translateY(-2px);
-}
-
-.actor-list-content {
-  width: 100%;
 }
 
 .loading, .no-results {
@@ -278,11 +255,6 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .actor-list-container {
-    padding: 30px 15px;
-    margin-top: 60px;
-  }
-  
   .form-group {
     flex-direction: column;
   }
