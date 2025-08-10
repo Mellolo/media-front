@@ -111,7 +111,7 @@ onMounted(() => {
   background: white;
   border-radius: 15px;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
   margin-top: 60px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
@@ -207,6 +207,7 @@ onMounted(() => {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 30px;
   width: 100%;
+  width: 1200px;
 }
 
 .actor-card {
