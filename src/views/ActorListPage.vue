@@ -204,17 +204,17 @@ onMounted(() => {
 
 .actors-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
   width: 100%;
   width: 1200px;
 }
 
 .actor-card {
   border: 1px solid #e1e1e1;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
   background: #fff;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -222,8 +222,8 @@ onMounted(() => {
 }
 
 .actor-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
 }
 
 .actor-card-content {
@@ -234,7 +234,7 @@ onMounted(() => {
 
 .actor-image {
   width: 100%;
-  height: 200px;
+  height: 150px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -254,15 +254,15 @@ onMounted(() => {
 }
 
 .actor-info {
-  padding: 20px;
+  padding: 15px;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 .actor-name {
-  margin: 0 0 10px 0;
-  font-size: 18px;
+  margin: 0 0 8px 0;
+  font-size: 16px;
   font-weight: 600;
   color: #333;
   flex: 1;
@@ -270,9 +270,9 @@ onMounted(() => {
 
 .actor-description {
   margin: 0;
-  font-size: 14px;
+  font-size: 12px;
   color: #666;
-  line-height: 1.5;
+  line-height: 1.4;
   flex: 1;
 }
 
@@ -291,15 +291,36 @@ onMounted(() => {
   }
   
   .actors-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+  }
+  
+  .actor-image {
+    height: 130px;
   }
 }
 
 @media (max-width: 480px) {
   .actors-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+  }
+  
+  .actor-image {
+    height: 120px;
+  }
+  
+  .actor-info {
+    padding: 10px;
+  }
+  
+  .actor-name {
+    font-size: 14px;
+    margin: 0 0 5px 0;
+  }
+  
+  .actor-description {
+    font-size: 11px;
   }
 }
 </style>
