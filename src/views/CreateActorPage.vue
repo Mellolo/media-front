@@ -152,11 +152,6 @@ const handleSubmit = async () => {
     }
   } catch (error) {
     console.error('创建演员失败:', error);
-    if (error.response && error.response.data) {
-      alert('创建失败: ' + error.response.data.message);
-    } else {
-      alert('创建失败，请重试');
-    }
   } finally {
     isSubmitting.value = false;
   }

@@ -51,17 +51,8 @@ const actor = ref({
 
 // 获取演员信息
 const fetchActorInfo = async () => {
-  try {
-    const response = await api.get(`/actor/page/${route.params.id}`);
-    actor.value = response.data.data;
-  } catch (error) {
-    console.error('获取演员信息失败:', error);
-    if (error.response && error.response.data) {
-      alert('获取演员信息失败: ' + error.response.data.message);
-    } else {
-      alert('网络错误，请检查连接');
-    }
-  }
+  const response = await api.get(`/actor/page/${route.params.id}`);
+  actor.value = response.data.data;
 };
 
 // 组件挂载时获取演员信息

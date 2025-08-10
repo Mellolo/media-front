@@ -105,11 +105,6 @@ const handleLogin = async () => {
     router.push('/');
   } catch (error) {
     console.error('Login error:', error);
-    if (error.response && error.response.data) {
-      alert('登录失败，请检查用户名和密码: ' + error.response.data.message);
-    } else {
-      alert('网络错误，请检查连接');
-    }
   }
 };
 
@@ -215,10 +210,6 @@ onMounted(() => {
 .login-button:hover {
   /* 移除了transform属性，鼠标悬停时不再移动 */
   box-shadow: 0 8px 20px rgba(67, 214, 180, 0.4);
-}
-
-.login-button:active {
-  /* 移除了transform属性，激活时不再移动 */
 }
 
 .login-footer {
