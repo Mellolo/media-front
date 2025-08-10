@@ -105,7 +105,7 @@ onMounted(() => {
 .actor-list-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: normal;
   min-height: calc(100vh - 60px);
   padding: 50px 20px;
   background: white;
@@ -140,6 +140,7 @@ onMounted(() => {
   width: 100%;
   max-width: 600px;
   margin-bottom: 40px;
+  align-self: center;
 }
 
 .search-form {
@@ -275,7 +276,7 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .actor-list-content {
+  .actor-list-container {
     padding: 30px 15px;
     margin-top: 60px;
   }
