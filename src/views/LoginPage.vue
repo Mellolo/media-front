@@ -30,7 +30,7 @@
         </div>
       </form>
       <div class="login-footer">
-        <p>还没有账户？<a href="/register">立即注册</a></p>
+        <!-- <p>还没有账户？<a href="/register">立即注册</a></p> -->
       </div>
     </div>
   </div>
