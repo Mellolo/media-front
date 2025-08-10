@@ -40,7 +40,6 @@
           </div>
           <div class="actor-info">
             <h3 class="actor-name">{{ actor.name }}</h3>
-            <p class="actor-description">{{ actor.description || '暂无描述' }}</p>
           </div>
         </div>
       </div>
