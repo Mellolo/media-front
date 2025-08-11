@@ -434,7 +434,7 @@ const handleSubmit = async () => {
     formData.append('file', form.value.file);
 
     // 发送POST请求
-    const response = await api.post('/video/upload', formData, {
+    const response = await api.post('/auth/video/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       },
