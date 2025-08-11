@@ -523,6 +523,7 @@ function debounce(func, wait) {
   transition: all 0.3s ease;
   background-color: #f8f9fa;
   color: #000;
+  min-width: 800px;
 }
 
 .form-input:focus,
