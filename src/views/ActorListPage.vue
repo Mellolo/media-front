@@ -67,7 +67,7 @@ const handleImageError = (event) => {
 const fetchActors = async (keyword = '') => {
   loading.value = true;
   try {
-    const response = await api.post('/actor/search', { keyword });
+    const response = await api.get('/actor/search', { keyword });
     actors.value = response.data.data || [];
   } catch (error) {
     console.error('获取演员列表失败:', error);
