@@ -16,6 +16,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/utils/api.js';
+import API_CONFIG from '@/config/api.js';
 import VideoPlayer from '@/components/VideoPlayer.vue';
 
 export default {
@@ -35,8 +36,8 @@ export default {
         loading.value = true;
         const response = await api.get(`/video/page/${route.params.id}`);
         videoData.value = response.data.data;
-        // 设置视频播放链接
-        videoSrc.value = `/video/play/${route.params.id}`;
+        // 设置视频播放链接，添加API基础URL
+        videoSrc.value = `${API_CONFIG.BASE_URL}/video/play/${route.params.id}`;
       } catch (err) {
         console.error('获取视频数据失败:', err);
         error.value = '获取视频数据失败';
