@@ -141,15 +141,16 @@
       v-if="hoveredActorId && (hoveredActorImage || hoveredActorLoading)" 
       class="actor-image-preview"
       :style="previewStyle"
-      @mouseenter="() => hoveredActorLoading = false"
-      @mouseleave="clearActorImage"
     >
       <img 
-        v-if="hoveredActorImage"
+        v-if="hoveredActorImage && !imageLoadError"
         :src="hoveredActorImage" 
         :alt="currentActorName"
         @error="handleImageError"
       />
+      <div v-else-if="imageLoadError" class="image-error">
+        图片加载失败
+      </div>
       <div v-else class="image-loading">加载中...</div>
     </div>
   </div>
@@ -182,6 +183,7 @@ const previewStyle = ref({
   top: '0px',
   left: '0px'
 });
+const imageLoadError = ref(false); // 图片加载错误状态
 
 // 已选择的演员列表
 const selectedActors = ref([]);
@@ -233,6 +235,9 @@ const loadActorImage = async (event, actor) => {
     left: `${rect.right + 10}px`
   };
   
+  // 重置错误状态
+  imageLoadError.value = false;
+  
   // 如果图片已缓存，直接使用
   if (imageCache.value[actor.id]) {
     hoveredActorImage.value = imageCache.value[actor.id];
@@ -249,24 +254,43 @@ const loadActorImage = async (event, actor) => {
   try {
     // 构造图片URL（使用与api.js相同的baseURL配置）
     // 直接使用api实例的defaults.baseURL，并处理可能的相对路径
-    const imageUrl = `${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`;
+    const imageUrl = `${API_CONFIG.BASE_URL}/actor/cover/11${actor.id}`;
     console.log('请求演员图片URL:', imageUrl); // 调试日志
     
     // 设置加载状态
     hoveredActorId.value = actor.id;
     hoveredActorLoading.value = true;
     
-    // 直接设置图片URL，让Vue自动处理图片加载
-    hoveredActorImage.value = imageUrl;
+    // 创建图片对象用于预加载
+    const img = new Image();
+    img.src = imageUrl;
     
-    // 缓存图片URL
-    imageCache.value[actor.id] = imageUrl;
+    // 图片加载完成后的处理
+    img.onload = () => {
+      // 直接设置图片URL，让Vue自动处理图片加载
+      hoveredActorImage.value = imageUrl;
+      
+      // 缓存图片URL
+      imageCache.value[actor.id] = imageUrl;
+      
+      // 清除加载状态
+      hoveredActorLoading.value = false;
+    };
     
-    // 设置加载完成状态（假设图片加载成功）
-    hoveredActorLoading.value = false;
+    // 图片加载错误处理
+    img.onerror = (e) => {
+      console.error('图片加载失败:', e);
+      // 设置错误状态
+      imageLoadError.value = true;
+      // 清除加载状态
+      hoveredActorLoading.value = false;
+    };
   } catch (error) {
     console.error('加载演员图片异常:', error);
+    // 清除加载状态
     hoveredActorLoading.value = false;
+    // 设置错误状态
+    imageLoadError.value = true;
   }
 };
 
@@ -276,11 +300,15 @@ const clearActorImage = () => {
   hoveredActorId.value = null;
   hoveredActorLoading.value = false;
   currentActorName.value = '';
+  imageLoadError.value = false; // 清除错误状态
 };
 
 // 处理图片加载错误
 const handleImageError = (event) => {
   console.error('图片显示错误:', event.target.src);
+  // 设置错误状态，显示错误提示
+  imageLoadError.value = true;
+  // 隐藏图片元素
   event.target.style.display = 'none';
 };
 
@@ -594,6 +622,13 @@ function debounce(func, wait) {
 .image-loading {
   color: #666;
   font-size: 12px;
+}
+
+.image-error {
+  color: #ff4d4f;
+  font-size: 12px;
+  text-align: center;
+  padding: 10px;
 }
 
 .selected-actors-container {
