@@ -31,54 +31,33 @@
       <div class="form-group">
         <label>选择演员</label>
         <div class="actor-selectors-container">
-          <div 
-            v-for="(actorSelector, index) in actorSelectors" 
-            :key="index"
-            class="actor-selector-wrapper"
-          >
-            <div class="actor-selector">
-              <div class="search-input-container">
-                <input 
-                  type="text" 
-                  v-model="actorSelector.keyword" 
-                  placeholder="搜索演员名称" 
-                  class="form-input"
-                  @input="handleActorSearch(index)"
-                />
-                <button 
-                  type="button" 
-                  class="remove-actor-selector" 
-                  @click="removeActorSelector(index)"
-                >
-                  ×
-                </button>
-              </div>
-              
-              <div v-if="actorSelector.loading" class="search-loading">搜索中...</div>
-              
+          <div class="actor-selector">
+            <div class="search-input-container">
+              <input 
+                type="text" 
+                v-model="actorSearchKeyword" 
+                placeholder="搜索演员名称" 
+                class="form-input"
+                @input="handleActorSearch"
+              />
+            </div>
+            
+            <div v-if="actorSearchLoading" class="search-loading">搜索中...</div>
+            
+            <div 
+              v-if="actorSearchResults.length > 0" 
+              class="search-results"
+            >
               <div 
-                v-if="actorSelector.results.length > 0" 
-                class="search-results"
+                v-for="actor in actorSearchResults" 
+                :key="actor.id"
+                class="search-result-item"
+                @click="addActor(actor)"
               >
-                <div 
-                  v-for="actor in actorSelector.results" 
-                  :key="actor.id"
-                  class="search-result-item"
-                  @click="addActor(index, actor)"
-                >
-                  {{ actor.name }}
-                </div>
+                {{ actor.name }}
               </div>
             </div>
           </div>
-          
-          <button 
-            type="button" 
-            class="add-actor-selector" 
-            @click="addActorSelector"
-          >
-            + 添加演员搜索框
-          </button>
           
           <div v-if="selectedActors.length > 0" class="selected-actors-container">
             <div 
@@ -167,8 +146,10 @@ const tagInput = ref('');
 const uploading = ref(false);
 const uploadProgress = ref(0);
 
-// 演员选择器数组
-const actorSelectors = ref([]);
+// 演员搜索相关状态
+const actorSearchKeyword = ref('');
+const actorSearchResults = ref([]);
+const actorSearchLoading = ref(false);
 
 // 已选择的演员列表
 const selectedActors = ref([]);
@@ -181,28 +162,11 @@ const form = ref({
   file: null
 });
 
-// 添加演员选择器
-const addActorSelector = () => {
-  actorSelectors.value.push({
-    keyword: '',
-    results: [],
-    loading: false
-  });
-};
-
-// 移除演员选择器
-const removeActorSelector = (index) => {
-  actorSelectors.value.splice(index, 1);
-};
-
 // 防抖搜索函数
-const debouncedSearch = debounce(async (index, keyword) => {
-  const selector = actorSelectors.value[index];
-  if (!selector) return;
-  
+const debouncedSearch = debounce(async (keyword) => {
   if (!keyword.trim()) {
-    selector.results = [];
-    selector.loading = false;
+    actorSearchResults.value = [];
+    actorSearchLoading.value = false;
     return;
   }
 
@@ -210,44 +174,31 @@ const debouncedSearch = debounce(async (index, keyword) => {
     const response = await api.get('/actor/search', {
       params: { keyword }
     });
-    // 更新对应选择器的结果
-    if (actorSelectors.value[index]) {
-      actorSelectors.value[index].results = response.data.data || [];
-    }
+    actorSearchResults.value = response.data.data || [];
   } catch (error) {
     console.error('搜索演员失败:', error);
-    if (actorSelectors.value[index]) {
-      actorSelectors.value[index].results = [];
-    }
+    actorSearchResults.value = [];
   } finally {
-    if (actorSelectors.value[index]) {
-      actorSelectors.value[index].loading = false;
-    }
+    actorSearchLoading.value = false;
   }
 }, 300);
 
 // 处理演员搜索
-const handleActorSearch = (index) => {
-  const selector = actorSelectors.value[index];
-  if (selector) {
-    selector.loading = true;
-    debouncedSearch(index, selector.keyword);
-  }
+const handleActorSearch = () => {
+  actorSearchLoading.value = true;
+  debouncedSearch(actorSearchKeyword.value);
 };
 
 // 添加演员到已选列表
-const addActor = (index, actor) => {
+const addActor = (actor) => {
   // 检查是否已选择该演员
   if (!selectedActors.value.some(selected => selected.id === actor.id)) {
     selectedActors.value.push(actor);
   }
   
-  // 清空该选择器的搜索结果和关键词
-  const selector = actorSelectors.value[index];
-  if (selector) {
-    selector.keyword = '';
-    selector.results = [];
-  }
+  // 清空搜索关键词和结果
+  actorSearchKeyword.value = '';
+  actorSearchResults.value = [];
 };
 
 // 从已选列表中移除演员
@@ -294,9 +245,10 @@ const resetForm = () => {
     tags: [],
     file: null
   };
-  actorSelectors.value = [];
   selectedActors.value = [];
   tagInput.value = '';
+  actorSearchKeyword.value = '';
+  actorSearchResults.value = [];
   uploadProgress.value = 0;
 };
 
@@ -362,7 +314,6 @@ const handleSubmit = async () => {
 // 组件挂载时不需要获取所有演员
 onMounted(() => {
   // 不需要预先加载演员列表
-  // 初始状态不添加任何演员选择器
 });
 </script>
 
@@ -452,13 +403,9 @@ onMounted(() => {
   width: 100%;
 }
 
-.actor-selector-wrapper {
-  margin-bottom: 15px;
-  position: relative;
-}
-
 .actor-selector {
   width: 100%;
+  margin-bottom: 15px;
 }
 
 .search-input-container {
@@ -468,29 +415,7 @@ onMounted(() => {
 }
 
 .search-input-container .form-input {
-  padding-right: 40px;
-}
-
-.remove-actor-selector {
-  position: absolute;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  font-weight: bold;
-  color: #999;
-  cursor: pointer;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-.remove-actor-selector:hover {
-  background-color: #f0f0f0;
-  color: #ff6b6b;
+  padding-right: 15px;
 }
 
 .search-loading {
@@ -522,26 +447,6 @@ onMounted(() => {
 
 .search-result-item:last-child {
   border-bottom: none;
-}
-
-.add-actor-selector {
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #43d6b4 0%, #38b8a0 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  width: 100%;
-  margin-bottom: 15px;
-}
-
-.add-actor-selector:hover {
-  box-shadow: 0 5px 15px rgba(67, 214, 180, 0.3);
-  transform: translateY(-2px);
 }
 
 .selected-actors-container {
