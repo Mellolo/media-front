@@ -308,7 +308,7 @@ const handleSubmit = async () => {
   }
 
   // 收集所有选中的演员ID
-  form.value.actorIds = selectedActors.value.map(actor => actor.id);
+  const actorIds = selectedActors.value.map(actor => actor.id);
 
   uploading.value = true;
   uploadProgress.value = 0;
@@ -319,15 +319,11 @@ const handleSubmit = async () => {
     formData.append('name', form.value.name);
     formData.append('description', form.value.description);
     
-    // 添加演员ID列表
-    form.value.actorIds.forEach(id => {
-      formData.append('actorIds', id);
-    });
+    // 添加演员ID列表（作为JSON字符串）
+    formData.append('actors', JSON.stringify(actorIds));
     
-    // 添加标签列表
-    form.value.tags.forEach(tag => {
-      formData.append('tags', tag);
-    });
+    // 添加标签列表（作为JSON字符串）
+    formData.append('tags', JSON.stringify(form.value.tags));
     
     // 添加视频文件
     formData.append('file', form.value.file);
