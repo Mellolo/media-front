@@ -722,6 +722,26 @@ function debounce(func, wait) {
   justify-content: center;
 }
 
+.form-file {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e1e1e1;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+  color: #000;
+  min-width: 800px;
+}
+
+.form-file:focus {
+  outline: none;
+  border-color: #43d6b4;
+  background-color: #fff;
+  box-shadow: 0 5px 15px rgba(67, 214, 180, 0.1);
+}
+
 .file-info {
   margin-top: 10px;
   font-size: 14px;
