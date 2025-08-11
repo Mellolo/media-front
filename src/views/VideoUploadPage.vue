@@ -64,14 +64,10 @@
                   v-for="actor in actorSelector.results" 
                   :key="actor.id"
                   class="search-result-item"
-                  @click="selectActor(index, actor)"
+                  @click="addActor(index, actor)"
                 >
                   {{ actor.name }}
                 </div>
-              </div>
-              
-              <div v-if="actorSelector.selected" class="selected-actor-display">
-                已选择: {{ actorSelector.selected.name }}
               </div>
             </div>
           </div>
@@ -81,8 +77,25 @@
             class="add-actor-selector" 
             @click="addActorSelector"
           >
-            + 添加演员
+            + 添加演员搜索框
           </button>
+          
+          <div v-if="selectedActors.length > 0" class="selected-actors-container">
+            <div 
+              v-for="(actor, actorIndex) in selectedActors" 
+              :key="actor.id"
+              class="selected-actor-tag"
+            >
+              {{ actor.name }}
+              <button 
+                type="button" 
+                class="remove-selected-actor" 
+                @click="removeActor(actorIndex)"
+              >
+                ×
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -157,6 +170,9 @@ const uploadProgress = ref(0);
 // 演员选择器数组
 const actorSelectors = ref([]);
 
+// 已选择的演员列表
+const selectedActors = ref([]);
+
 const form = ref({
   name: '',
   description: '',
@@ -170,7 +186,6 @@ const addActorSelector = () => {
   actorSelectors.value.push({
     keyword: '',
     results: [],
-    selected: null,
     loading: false
   });
 };
@@ -216,18 +231,28 @@ const handleActorSearch = (index) => {
   const selector = actorSelectors.value[index];
   if (selector) {
     selector.loading = true;
-    selector.selected = null; // 清除已选择的演员
     debouncedSearch(index, selector.keyword);
   }
 };
 
-// 选择演员
-const selectActor = (index, actor) => {
+// 添加演员到已选列表
+const addActor = (index, actor) => {
+  // 检查是否已选择该演员
+  if (!selectedActors.value.some(selected => selected.id === actor.id)) {
+    selectedActors.value.push(actor);
+  }
+  
+  // 清空该选择器的搜索结果和关键词
   const selector = actorSelectors.value[index];
   if (selector) {
-    selector.selected = actor;
-    selector.results = []; // 清空搜索结果
+    selector.keyword = '';
+    selector.results = [];
   }
+};
+
+// 从已选列表中移除演员
+const removeActor = (index) => {
+  selectedActors.value.splice(index, 1);
 };
 
 // 处理文件选择
@@ -270,6 +295,7 @@ const resetForm = () => {
     file: null
   };
   actorSelectors.value = [];
+  selectedActors.value = [];
   tagInput.value = '';
   uploadProgress.value = 0;
 };
@@ -282,9 +308,7 @@ const handleSubmit = async () => {
   }
 
   // 收集所有选中的演员ID
-  form.value.actorIds = actorSelectors.value
-    .filter(selector => selector.selected)
-    .map(selector => selector.selected.id);
+  form.value.actorIds = selectedActors.value.map(actor => actor.id);
 
   uploading.value = true;
   uploadProgress.value = 0;
@@ -504,15 +528,6 @@ onMounted(() => {
   border-bottom: none;
 }
 
-.selected-actor-display {
-  margin-top: 8px;
-  padding: 8px 12px;
-  background-color: #e1f7f0;
-  border-radius: 8px;
-  color: #38b8a0;
-  font-size: 14px;
-}
-
 .add-actor-selector {
   padding: 12px 20px;
   background: linear-gradient(135deg, #43d6b4 0%, #38b8a0 100%);
@@ -525,11 +540,45 @@ onMounted(() => {
   transition: all 0.3s ease;
   white-space: nowrap;
   width: 100%;
+  margin-bottom: 15px;
 }
 
 .add-actor-selector:hover {
   box-shadow: 0 5px 15px rgba(67, 214, 180, 0.3);
   transform: translateY(-2px);
+}
+
+.selected-actors-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.selected-actor-tag {
+  display: inline-flex;
+  align-items: center;
+  background: #e1f7f0;
+  color: #38b8a0;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+.remove-selected-actor {
+  background: none;
+  border: none;
+  color: #38b8a0;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 8px;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tag-input-container {
