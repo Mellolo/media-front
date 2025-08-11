@@ -440,9 +440,17 @@ const handleSubmit = async () => {
       },
       onUploadProgress: (progressEvent) => {
         if (progressEvent.lengthComputable) {
-          uploadProgress.value = Math.round(
+          // 计算并更新上传进度
+          const progress = Math.round(
             (progressEvent.loaded * 100) / progressEvent.total
           );
+          uploadProgress.value = progress;
+          
+          // 可选：添加进度变化的调试日志
+          console.log(`上传进度: ${progress}%`);
+        } else {
+          // 对于无法计算进度的情况，显示"上传中"
+          console.log('上传中，无法计算具体进度');
         }
       }
     });
@@ -840,6 +848,15 @@ function debounce(func, wait) {
   height: 100%;
   background: linear-gradient(90deg, #43d6b4, #38b8a0);
   transition: width 0.3s ease;
+  will-change: width;
+  border-radius: 5px;
+}
+
+.progress-text {
+  text-align: center;
+  margin-top: 10px;
+  font-weight: 600;
+  color: #333;
 }
 
 .progress-text {
