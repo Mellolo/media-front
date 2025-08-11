@@ -470,7 +470,7 @@ function debounce(func, wait) {
   background: white;
   border-radius: 15px;
   width: 100%;
-  max-width: 800px;
+  max-width: 1500px;
   margin: 0 auto;
   margin-top: 60px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
@@ -508,7 +508,8 @@ function debounce(func, wait) {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #333;
+  color: #38b8a0;
+  text-align: left;
 }
 
 .form-input,

@@ -6,7 +6,7 @@
     <div class="create-actor-form">
       <form @submit.prevent="handleSubmit" class="actor-form">
         <div class="form-group">
-          <label for="name" class="form-label">名称</label>
+          <label for="name" class="form-label">名称 *</label>
           <input 
             type="text" 
             id="name" 
@@ -28,7 +28,7 @@
         </div>
 
         <div class="form-group">
-          <label for="coverImage" class="form-label">封面图</label>
+          <label for="coverImage" class="form-label">封面图 *</label>
           <input 
             type="file" 
             id="coverImage" 
