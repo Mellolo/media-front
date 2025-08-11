@@ -138,7 +138,7 @@
     
     <!-- 悬停图片预览 -->
     <div 
-      v-if="hoveredActorId && (hoveredActorImage || hoveredActorLoading)" 
+      v-if="hoveredActorId" 
       class="actor-image-preview"
       :style="previewStyle"
     >
@@ -254,7 +254,7 @@ const loadActorImage = async (event, actor) => {
   try {
     // 构造图片URL（使用与api.js相同的baseURL配置）
     // 直接使用api实例的defaults.baseURL，并处理可能的相对路径
-    const imageUrl = `${API_CONFIG.BASE_URL}/actor/cover/11${actor.id}`;
+    const imageUrl = `${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`;
     console.log('请求演员图片URL:', imageUrl); // 调试日志
     
     // 设置加载状态
