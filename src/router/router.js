@@ -5,6 +5,7 @@ import CreateActorPage from '@/views/CreateActorPage.vue'
 import LoginPage from '@/views/LoginPage.vue'
 import ActorProfilePage from '@/views/ActorProfilePage.vue'
 import ActorListPage from '@/views/ActorListPage.vue'
+import VideoUploadPage from '@/views/VideoUploadPage.vue'
 
 const routes = [
   {
@@ -33,6 +34,11 @@ const routes = [
     path: '/actor/list',
     name: 'ActorList',
     component: ActorListPage
+  },
+  {
+    path: '/video/upload',
+    name: 'VideoUpload',
+    component: VideoUploadPage
   },
   {
     path: '/user/login',
