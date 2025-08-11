@@ -5,9 +5,8 @@
       class="video-element"
       oncontextmenu="return false"
       controlsList="nodownload"
-      :onloadedmetadata="() => {}"
     >
-      <source :src="src" type="video/mp4" />
+      <source :src="fullSrc" type="video/mp4" />
       您的浏览器不支持视频播放。
     </video>
   </div>
@@ -20,6 +19,28 @@ export default {
     src: {
       type: String,
       required: true
+    }
+  },
+  computed: {
+    fullSrc() {
+      return this.addTokenToUrl(this.src);
+    }
+  },
+  methods: {
+    addTokenToUrl(url) {
+      // 获取存储在localStorage中的token
+      const token = localStorage.getItem('authToken');
+      
+      // 如果没有token，直接返回原始URL
+      if (!token) {
+        return url;
+      }
+      
+      // 检查URL是否已经包含查询参数
+      const separator = url.includes('?') ? '&' : '?';
+      
+      // 添加token作为查询参数
+      return `${url}${separator}token=${encodeURIComponent(token)}`;
     }
   }
 };
@@ -38,7 +59,7 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
-  width: 90%;
-  height: 90%;
+  width: 100%;
+  height: 100%;
 }
 </style>
