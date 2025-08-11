@@ -13,8 +13,9 @@
           v-model="form.name" 
           placeholder="请输入视频名称" 
           class="form-input"
-          required
+          :class="{ 'input-error': nameError }"
         />
+        <div v-if="nameError" class="error-message">请输入视频名称</div>
       </div>
       
       <div class="form-group">
@@ -114,8 +115,9 @@
           @change="handleFileChange" 
           accept="video/*"
           class="form-file"
-          required
+          :class="{ 'input-error': fileError }"
         />
+        <div v-if="fileError" class="error-message">请选择视频文件</div>
         <div v-if="form.file" class="file-info">
           已选择文件: {{ form.file.name }} ({{ formatFileSize(form.file.size) }})
         </div>
@@ -195,6 +197,10 @@ const form = ref({
   tags: [],
   file: null
 });
+
+// 表单验证错误状态
+const nameError = ref(false);
+const fileError = ref(false);
 
 // 防抖搜索函数
 const debouncedSearch = debounce(async (keyword) => {
@@ -384,8 +390,25 @@ const resetForm = () => {
 
 // 提交表单
 const handleSubmit = async () => {
+  // 重置错误状态
+  nameError.value = false;
+  fileError.value = false;
+  
+  // 验证表单
+  let isValid = true;
+  
+  if (!form.value.name.trim()) {
+    nameError.value = true;
+    isValid = false;
+  }
+  
   if (!form.value.file) {
-    alert('请选择视频文件');
+    fileError.value = true;
+    isValid = false;
+  }
+  
+  // 如果验证失败，不提交表单
+  if (!isValid) {
     return;
   }
 
@@ -532,6 +555,14 @@ function debounce(func, wait) {
   border-color: #43d6b4;
   background-color: #fff;
   box-shadow: 0 5px 15px rgba(67, 214, 180, 0.1);
+}
+
+/* 错误状态下的输入框样式 */
+.form-input.input-error,
+.form-textarea.input-error,
+.form-file.input-error {
+  border-color: #ff4757;
+  background-color: #fff0f0;
 }
 
 .form-textarea {
@@ -816,6 +847,13 @@ function debounce(func, wait) {
   margin-top: 10px;
   font-weight: 600;
   color: #333;
+}
+
+.error-message {
+  color: #ff4757;
+  font-size: 14px;
+  margin-top: 5px;
+  text-align: left;
 }
 
 @media (max-width: 768px) {
