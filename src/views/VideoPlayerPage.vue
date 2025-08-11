@@ -3,7 +3,7 @@
     <div v-if="loading">加载中...</div>
     <div v-else-if="error">{{ error }}</div>
     <div v-else>
-      <h1>{{ videoData.title }}</h1>
+      <h1 class="video-title">{{ videoData.title }}</h1>
       <VideoPlayer :src="videoSrc" />
       <div class="video-description">
         <p>{{ videoData.description }}</p>
@@ -64,10 +64,39 @@ export default {
 .video-player-container {
   color: #000;
   padding: 20px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.video-title {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
 }
 
 .video-description {
   color: #000;
   margin-top: 20px;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .video-player-container {
+    padding: 10px;
+  }
+  
+  .video-title {
+    font-size: 20px;
+  }
 }
 </style>
