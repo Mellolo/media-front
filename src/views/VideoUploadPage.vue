@@ -248,9 +248,8 @@ const loadActorImage = async (event, actor) => {
   
   try {
     // 构造图片URL（使用与api.js相同的baseURL配置）
-    // API_CONFIG.BASE_URL 是 '/api'，所以我们需要构造完整的URL
-    const baseURL = window.location.origin; // 获取当前域名
-    const imageUrl = `${baseURL}/api/actor/cover/${actor.id}`;
+    // 直接使用api实例的defaults.baseURL，并处理可能的相对路径
+    const imageUrl = `${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`;
     console.log('请求演员图片URL:', imageUrl); // 调试日志
     
     // 设置加载状态
@@ -275,37 +274,11 @@ const loadActorImage = async (event, actor) => {
           }
         } else {
           console.log('演员图片不存在:', imageUrl, '状态码:', response.status);
-          // 尝试不带/api前缀的URL
-          const alternativeUrl = `${baseURL}/actor/cover/${actor.id}`;
-          console.log('尝试备用URL:', alternativeUrl);
-          
-          fetch(alternativeUrl, { 
-            method: 'HEAD',
-            credentials: 'include'
-          })
-            .then(altResponse => {
-              if (altResponse.ok) {
-                console.log('备用URL图片存在:', alternativeUrl);
-                if (hoveredActorId.value === actor.id) {
-                  hoveredActorImage.value = alternativeUrl;
-                  hoveredActorLoading.value = false;
-                  imageCache.value[actor.id] = alternativeUrl;
-                }
-              } else {
-                console.log('备用URL图片也不存在:', alternativeUrl);
-                if (hoveredActorId.value === actor.id) {
-                  hoveredActorImage.value = '';
-                  hoveredActorLoading.value = false;
-                }
-              }
-            })
-            .catch(altError => {
-              console.error('检查备用URL图片失败:', alternativeUrl, altError);
-              if (hoveredActorId.value === actor.id) {
-                hoveredActorImage.value = '';
-                hoveredActorLoading.value = false;
-              }
-            });
+          // 加载失败时清除状态
+          if (hoveredActorId.value === actor.id) {
+            hoveredActorImage.value = '';
+            hoveredActorLoading.value = false;
+          }
         }
       })
       .catch(error => {
