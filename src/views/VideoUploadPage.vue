@@ -52,9 +52,18 @@
                 v-for="actor in actorSearchResults" 
                 :key="actor.id"
                 class="search-result-item"
+                @mouseenter="loadActorImage(actor)"
+                @mouseleave="clearActorImage()"
                 @click="addActor(actor)"
               >
                 {{ actor.name }}
+                <div v-if="hoveredActorImage && hoveredActorId === actor.id" class="actor-image-preview">
+                  <img 
+                    :src="hoveredActorImage" 
+                    :alt="actor.name"
+                    @error="handleImageError"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -140,6 +149,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/utils/api.js';
 import { debounce } from 'lodash';
+import API_CONFIG from '@/config/api.js';
 
 const router = useRouter();
 const tagInput = ref('');
@@ -150,6 +160,11 @@ const uploadProgress = ref(0);
 const actorSearchKeyword = ref('');
 const actorSearchResults = ref([]);
 const actorSearchLoading = ref(false);
+
+// 悬停显示演员图片相关状态
+const hoveredActorImage = ref('');
+const hoveredActorId = ref(null);
+const imageCache = ref({}); // 缓存已加载的图片
 
 // 已选择的演员列表
 const selectedActors = ref([]);
@@ -189,6 +204,50 @@ const handleActorSearch = () => {
   debouncedSearch(actorSearchKeyword.value);
 };
 
+// 加载演员图片
+const loadActorImage = async (actor) => {
+  // 如果图片已缓存，直接使用
+  if (imageCache.value[actor.id]) {
+    hoveredActorImage.value = imageCache.value[actor.id];
+    hoveredActorId.value = actor.id;
+    return;
+  }
+  
+  // 如果演员没有ID，不加载图片
+  if (!actor.id) {
+    return;
+  }
+  
+  try {
+    // 构造图片URL
+    const imageUrl = `${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`;
+    
+    // 预加载图片
+    const img = new Image();
+    img.onload = () => {
+      // 确保鼠标仍在该演员项上
+      hoveredActorImage.value = imageUrl;
+      hoveredActorId.value = actor.id;
+      // 缓存图片
+      imageCache.value[actor.id] = imageUrl;
+    };
+    img.src = imageUrl;
+  } catch (error) {
+    console.error('加载演员图片失败:', error);
+  }
+};
+
+// 清除演员图片
+const clearActorImage = () => {
+  hoveredActorImage.value = '';
+  hoveredActorId.value = null;
+};
+
+// 处理图片加载错误
+const handleImageError = (event) => {
+  event.target.style.display = 'none';
+};
+
 // 添加演员到已选列表
 const addActor = (actor) => {
   // 检查是否已选择该演员
@@ -199,6 +258,9 @@ const addActor = (actor) => {
   // 清空搜索关键词和结果
   actorSearchKeyword.value = '';
   actorSearchResults.value = [];
+  
+  // 清除悬停图片
+  clearActorImage();
 };
 
 // 从已选列表中移除演员
@@ -249,6 +311,8 @@ const resetForm = () => {
   tagInput.value = '';
   actorSearchKeyword.value = '';
   actorSearchResults.value = [];
+  hoveredActorImage.value = '';
+  hoveredActorId.value = null;
   uploadProgress.value = 0;
 };
 
@@ -406,6 +470,7 @@ onMounted(() => {
 .actor-selector {
   width: 100%;
   margin-bottom: 15px;
+  position: relative;
 }
 
 .search-input-container {
@@ -433,12 +498,15 @@ onMounted(() => {
   background: white;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   z-index: 10;
+  position: relative;
 }
 
 .search-result-item {
   padding: 10px 15px;
   cursor: pointer;
   border-bottom: 1px solid #f0f0f0;
+  color: #000; /* 黑色字体 */
+  position: relative;
 }
 
 .search-result-item:hover {
@@ -447,6 +515,27 @@ onMounted(() => {
 
 .search-result-item:last-child {
   border-bottom: none;
+}
+
+.actor-image-preview {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  margin-left: 10px;
+  width: 100px;
+  height: 100px;
+  background-color: #f8f9fa;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 20;
+}
+
+.actor-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .selected-actors-container {
@@ -626,6 +715,13 @@ onMounted(() => {
   
   .form-actions {
     flex-direction: column;
+  }
+  
+  .actor-image-preview {
+    left: 0;
+    top: 100%;
+    margin-left: 0;
+    margin-top: 5px;
   }
 }
 </style>
