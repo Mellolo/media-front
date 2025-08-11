@@ -29,22 +29,61 @@
       </div>
       
       <div class="form-group">
-        <label for="videoActors">选择演员</label>
-        <select 
-          id="videoActors"
-          v-model="selectedActors" 
-          multiple 
-          class="form-select"
-        >
-          <option 
-            v-for="actor in actors" 
-            :key="actor.id" 
-            :value="actor.id"
+        <label>选择演员</label>
+        <div class="actor-selectors-container">
+          <div 
+            v-for="(actorSelector, index) in actorSelectors" 
+            :key="index"
+            class="actor-selector-wrapper"
           >
-            {{ actor.name }}
-          </option>
-        </select>
-        <div class="hint">按住 Ctrl (Windows) 或 Command (Mac) 可多选</div>
+            <div class="actor-selector">
+              <div class="search-input-container">
+                <input 
+                  type="text" 
+                  v-model="actorSelector.keyword" 
+                  placeholder="搜索演员名称" 
+                  class="form-input"
+                  @input="handleActorSearch(index)"
+                />
+                <button 
+                  type="button" 
+                  class="remove-actor-selector" 
+                  @click="removeActorSelector(index)"
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div v-if="actorSelector.loading" class="search-loading">搜索中...</div>
+              
+              <div 
+                v-if="actorSelector.results.length > 0" 
+                class="search-results"
+              >
+                <div 
+                  v-for="actor in actorSelector.results" 
+                  :key="actor.id"
+                  class="search-result-item"
+                  @click="selectActor(index, actor)"
+                >
+                  {{ actor.name }}
+                </div>
+              </div>
+              
+              <div v-if="actorSelector.selected" class="selected-actor-display">
+                已选择: {{ actorSelector.selected.name }}
+              </div>
+            </div>
+          </div>
+          
+          <button 
+            type="button" 
+            class="add-actor-selector" 
+            @click="addActorSelector"
+          >
+            + 添加演员
+          </button>
+        </div>
       </div>
       
       <div class="form-group">
@@ -108,13 +147,15 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/utils/api.js';
+import { debounce } from 'lodash';
 
 const router = useRouter();
-const actors = ref([]);
-const selectedActors = ref([]);
 const tagInput = ref('');
 const uploading = ref(false);
 const uploadProgress = ref(0);
+
+// 演员选择器数组
+const actorSelectors = ref([]);
 
 const form = ref({
   name: '',
@@ -124,20 +165,68 @@ const form = ref({
   file: null
 });
 
-// 获取演员列表
-const fetchActors = async () => {
+// 添加演员选择器
+const addActorSelector = () => {
+  actorSelectors.value.push({
+    keyword: '',
+    results: [],
+    selected: null,
+    loading: false
+  });
+};
+
+// 移除演员选择器
+const removeActorSelector = (index) => {
+  actorSelectors.value.splice(index, 1);
+};
+
+// 防抖搜索函数
+const debouncedSearch = debounce(async (index, keyword) => {
+  const selector = actorSelectors.value[index];
+  if (!selector) return;
+  
+  if (!keyword.trim()) {
+    selector.results = [];
+    selector.loading = false;
+    return;
+  }
+
   try {
     const response = await api.get('/actor/search', {
-      params: { keyword: '' }
+      params: { keyword }
     });
-    actors.value = response.data.data || [];
-  } catch (error) {
-    console.error('获取演员列表失败:', error);
-    if (error.response && error.response.data) {
-      alert('获取演员列表失败: ' + error.response.data.message);
-    } else {
-      alert('网络错误，请检查连接');
+    // 更新对应选择器的结果
+    if (actorSelectors.value[index]) {
+      actorSelectors.value[index].results = response.data.data || [];
     }
+  } catch (error) {
+    console.error('搜索演员失败:', error);
+    if (actorSelectors.value[index]) {
+      actorSelectors.value[index].results = [];
+    }
+  } finally {
+    if (actorSelectors.value[index]) {
+      actorSelectors.value[index].loading = false;
+    }
+  }
+}, 300);
+
+// 处理演员搜索
+const handleActorSearch = (index) => {
+  const selector = actorSelectors.value[index];
+  if (selector) {
+    selector.loading = true;
+    selector.selected = null; // 清除已选择的演员
+    debouncedSearch(index, selector.keyword);
+  }
+};
+
+// 选择演员
+const selectActor = (index, actor) => {
+  const selector = actorSelectors.value[index];
+  if (selector) {
+    selector.selected = actor;
+    selector.results = []; // 清空搜索结果
   }
 };
 
@@ -180,7 +269,7 @@ const resetForm = () => {
     tags: [],
     file: null
   };
-  selectedActors.value = [];
+  actorSelectors.value = [];
   tagInput.value = '';
   uploadProgress.value = 0;
 };
@@ -192,8 +281,10 @@ const handleSubmit = async () => {
     return;
   }
 
-  // 更新选中的演员ID
-  form.value.actorIds = selectedActors.value;
+  // 收集所有选中的演员ID
+  form.value.actorIds = actorSelectors.value
+    .filter(selector => selector.selected)
+    .map(selector => selector.selected.id);
 
   uploading.value = true;
   uploadProgress.value = 0;
@@ -248,9 +339,10 @@ const handleSubmit = async () => {
   }
 };
 
-// 组件挂载时获取演员列表
+// 组件挂载时不需要获取所有演员
 onMounted(() => {
-  fetchActors();
+  // 不需要预先加载演员列表
+  // 初始状态不添加任何演员选择器
 });
 </script>
 
@@ -305,8 +397,7 @@ onMounted(() => {
 }
 
 .form-input,
-.form-textarea,
-.form-select {
+.form-textarea {
   width: 100%;
   padding: 12px 15px;
   border: 2px solid #e1e1e1;
@@ -319,8 +410,7 @@ onMounted(() => {
 }
 
 .form-input:focus,
-.form-textarea:focus,
-.form-select:focus {
+.form-textarea:focus {
   outline: none;
   border-color: #43d6b4;
   background-color: #fff;
@@ -332,15 +422,114 @@ onMounted(() => {
   font-family: inherit;
 }
 
-.form-select {
-  height: auto;
-  min-height: 120px;
-}
-
 .hint {
   margin-top: 5px;
   font-size: 14px;
   color: #666;
+}
+
+.actor-selectors-container {
+  width: 100%;
+}
+
+.actor-selector-wrapper {
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.actor-selector {
+  width: 100%;
+}
+
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-container .form-input {
+  padding-right: 40px;
+}
+
+.remove-actor-selector {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  font-weight: bold;
+  color: #999;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.remove-actor-selector:hover {
+  background-color: #f0f0f0;
+  color: #ff6b6b;
+}
+
+.search-loading {
+  color: #666;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.search-results {
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 5px;
+  background: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+.search-result-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.search-result-item:hover {
+  background-color: #f8f9fa;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.selected-actor-display {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: #e1f7f0;
+  border-radius: 8px;
+  color: #38b8a0;
+  font-size: 14px;
+}
+
+.add-actor-selector {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #43d6b4 0%, #38b8a0 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.add-actor-selector:hover {
+  box-shadow: 0 5px 15px rgba(67, 214, 180, 0.3);
+  transform: translateY(-2px);
 }
 
 .tag-input-container {
