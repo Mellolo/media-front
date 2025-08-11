@@ -32,7 +32,7 @@ export default {
   },
   computed: {
     fullSrc() {
-      return this.addTokenToUrl(this.src);
+        return this.addTokenToUrl(this.src);
     }
   },
   methods: {
@@ -72,11 +72,13 @@ export default {
 
 <style scoped>
 .video-player {
-  position: relative;
-  padding-bottom: 56.25%;
+  width: 100%;
+  max-width: 1200px;
   height: 0;
+  padding-bottom: 67.5%; /* 16:9 宽高比 */
+  margin: 0 auto;
+  position: relative;
   overflow: hidden;
-  max-width: 100%;
 }
 
 :deep(.video-js) {
@@ -102,5 +104,20 @@ export default {
 
 :deep(.vjs-volume-level) {
   background-color: #43d6b4;
+}
+
+/* 响应式控制栏 */
+:deep(.vjs-control-bar) {
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  :deep(.vjs-control-bar) {
+    font-size: 12px;
+  }
+  
+  .video-player {
+    max-width: 100%;
+  }
 }
 </style>
