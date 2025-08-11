@@ -257,38 +257,37 @@ const loadActorImage = async (event, actor) => {
     hoveredActorLoading.value = true;
     hoveredActorImage.value = '';
     
-    // 使用HEAD请求检查图片是否存在
-    fetch(imageUrl, { 
-      method: 'HEAD',
-      credentials: 'include' // 确保携带cookie
-    })
-      .then(response => {
-        if (response.ok) {
-          console.log('演员图片存在:', imageUrl);
-          // 确保鼠标仍在该演员项上
-          if (hoveredActorId.value === actor.id) {
-            hoveredActorImage.value = imageUrl;
-            hoveredActorLoading.value = false;
-            // 缓存图片
-            imageCache.value[actor.id] = imageUrl;
-          }
-        } else {
-          console.log('演员图片不存在:', imageUrl, '状态码:', response.status);
-          // 加载失败时清除状态
-          if (hoveredActorId.value === actor.id) {
-            hoveredActorImage.value = '';
-            hoveredActorLoading.value = false;
-          }
-        }
-      })
-      .catch(error => {
-        console.error('检查演员图片失败:', imageUrl, error);
-        // 加载失败时清除状态
-        if (hoveredActorId.value === actor.id) {
-          hoveredActorImage.value = '';
-          hoveredActorLoading.value = false;
-        }
-      });
+    // 使用GET请求获取图片（通过api实例，确保携带认证信息）
+    // 创建一个临时的图片对象来加载图片
+    const img = new Image();
+    
+    // 设置图片源（这会触发GET请求）
+    img.src = imageUrl;
+    
+    // 设置跨域属性，确保携带认证信息
+    img.crossOrigin = 'use-credentials';
+    
+    // 图片加载成功回调
+    img.onload = () => {
+      console.log('演员图片加载成功:', imageUrl);
+      // 确保鼠标仍在该演员项上
+      if (hoveredActorId.value === actor.id) {
+        hoveredActorImage.value = imageUrl;
+        hoveredActorLoading.value = false;
+        // 缓存图片
+        imageCache.value[actor.id] = imageUrl;
+      }
+    };
+    
+    // 图片加载失败回调
+    img.onerror = (error) => {
+      console.error('演员图片加载失败:', imageUrl, error);
+      // 加载失败时清除状态
+      if (hoveredActorId.value === actor.id) {
+        hoveredActorImage.value = '';
+        hoveredActorLoading.value = false;
+      }
+    };
   } catch (error) {
     console.error('加载演员图片异常:', error);
     hoveredActorLoading.value = false;
