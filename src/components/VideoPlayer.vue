@@ -72,10 +72,10 @@ export default {
 
 <style scoped>
 .video-player {
-  width: 100%;
+  width: 800px;
   max-width: 1200px;
+  padding-block: 67.5%; /* 16:9 宽高比 */
   height: 0;
-  padding-bottom: 67.5%; /* 16:9 宽高比 */
   margin: 0 auto;
   position: relative;
   overflow: hidden;
