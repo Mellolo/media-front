@@ -37,7 +37,7 @@ export default {
         const response = await api.get(`/video/page/${route.params.id}`);
         videoData.value = response.data.data;
         // 设置视频播放链接，添加API基础URL
-        videoSrc.value = `${API_CONFIG.BASE_URL}/video/play/${route.params.id}`;
+        videoSrc.value = `${API_CONFIG.BASE_URL}/auth/video/play/${route.params.id}`;
       } catch (err) {
         console.error('获取视频数据失败:', err);
         error.value = '获取视频数据失败';
