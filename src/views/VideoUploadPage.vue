@@ -47,23 +47,17 @@
             <div 
               v-if="actorSearchResults.length > 0" 
               class="search-results"
+              ref="searchResultsRef"
             >
               <div 
                 v-for="actor in actorSearchResults" 
                 :key="actor.id"
                 class="search-result-item"
-                @mouseenter="loadActorImage(actor)"
-                @mouseleave="clearActorImage()"
+                @mouseenter="event => loadActorImage(event, actor)"
+                @mouseleave="clearActorImage"
                 @click="addActor(actor)"
               >
                 {{ actor.name }}
-                <div v-if="hoveredActorImage && hoveredActorId === actor.id" class="actor-image-preview">
-                  <img 
-                    :src="hoveredActorImage" 
-                    :alt="actor.name"
-                    @error="handleImageError"
-                  />
-                </div>
               </div>
             </div>
           </div>
@@ -141,6 +135,23 @@
         <div class="progress-text">{{ uploadProgress }}%</div>
       </div>
     </form>
+    
+    <!-- 悬停图片预览 -->
+    <div 
+      v-if="hoveredActorId && (hoveredActorImage || hoveredActorLoading)" 
+      class="actor-image-preview"
+      :style="previewStyle"
+      @mouseenter="() => hoveredActorLoading = false"
+      @mouseleave="clearActorImage"
+    >
+      <img 
+        v-if="hoveredActorImage"
+        :src="hoveredActorImage" 
+        :alt="currentActorName"
+        @error="handleImageError"
+      />
+      <div v-else class="image-loading">加载中...</div>
+    </div>
   </div>
 </template>
 
@@ -148,7 +159,6 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/utils/api.js';
-import { debounce } from 'lodash';
 import API_CONFIG from '@/config/api.js';
 
 const router = useRouter();
@@ -160,11 +170,18 @@ const uploadProgress = ref(0);
 const actorSearchKeyword = ref('');
 const actorSearchResults = ref([]);
 const actorSearchLoading = ref(false);
+const searchResultsRef = ref(null);
 
 // 悬停显示演员图片相关状态
 const hoveredActorImage = ref('');
 const hoveredActorId = ref(null);
+const hoveredActorLoading = ref(false);
+const currentActorName = ref('');
 const imageCache = ref({}); // 缓存已加载的图片
+const previewStyle = ref({
+  top: '0px',
+  left: '0px'
+});
 
 // 已选择的演员列表
 const selectedActors = ref([]);
@@ -205,11 +222,22 @@ const handleActorSearch = () => {
 };
 
 // 加载演员图片
-const loadActorImage = async (actor) => {
+const loadActorImage = async (event, actor) => {
+  // 设置当前悬停的演员名称
+  currentActorName.value = actor.name;
+  
+  // 计算预览位置
+  const rect = event.target.getBoundingClientRect();
+  previewStyle.value = {
+    top: `${rect.top - 160}px`,
+    left: `${rect.right + 10}px`
+  };
+  
   // 如果图片已缓存，直接使用
   if (imageCache.value[actor.id]) {
     hoveredActorImage.value = imageCache.value[actor.id];
     hoveredActorId.value = actor.id;
+    hoveredActorLoading.value = false;
     return;
   }
   
@@ -219,21 +247,78 @@ const loadActorImage = async (actor) => {
   }
   
   try {
-    // 构造图片URL
-    const imageUrl = `${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`;
+    // 构造图片URL（使用与api.js相同的baseURL配置）
+    // API_CONFIG.BASE_URL 是 '/api'，所以我们需要构造完整的URL
+    const baseURL = window.location.origin; // 获取当前域名
+    const imageUrl = `${baseURL}/api/actor/cover/${actor.id}`;
+    console.log('请求演员图片URL:', imageUrl); // 调试日志
     
-    // 预加载图片
-    const img = new Image();
-    img.onload = () => {
-      // 确保鼠标仍在该演员项上
-      hoveredActorImage.value = imageUrl;
-      hoveredActorId.value = actor.id;
-      // 缓存图片
-      imageCache.value[actor.id] = imageUrl;
-    };
-    img.src = imageUrl;
+    // 设置加载状态
+    hoveredActorId.value = actor.id;
+    hoveredActorLoading.value = true;
+    hoveredActorImage.value = '';
+    
+    // 使用HEAD请求检查图片是否存在
+    fetch(imageUrl, { 
+      method: 'HEAD',
+      credentials: 'include' // 确保携带cookie
+    })
+      .then(response => {
+        if (response.ok) {
+          console.log('演员图片存在:', imageUrl);
+          // 确保鼠标仍在该演员项上
+          if (hoveredActorId.value === actor.id) {
+            hoveredActorImage.value = imageUrl;
+            hoveredActorLoading.value = false;
+            // 缓存图片
+            imageCache.value[actor.id] = imageUrl;
+          }
+        } else {
+          console.log('演员图片不存在:', imageUrl, '状态码:', response.status);
+          // 尝试不带/api前缀的URL
+          const alternativeUrl = `${baseURL}/actor/cover/${actor.id}`;
+          console.log('尝试备用URL:', alternativeUrl);
+          
+          fetch(alternativeUrl, { 
+            method: 'HEAD',
+            credentials: 'include'
+          })
+            .then(altResponse => {
+              if (altResponse.ok) {
+                console.log('备用URL图片存在:', alternativeUrl);
+                if (hoveredActorId.value === actor.id) {
+                  hoveredActorImage.value = alternativeUrl;
+                  hoveredActorLoading.value = false;
+                  imageCache.value[actor.id] = alternativeUrl;
+                }
+              } else {
+                console.log('备用URL图片也不存在:', alternativeUrl);
+                if (hoveredActorId.value === actor.id) {
+                  hoveredActorImage.value = '';
+                  hoveredActorLoading.value = false;
+                }
+              }
+            })
+            .catch(altError => {
+              console.error('检查备用URL图片失败:', alternativeUrl, altError);
+              if (hoveredActorId.value === actor.id) {
+                hoveredActorImage.value = '';
+                hoveredActorLoading.value = false;
+              }
+            });
+        }
+      })
+      .catch(error => {
+        console.error('检查演员图片失败:', imageUrl, error);
+        // 加载失败时清除状态
+        if (hoveredActorId.value === actor.id) {
+          hoveredActorImage.value = '';
+          hoveredActorLoading.value = false;
+        }
+      });
   } catch (error) {
-    console.error('加载演员图片失败:', error);
+    console.error('加载演员图片异常:', error);
+    hoveredActorLoading.value = false;
   }
 };
 
@@ -241,10 +326,13 @@ const loadActorImage = async (actor) => {
 const clearActorImage = () => {
   hoveredActorImage.value = '';
   hoveredActorId.value = null;
+  hoveredActorLoading.value = false;
+  currentActorName.value = '';
 };
 
 // 处理图片加载错误
 const handleImageError = (event) => {
+  console.error('图片显示错误:', event.target.src);
   event.target.style.display = 'none';
 };
 
@@ -313,6 +401,8 @@ const resetForm = () => {
   actorSearchResults.value = [];
   hoveredActorImage.value = '';
   hoveredActorId.value = null;
+  hoveredActorLoading.value = false;
+  currentActorName.value = '';
   uploadProgress.value = 0;
 };
 
@@ -379,6 +469,19 @@ const handleSubmit = async () => {
 onMounted(() => {
   // 不需要预先加载演员列表
 });
+
+// 防抖函数实现
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 </script>
 
 <style scoped>
@@ -397,6 +500,7 @@ onMounted(() => {
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-sizing: border-box;
+  position: relative;
 }
 
 .video-upload-header {
@@ -518,24 +622,30 @@ onMounted(() => {
 }
 
 .actor-image-preview {
-  position: absolute;
-  top: 0;
-  left: 100%;
-  margin-left: 10px;
-  width: 100px;
-  height: 100px;
+  position: fixed;
+  width: 150px;
+  height: 150px;
   background-color: #f8f9fa;
   border: 1px solid #e1e1e1;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  z-index: 20;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .actor-image-preview img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.image-loading {
+  color: #666;
+  font-size: 12px;
 }
 
 .selected-actors-container {
@@ -718,10 +828,12 @@ onMounted(() => {
   }
   
   .actor-image-preview {
-    left: 0;
-    top: 100%;
-    margin-left: 0;
-    margin-top: 5px;
+    width: 120px;
+    height: 120px;
+    left: 50% !important;
+    transform: translateX(-50%);
+    top: auto !important;
+    bottom: 20px !important;
   }
 }
 </style>
