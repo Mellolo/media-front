@@ -111,7 +111,7 @@ const loading = ref(false);
 
 // 分页相关
 const currentPage = ref(1);
-const itemsPerPage = ref(5); // 每页显示20个演员
+const itemsPerPage = ref(20); // 每页显示20个演员
 const inputPage = ref(1); // 用于输入页码的响应式数据
 
 // 监听当前页变化，同步更新输入框的值

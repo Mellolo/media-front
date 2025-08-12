@@ -1,13 +1,13 @@
 <template>
   <div class="video-list">
     <div v-if="loading" class="loading">搜索中...</div>
-    <div v-else-if="videos.length === 0" class="no-results">暂无视频</div>
+    <div v-else-if="paginatedVideos.length === 0" class="no-results">暂无视频</div>
     <div 
       v-else
       class="videos-grid"
     >
       <div 
-        v-for="video in videos" 
+        v-for="video in paginatedVideos" 
         :key="video.id" 
         class="video-card"
         @click="goToVideo(video.id)"
@@ -51,11 +51,62 @@
         </div>
       </div>
     </div>
+    
+    <!-- 分页组件 -->
+    <div v-if="totalPages > 1" class="pagination">
+      <button 
+        :disabled="currentPage === 1" 
+        @click="currentPage = 1"
+        class="pagination-button"
+      >
+        首页
+      </button>
+      <button 
+        :disabled="currentPage === 1" 
+        @click="currentPage--"
+        class="pagination-button"
+      >
+        上一页
+      </button>
+      
+      <div class="pagination-input-container">
+        <span>第</span>
+        <input 
+          type="number" 
+          min="1" 
+          :max="totalPages" 
+          v-model.number="inputPage" 
+          @keyup.enter="goToPage"
+          class="pagination-input"
+        />
+        <span>页</span>
+        <button @click="goToPage" class="go-button">跳转</button>
+      </div>
+      
+      <span class="pagination-info">
+        共 {{ totalPages }} 页
+      </span>
+      
+      <button 
+        :disabled="currentPage === totalPages" 
+        @click="currentPage++"
+        class="pagination-button"
+      >
+        下一页
+      </button>
+      <button 
+        :disabled="currentPage === totalPages" 
+        @click="currentPage = totalPages"
+        class="pagination-button"
+      >
+        末页
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import API_CONFIG from '@/config/api.js'
 
@@ -71,6 +122,49 @@ const props = defineProps({
 })
 
 const router = useRouter()
+
+// 分页相关
+const currentPage = ref(1)
+const itemsPerPage = ref(20) // 每页显示20个视频
+const inputPage = ref(1) // 用于输入页码的响应式数据
+
+// 监听当前页变化，同步更新输入框的值
+watch(currentPage, (newPage) => {
+  inputPage.value = newPage
+})
+
+// 监听传入的视频列表变化，重置到第一页
+watch(() => props.videos, () => {
+  currentPage.value = 1
+  inputPage.value = 1
+})
+
+// 计算分页后的视频列表
+const paginatedVideos = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return props.videos.slice(start, end)
+})
+
+// 计算总页数
+const totalPages = computed(() => {
+  return Math.ceil(props.videos.length / itemsPerPage.value)
+})
+
+// 跳转到指定页数
+const goToPage = () => {
+  let page = inputPage.value
+  
+  // 验证输入的页码
+  if (isNaN(page) || page < 1) {
+    page = 1
+  } else if (page > totalPages.value) {
+    page = totalPages.value
+  }
+  
+  currentPage.value = page
+  inputPage.value = page
+}
 
 // 处理图片加载错误
 const handleImageError = (event) => {
@@ -206,6 +300,94 @@ const goToVideo = (videoId) => {
   color: #666;
 }
 
+/* 分页样式 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 40px;
+  padding: 20px 0;
+  flex-wrap: wrap;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 50px;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background: #e0e0e0;
+  border-color: #ccc;
+}
+
+.pagination-button:disabled {
+  background: #f8f8f8;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+  white-space: nowrap;
+  margin: 0 10px;
+}
+
+.pagination-input-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pagination-input {
+  width: 60px;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+  background-color: #fff; /* 白底 */
+  color: #000; /* 黑字 */
+}
+
+.pagination-input:focus {
+  outline: none;
+  border-color: #43d6b4;
+  box-shadow: 0 0 0 2px rgba(67, 214, 180, 0.2);
+}
+
+.pagination-input::-webkit-outer-spin-button,
+.pagination-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pagination-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.go-button {
+  padding: 6px 12px;
+  background: #43d6b4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.go-button:hover {
+  background: #38b8a0;
+}
+
 @media (max-width: 768px) {
   .videos-grid {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -214,6 +396,24 @@ const goToVideo = (videoId) => {
   
   .video-thumbnail {
     height: 130px;
+  }
+  
+  .pagination {
+    gap: 5px;
+  }
+  
+  .pagination-button {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+  
+  .pagination-input {
+    width: 50px;
+    padding: 4px 6px;
+  }
+  
+  .go-button {
+    padding: 4px 10px;
   }
 }
 
@@ -234,6 +434,15 @@ const goToVideo = (videoId) => {
   .video-name {
     font-size: 14px;
     margin: 0 0 5px 0;
+  }
+  
+  .pagination {
+    flex-direction: column;
+  }
+  
+  .pagination-input-container {
+    order: -1;
+    margin-bottom: 10px;
   }
 }
 </style>
