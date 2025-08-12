@@ -82,7 +82,7 @@
         </div>
         
         <div class="search-actions">
-          <button type="button" @click="resetSearch" class="reset-button">重置</button>
+          <button type="button" @click="resetAdvancedSearch" class="reset-button">重置</button>
           <button type="button" @click="handleSearch" class="search-button-advanced">高级搜索</button>
         </div>
       </div>
@@ -117,6 +117,10 @@ const selectedTags = ref([])
 
 // 切换高级搜索展开/收起状态
 const toggleAdvancedSearch = () => {
+  // 如果是从展开状态切换到收起状态，则重置高级搜索条件
+  if (isAdvancedSearchOpen.value) {
+    resetAdvancedSearch()
+  }
   isAdvancedSearchOpen.value = !isAdvancedSearchOpen.value
 }
 
@@ -209,14 +213,19 @@ const handleSearch = () => {
   fetchVideos(params)
 }
 
-// 重置搜索
-const resetSearch = () => {
-  searchKeyword.value = ''
+// 重置高级搜索（仅重置条件，不发送请求）
+const resetAdvancedSearch = () => {
   actorSearchKeyword.value = ''
   actorSearchResults.value = []
   selectedActors.value = []
   tagInput.value = ''
   selectedTags.value = []
+}
+
+// 重置所有搜索条件
+const resetSearch = () => {
+  searchKeyword.value = ''
+  resetAdvancedSearch()
   fetchVideos()
 }
 
