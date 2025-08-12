@@ -436,7 +436,10 @@ onMounted(() => {
 }
 
 .pagination-input[type=number] {
-  -moz-appearance: textfield;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+  padding-right: 4px;
 }
 
 .go-button {
