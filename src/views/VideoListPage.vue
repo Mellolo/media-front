@@ -19,58 +19,60 @@
       
       <div class="advanced-search">
         <div class="search-filters">
-          <div class="filter-group">
-            <label>演员:</label>
-            <div class="actor-selector">
-              <input
-                type="text"
-                v-model="actorSearchKeyword"
-                @input="debounceSearchActors"
-                placeholder="搜索演员"
-                class="filter-input"
-              />
-              <div v-if="actorSearchResults.length > 0" class="search-results">
-                <div
-                  v-for="actor in actorSearchResults"
-                  :key="actor.id"
-                  class="search-result-item"
-                  @click="selectActor(actor)"
-                >
-                  {{ actor.name }}
+          <div class="filter-row">
+            <div class="filter-group">
+              <label>演员:</label>
+              <div class="actor-selector">
+                <input
+                  type="text"
+                  v-model="actorSearchKeyword"
+                  @input="debounceSearchActors"
+                  placeholder="搜索演员"
+                  class="filter-input"
+                />
+                <div v-if="actorSearchResults.length > 0" class="search-results">
+                  <div
+                    v-for="actor in actorSearchResults"
+                    :key="actor.id"
+                    class="search-result-item"
+                    @click="selectActor(actor)"
+                  >
+                    {{ actor.name }}
+                  </div>
+                </div>
+                <div class="selected-actors" v-if="selectedActors.length > 0">
+                  <span
+                    v-for="actor in selectedActors"
+                    :key="actor.id"
+                    class="selected-item"
+                  >
+                    {{ actor.name }}
+                    <span class="remove-item" @click="removeActor(actor.id)">×</span>
+                  </span>
                 </div>
               </div>
-              <div class="selected-actors" v-if="selectedActors.length > 0">
-                <span
-                  v-for="actor in selectedActors"
-                  :key="actor.id"
-                  class="selected-item"
-                >
-                  {{ actor.name }}
-                  <span class="remove-item" @click="removeActor(actor.id)">×</span>
-                </span>
-              </div>
             </div>
-          </div>
-          
-          <div class="filter-group">
-            <label>标签:</label>
-            <div class="tag-input-group">
-              <input
-                type="text"
-                v-model="tagInput"
-                @keyup.enter="addTag"
-                placeholder="输入标签后按回车添加"
-                class="filter-input"
-              />
-              <div class="selected-tags" v-if="selectedTags.length > 0">
-                <span
-                  v-for="(tag, index) in selectedTags"
-                  :key="index"
-                  class="selected-item"
-                >
-                  {{ tag }}
-                  <span class="remove-item" @click="removeTag(index)">×</span>
-                </span>
+            
+            <div class="filter-group">
+              <label>标签:</label>
+              <div class="tag-input-group">
+                <input
+                  type="text"
+                  v-model="tagInput"
+                  @keyup.enter="addTag"
+                  placeholder="输入标签后按回车添加"
+                  class="filter-input"
+                />
+                <div class="selected-tags" v-if="selectedTags.length > 0">
+                  <span
+                    v-for="(tag, index) in selectedTags"
+                    :key="index"
+                    class="selected-item"
+                  >
+                    {{ tag }}
+                    <span class="remove-item" @click="removeTag(index)">×</span>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -250,7 +252,7 @@ onMounted(() => {
 
 .search-section {
   width: 100%;
-  max-width: 600px;
+  max-width: 800px;
   margin-bottom: 40px;
   align-self: center;
 }
@@ -314,7 +316,13 @@ onMounted(() => {
   margin-top: 20px;
 }
 
+.filter-row {
+  display: flex;
+  gap: 20px;
+}
+
 .filter-group {
+  flex: 1;
   margin-bottom: 20px;
 }
 
@@ -457,6 +465,11 @@ onMounted(() => {
   
   .advanced-search {
     padding: 15px;
+  }
+  
+  .filter-row {
+    flex-direction: column;
+    gap: 0;
   }
   
   .search-actions {

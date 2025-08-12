@@ -95,6 +95,7 @@ const goToVideo = (videoId) => {
 <style scoped>
 .video-list {
   width: 100%;
+  width: 1200px;
 }
 
 .loading, .no-results {
