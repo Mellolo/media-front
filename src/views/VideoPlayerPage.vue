@@ -22,6 +22,34 @@
           <h2 class="section-title">视频描述</h2>
           <p class="description-text">{{ videoData.description || '暂无描述' }}</p>
         </div>
+        
+        <!-- 演员信息 -->
+        <div v-if="videoData.actors && videoData.actors.length > 0" class="video-actors">
+          <h2 class="section-title">演员</h2>
+          <div class="actors-list">
+            <span 
+              v-for="actor in videoData.actors" 
+              :key="actor.id" 
+              class="actor-tag"
+            >
+              {{ actor.name }}
+            </span>
+          </div>
+        </div>
+        
+        <!-- 标签信息 -->
+        <div v-if="videoData.tags && videoData.tags.length > 0" class="video-tags">
+          <h2 class="section-title">标签</h2>
+          <div class="tags-list">
+            <span 
+              v-for="tag in videoData.tags" 
+              :key="tag" 
+              class="tag-item"
+            >
+              {{ tag }}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -235,6 +263,39 @@ export default {
   text-align: left;
 }
 
+.video-actors,
+.video-tags {
+  margin-top: 25px;
+}
+
+.video-actors:first-child,
+.video-tags:first-child {
+  margin-top: 0;
+}
+
+.actors-list,
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.actor-tag,
+.tag-item {
+  background: rgba(67, 214, 180, 0.1);
+  color: #43d6b4;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.tag-item {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .video-player-page {
@@ -265,6 +326,17 @@ export default {
     border-radius: 6px;
     margin-bottom: 20px;
   }
+  
+  .actors-list,
+  .tags-list {
+    gap: 8px;
+  }
+  
+  .actor-tag,
+  .tag-item {
+    font-size: 13px;
+    padding: 5px 10px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -278,6 +350,17 @@ export default {
   
   .description-text {
     font-size: 14px;
+  }
+  
+  .actors-list,
+  .tags-list {
+    gap: 6px;
+  }
+  
+  .actor-tag,
+  .tag-item {
+    font-size: 12px;
+    padding: 4px 8px;
   }
 }
 </style>
