@@ -61,9 +61,25 @@
       >
         上一页
       </button>
+      
+      <div class="pagination-input-container">
+        <span>第</span>
+        <input 
+          type="number" 
+          min="1" 
+          :max="totalPages" 
+          v-model.number="inputPage" 
+          @keyup.enter="goToPage"
+          class="pagination-input"
+        />
+        <span>页</span>
+        <button @click="goToPage" class="go-button">跳转</button>
+      </div>
+      
       <span class="pagination-info">
-        第 {{ currentPage }} 页，共 {{ totalPages }} 页
+        共 {{ totalPages }} 页
       </span>
+      
       <button 
         :disabled="currentPage === totalPages" 
         @click="currentPage++"
@@ -83,7 +99,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/utils/api.js';
 import API_CONFIG from '@/config/api.js';
@@ -95,7 +111,13 @@ const loading = ref(false);
 
 // 分页相关
 const currentPage = ref(1);
-const itemsPerPage = ref(20); // 每页显示20个演员
+const itemsPerPage = ref(5); // 每页显示20个演员
+const inputPage = ref(1); // 用于输入页码的响应式数据
+
+// 监听当前页变化，同步更新输入框的值
+watch(currentPage, (newPage) => {
+  inputPage.value = newPage;
+});
 
 // 计算分页后的演员列表
 const paginatedActors = computed(() => {
@@ -108,6 +130,21 @@ const paginatedActors = computed(() => {
 const totalPages = computed(() => {
   return Math.ceil(actors.value.length / itemsPerPage.value);
 });
+
+// 跳转到指定页数
+const goToPage = () => {
+  let page = inputPage.value;
+  
+  // 验证输入的页码
+  if (isNaN(page) || page < 1) {
+    page = 1;
+  } else if (page > totalPages.value) {
+    page = totalPages.value;
+  }
+  
+  currentPage.value = page;
+  inputPage.value = page;
+};
 
 // 处理图片加载错误
 const handleImageError = (event) => {
@@ -124,6 +161,7 @@ const fetchActors = async (keyword = '') => {
     actors.value = response.data.data || [];
     // 重置到第一页
     currentPage.value = 1;
+    inputPage.value = 1;
   } catch (error) {
     console.error('获取演员列表失败:', error);
     if (error.response && error.response.data) {
@@ -337,6 +375,7 @@ onMounted(() => {
   gap: 10px;
   margin-top: 40px;
   padding: 20px 0;
+  flex-wrap: wrap;
 }
 
 .pagination-button {
@@ -347,6 +386,7 @@ onMounted(() => {
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s ease;
+  min-width: 50px;
 }
 
 .pagination-button:hover:not(:disabled) {
@@ -364,6 +404,55 @@ onMounted(() => {
   font-size: 14px;
   color: #666;
   white-space: nowrap;
+  margin: 0 10px;
+}
+
+.pagination-input-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pagination-input {
+  width: 60px;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+  background-color: #fff; /* 白底 */
+  color: #000; /* 黑字 */
+}
+
+.pagination-input:focus {
+  outline: none;
+  border-color: #43d6b4;
+  box-shadow: 0 0 0 2px rgba(67, 214, 180, 0.2);
+}
+
+.pagination-input::-webkit-outer-spin-button,
+.pagination-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pagination-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.go-button {
+  padding: 6px 12px;
+  background: #43d6b4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.go-button:hover {
+  background: #38b8a0;
 }
 
 @media (max-width: 768px) {
@@ -390,11 +479,21 @@ onMounted(() => {
   }
   
   .pagination {
-    flex-wrap: wrap;
+    gap: 5px;
   }
   
-  .pagination-button, .pagination-info {
-    margin: 5px;
+  .pagination-button {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+  
+  .pagination-input {
+    width: 50px;
+    padding: 4px 6px;
+  }
+  
+  .go-button {
+    padding: 4px 10px;
   }
 }
 
@@ -419,6 +518,15 @@ onMounted(() => {
   
   .actor-description {
     font-size: 11px;
+  }
+  
+  .pagination {
+    flex-direction: column;
+  }
+  
+  .pagination-input-container {
+    order: -1;
+    margin-bottom: 10px;
   }
 }
 </style>
