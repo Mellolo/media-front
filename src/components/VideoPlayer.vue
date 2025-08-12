@@ -71,10 +71,9 @@ export default {
 
 <style scoped>
 .video-player {
-  width: 800px;
+  width: 700px;
   max-width: 1200px;
-  padding-top: 100%; /* 16:9 宽高比 */
-  padding-bottom: 40%; /* 16:9 宽高比 */
+  height: 675px;
   margin: 0 auto;
   position: relative;
   overflow: hidden;
@@ -110,13 +109,21 @@ export default {
   font-size: 14px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
+  .video-player {
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+  
   :deep(.vjs-control-bar) {
     font-size: 12px;
   }
-  
-  .video-player {
-    max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  :deep(.vjs-control-bar) {
+    font-size: 10px;
   }
 }
 </style>
