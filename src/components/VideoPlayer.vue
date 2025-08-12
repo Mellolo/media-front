@@ -73,7 +73,6 @@ export default {
 .video-player {
   width: 800px;
   max-width: 1200px;
-  height: 500px;
   padding-top: 100%; /* 16:9 宽高比 */
   padding-bottom: 40%; /* 16:9 宽高比 */
   margin: 0 auto;
