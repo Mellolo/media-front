@@ -39,7 +39,7 @@
     <!-- 视频列表展示 -->
     <div class="actor-videos-section">
       <div class="section-header">
-        <h2>视频</h2>
+        <h2>出演视频</h2>
       </div>
       <VideoList :videos="videos" :loading="loadingVideos" />
     </div>
