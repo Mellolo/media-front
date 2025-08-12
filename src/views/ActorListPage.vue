@@ -20,10 +20,10 @@
     
     <div class="actors-grid">
       <div v-if="loading" class="loading">搜索中...</div>
-      <div v-else-if="actors.length === 0" class="no-results">暂无演员信息</div>
+      <div v-else-if="paginatedActors.length === 0" class="no-results">暂无演员信息</div>
       <div 
         v-else
-        v-for="actor in actors" 
+        v-for="actor in paginatedActors" 
         :key="actor.id" 
         class="actor-card"
         @click="goToActorProfile(actor.id)"
@@ -44,11 +44,46 @@
         </div>
       </div>
     </div>
+    
+    <!-- 分页组件 -->
+    <div v-if="totalPages > 1" class="pagination">
+      <button 
+        :disabled="currentPage === 1" 
+        @click="currentPage = 1"
+        class="pagination-button"
+      >
+        首页
+      </button>
+      <button 
+        :disabled="currentPage === 1" 
+        @click="currentPage--"
+        class="pagination-button"
+      >
+        上一页
+      </button>
+      <span class="pagination-info">
+        第 {{ currentPage }} 页，共 {{ totalPages }} 页
+      </span>
+      <button 
+        :disabled="currentPage === totalPages" 
+        @click="currentPage++"
+        class="pagination-button"
+      >
+        下一页
+      </button>
+      <button 
+        :disabled="currentPage === totalPages" 
+        @click="currentPage = totalPages"
+        class="pagination-button"
+      >
+        末页
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/utils/api.js';
 import API_CONFIG from '@/config/api.js';
@@ -57,6 +92,22 @@ const router = useRouter();
 const searchKeyword = ref('');
 const actors = ref([]);
 const loading = ref(false);
+
+// 分页相关
+const currentPage = ref(1);
+const itemsPerPage = ref(20); // 每页显示20个演员
+
+// 计算分页后的演员列表
+const paginatedActors = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return actors.value.slice(start, end);
+});
+
+// 计算总页数
+const totalPages = computed(() => {
+  return Math.ceil(actors.value.length / itemsPerPage.value);
+});
 
 // 处理图片加载错误
 const handleImageError = (event) => {
@@ -71,6 +122,8 @@ const fetchActors = async (keyword = '') => {
       params: { keyword }
     });
     actors.value = response.data.data || [];
+    // 重置到第一页
+    currentPage.value = 1;
   } catch (error) {
     console.error('获取演员列表失败:', error);
     if (error.response && error.response.data) {
@@ -276,6 +329,43 @@ onMounted(() => {
   flex: 1;
 }
 
+/* 分页样式 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 40px;
+  padding: 20px 0;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background: #e0e0e0;
+  border-color: #ccc;
+}
+
+.pagination-button:disabled {
+  background: #f8f8f8;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+  white-space: nowrap;
+}
+
 @media (max-width: 768px) {
   .actor-list-container {
     padding: 30px 15px;
@@ -297,6 +387,14 @@ onMounted(() => {
   
   .actor-image {
     height: 130px;
+  }
+  
+  .pagination {
+    flex-wrap: wrap;
+  }
+  
+  .pagination-button, .pagination-info {
+    margin: 5px;
   }
 }
 
