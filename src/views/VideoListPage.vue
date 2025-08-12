@@ -223,7 +223,7 @@ onMounted(() => {
   background: white;
   border-radius: 15px;
   width: 100%;
-  max-width: 1500px;
+  max-width: 1200px;
   margin: 0 auto;
   margin-top: 60px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
@@ -250,7 +250,7 @@ onMounted(() => {
 
 .search-section {
   width: 100%;
-  max-width: 800px;
+  max-width: 600px;
   margin-bottom: 40px;
   align-self: center;
 }

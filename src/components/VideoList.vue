@@ -102,14 +102,15 @@ const goToVideo = (videoId) => {
   padding: 40px;
   font-size: 18px;
   color: #666;
-  grid-column: 1 / -1;
+  grid-column: 1 / -1; /* 占据整行 */
 }
 
 .videos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
   width: 100%;
+  width: 1200px;
 }
 
 .video-card {
@@ -159,7 +160,6 @@ const goToVideo = (videoId) => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 15px;
 }
 
 .video-name {
@@ -203,7 +203,7 @@ const goToVideo = (videoId) => {
 
 @media (max-width: 768px) {
   .videos-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 15px;
   }
   
@@ -214,12 +214,12 @@ const goToVideo = (videoId) => {
 
 @media (max-width: 480px) {
   .videos-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
   }
   
   .video-thumbnail {
-    height: 110px;
+    height: 120px;
   }
   
   .video-info {
@@ -228,6 +228,7 @@ const goToVideo = (videoId) => {
   
   .video-name {
     font-size: 14px;
+    margin: 0 0 5px 0;
   }
 }
 </style>
