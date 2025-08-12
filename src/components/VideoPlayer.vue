@@ -89,7 +89,6 @@ export default {
 <style scoped>
 .video-player {
   width: 800px;
-  max-width: 1200px;
   height: 450px;
   margin: 0 auto;
   position: relative;
@@ -136,30 +135,6 @@ export default {
 
 :deep(.vjs-slider-bar) {
   background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* 大播放按钮样式 */
-:deep(.vjs-big-play-button) {
-  background-color: rgba(0, 0, 0, 0.5);
-  border: 2px solid #43d6b4;
-  border-radius: 50%;
-  width: 3em;
-  height: 3em;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  transition: all 0.3s ease;
-}
-
-:deep(.vjs-big-play-button:hover) {
-  background-color: rgba(67, 214, 180, 0.5);
-  border-color: #fff;
-}
-
-:deep(.vjs-big-play-button:before) {
-  font-size: 2em;
-  line-height: 1.5em;
-  text-shadow: none;
 }
 
 /* 控制按钮样式 */
