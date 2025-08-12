@@ -5,6 +5,8 @@
       class="video-js vjs-default-skin"
       controls
       preload="auto"
+      oncontextmenu="return false"
+      controlsList="nodownload"
     >
       <source :src="fullSrc" type="video/mp4" />
       您的浏览器不支持视频播放。
@@ -61,6 +63,18 @@ export default {
       aspectRatio: '16:9',
       width: '100%',
       height: '100%'
+    });
+    
+    // 禁用右键菜单
+    this.$refs.videoPlayer.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      return false;
+    });
+    
+    // 禁用拖拽
+    this.$refs.videoPlayer.addEventListener('dragstart', (e) => {
+      e.preventDefault();
+      return false;
     });
   },
   beforeUnmount() {
