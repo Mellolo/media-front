@@ -27,13 +27,14 @@
         <div v-if="videoData.actors && videoData.actors.length > 0" class="video-actors">
           <h2 class="section-title">演员</h2>
           <div class="actors-list">
-            <span 
+            <router-link
               v-for="actor in videoData.actors" 
               :key="actor.id" 
+              :to="`/actor/profile/${actor.id}`"
               class="actor-tag"
             >
               {{ actor.name }}
-            </span>
+            </router-link>
           </div>
         </div>
         
@@ -273,7 +274,30 @@ export default {
   margin-top: 0;
 }
 
-.actors-list,
+.actors-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.actor-tag {
+  background: rgba(67, 214, 180, 0.1);
+  color: #43d6b4;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.actor-tag:hover {
+  background: rgba(67, 214, 180, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 .tags-list {
   display: flex;
   flex-wrap: wrap;
@@ -281,19 +305,13 @@ export default {
   margin-top: 10px;
 }
 
-.actor-tag,
 .tag-item {
-  background: rgba(67, 214, 180, 0.1);
-  color: #43d6b4;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 500;
-}
-
-.tag-item {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
 }
 
 /* 响应式设计 */
