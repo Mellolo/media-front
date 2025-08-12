@@ -15,7 +15,6 @@
 <script>
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
-import API_CONFIG from '@/config/api.js';
 
 export default {
   name: 'VideoPlayer',
@@ -74,8 +73,9 @@ export default {
 .video-player {
   width: 800px;
   max-width: 1200px;
-  padding-block: 67.5%; /* 16:9 宽高比 */
-  height: 0;
+  height: 500px;
+  padding-top: 100%; /* 16:9 宽高比 */
+  padding-bottom: 40%; /* 16:9 宽高比 */
   margin: 0 auto;
   position: relative;
   overflow: hidden;
