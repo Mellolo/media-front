@@ -14,10 +14,13 @@
             class="search-input"
           />
           <button type="submit" class="search-button">搜索</button>
+          <button type="button" @click="toggleAdvancedSearch" class="toggle-button">
+            {{ isAdvancedSearchOpen ? '收起' : '高级' }}
+          </button>
         </div>
       </form>
       
-      <div class="advanced-search">
+      <div v-show="isAdvancedSearchOpen" class="advanced-search">
         <div class="search-filters">
           <div class="filter-row">
             <div class="filter-group">
@@ -99,6 +102,9 @@ const searchKeyword = ref('')
 const videos = ref([])
 const loading = ref(false)
 
+// 高级搜索展开状态，默认为收起
+const isAdvancedSearchOpen = ref(false)
+
 // 演员搜索相关
 const actorSearchKeyword = ref('')
 const actorSearchResults = ref([])
@@ -108,6 +114,11 @@ const searchingActors = ref(false)
 // 标签相关
 const tagInput = ref('')
 const selectedTags = ref([])
+
+// 切换高级搜索展开/收起状态
+const toggleAdvancedSearch = () => {
+  isAdvancedSearchOpen.value = !isAdvancedSearchOpen.value
+}
 
 // 搜索演员（防抖）
 const searchActors = async () => {
@@ -259,7 +270,7 @@ onMounted(() => {
 
 .search-form {
   width: 100%;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .form-group {
@@ -309,11 +320,28 @@ onMounted(() => {
   transform: translateY(-2px);
 }
 
+.toggle-button {
+  padding: 15px 20px;
+  background: #f0f0f0;
+  color: #666;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.toggle-button:hover {
+  background: #e0e0e0;
+}
+
 .advanced-search {
   background: #f8f9fa;
   border-radius: 10px;
   padding: 20px;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .filter-row {
@@ -460,6 +488,10 @@ onMounted(() => {
   }
   
   .search-button {
+    padding: 15px;
+  }
+  
+  .toggle-button {
     padding: 15px;
   }
   
