@@ -12,10 +12,7 @@
     </div>
     <div v-else class="video-content">
       <div class="video-header">
-        <h1 class="video-title">{{ videoData.name }}</h1>
-        <div class="video-meta">
-          <span class="video-id">视频 ID: {{ route.params.id }}</span>
-        </div>
+        <h1 class="video-name">{{ videoData.name }}</h1>
       </div>
       <div class="video-player-wrapper">
         <VideoPlayer :src="videoSrc" />
@@ -176,10 +173,10 @@ export default {
   text-align: center;
 }
 
-.video-title {
+.video-name {
   font-size: 28px;
   font-weight: 700;
-  margin: 0 0 10px 0;
+  margin: 0;
   color: #fff;
   line-height: 1.3;
   text-align: center;
@@ -269,7 +266,7 @@ export default {
 }
 
 @media (max-width: 480px) {
-  .video-title {
+  .video-name {
     font-size: 20px;
   }
   
@@ -279,15 +276,6 @@ export default {
   
   .description-text {
     font-size: 14px;
-  }
-  
-  .video-meta {
-    flex-wrap: wrap;
-  }
-  
-  .video-id {
-    font-size: 12px;
-    padding: 4px 10px;
   }
 }
 </style>
