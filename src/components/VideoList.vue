@@ -189,7 +189,8 @@ const goToVideo = (videoId) => {
 <style scoped>
 .video-list {
   width: 100%;
-  width: 1200px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .loading, .no-results {
@@ -205,7 +206,8 @@ const goToVideo = (videoId) => {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
   width: 100%;
-  width: 1200px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .video-card {

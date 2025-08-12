@@ -202,8 +202,7 @@ onMounted(() => {
   padding: 50px 20px;
   background: white;
   border-radius: 15px;
-  width: 100%;
-  max-width: 1500px;
+  max-width: 1200px;
   margin: 0 auto;
   margin-top: 60px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
@@ -298,8 +297,8 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
-  width: 100%;
-  width: 1200px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .actor-card {
