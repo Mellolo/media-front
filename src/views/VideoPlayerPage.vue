@@ -80,12 +80,12 @@ export default {
 
 <style scoped>
 .video-player-page {
-  width: 100%;
+  margin-top: 60px;
+  width: 1000px;
   min-height: 100vh;
   background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
   color: #fff;
   padding: 0;
-  margin: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
