@@ -177,7 +177,7 @@ export default {
   font-size: 28px;
   font-weight: 700;
   margin: 0;
-  color: #fff;
+  color: #43d6b4;
   line-height: 1.3;
   text-align: center;
 }
@@ -219,9 +219,10 @@ export default {
   font-size: 22px;
   font-weight: 600;
   margin: 0 0 15px 0;
-  color: #fff;
+  color: #43d6b4;
   border-bottom: 2px solid #43d6b4;
   padding-bottom: 10px;
+  text-align: left;
 }
 
 .description-text {
@@ -231,6 +232,7 @@ export default {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
+  text-align: left;
 }
 
 /* 响应式设计 */
