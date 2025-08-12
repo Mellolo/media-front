@@ -28,15 +28,15 @@
         </div>
 
         <div class="form-group">
-          <label for="coverImage" class="form-label">封面图 *</label>
+          <label for="cover" class="form-label">封面图 *</label>
           <input 
             type="file" 
-            id="coverImage" 
+            id="cover" 
             @change="handleFileChange" 
             accept="image/*"
-            :class="{ 'input-error': coverImageError }"
+            :class="{ 'input-error': coverError }"
           />
-          <div v-if="coverImageError" class="error-message">请选择封面图</div>
+          <div v-if="coverError" class="error-message">请选择封面图</div>
           <div v-if="previewImage" class="image-preview">
             <img :src="previewImage" alt="预览图片" />
           </div>
@@ -64,7 +64,7 @@ const router = useRouter();
 const actorForm = reactive({
   name: '',
   description: '',
-  coverImage: null
+  cover: null
 });
 
 // 状态管理
@@ -73,13 +73,13 @@ const previewImage = ref('');
 
 // 错误状态
 const nameError = ref(false);
-const coverImageError = ref(false);
+const coverError = ref(false);
 
 // 处理文件选择
 const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
-    actorForm.coverImage = file;
+    actorForm.cover = file;
     
     // 生成预览图
     const reader = new FileReader();
@@ -94,23 +94,23 @@ const handleFileChange = (event) => {
 const resetForm = () => {
   actorForm.name = '';
   actorForm.description = '';
-  actorForm.coverImage = null;
+  actorForm.cover = null;
   previewImage.value = '';
-  const fileInput = document.getElementById('coverImage');
+  const fileInput = document.getElementById('cover');
   if (fileInput) {
     fileInput.value = '';
   }
   
   // 重置错误状态
   nameError.value = false;
-  coverImageError.value = false;
+  coverError.value = false;
 };
 
 // 提交表单
 const handleSubmit = async () => {
   // 重置错误状态
   nameError.value = false;
-  coverImageError.value = false;
+  coverError.value = false;
   
   // 验证表单
   let isValid = true;
@@ -120,8 +120,8 @@ const handleSubmit = async () => {
     isValid = false;
   }
   
-  if (!actorForm.coverImage) {
-    coverImageError.value = true;
+  if (!actorForm.cover) {
+    coverError.value = true;
     isValid = false;
   }
   
@@ -136,7 +136,7 @@ const handleSubmit = async () => {
     const formData = new FormData();
     formData.append('name', actorForm.name);
     formData.append('description', actorForm.description);
-    formData.append('coverImage', actorForm.coverImage);
+    formData.append('cover', actorForm.cover);
 
     const response = await api.post('/auth/actor/create', formData, {
       headers: {
