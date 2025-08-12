@@ -1,37 +1,47 @@
 <template>
-  <div class="actor-profile-container">
-    <div class="actor-profile-content">
-      <div class="actor-profile-layout">
-        <div class="actor-info">
-          <div class="actor-profile-header">
-            <h1>演员信息</h1>
-          </div>
-
-          <div class="info-group">
-            <label class="info-label">名称</label>
-            <div class="info-value">{{ actor.name || '暂无' }}</div>
-          </div>
-
-          <div class="info-group">
-            <label class="info-label">描述</label>
-            <div class="info-value">{{ actor.description || '暂无描述' }}</div>
-          </div>
-        </div>
-        
-        <div class="actor-image-section">
-          <div class="image-frame">
-            <div class="image-frame-header">
-              <span class="image-frame-title">封面</span>
+  <div>
+    <div class="actor-profile-container">
+      <div class="actor-profile-content">
+        <div class="actor-profile-layout">
+          <div class="actor-info">
+            <div class="actor-profile-header">
+              <h1>演员信息</h1>
             </div>
-            <div class="image-frame-content">
-              <div class="image-preview" v-if="actor.id">
-                <img :src="`${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`" :alt="actor.name" />
+
+            <div class="info-group">
+              <label class="info-label">名称</label>
+              <div class="info-value">{{ actor.name || '暂无' }}</div>
+            </div>
+
+            <div class="info-group">
+              <label class="info-label">描述</label>
+              <div class="info-value">{{ actor.description || '暂无描述' }}</div>
+            </div>
+          </div>
+          
+          <div class="actor-image-section">
+            <div class="image-frame">
+              <div class="image-frame-header">
+                <span class="image-frame-title">封面</span>
               </div>
-              <div v-else class="no-image">暂无封面图</div>
+              <div class="image-frame-content">
+                <div class="image-preview" v-if="actor.id">
+                  <img :src="`${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`" :alt="actor.name" />
+                </div>
+                <div v-else class="no-image">暂无封面图</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+    
+    <!-- 视频列表展示 -->
+    <div class="actor-videos-section">
+      <div class="section-header">
+        <h2>视频</h2>
+      </div>
+      <VideoList :videos="videos" :loading="loadingVideos" />
     </div>
   </div>
 </template>
@@ -41,6 +51,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/utils/api.js';
 import API_CONFIG from '@/config/api.js';
+import VideoList from '@/components/VideoList.vue';
 
 const route = useRoute();
 const actor = ref({
@@ -49,15 +60,39 @@ const actor = ref({
   description: '',
 });
 
+// 视频列表相关
+const videos = ref([]);
+const loadingVideos = ref(false);
+
 // 获取演员信息
 const fetchActorInfo = async () => {
   const response = await api.get(`/actor/page/${route.params.id}`);
   actor.value = response.data.data;
 };
 
-// 组件挂载时获取演员信息
+// 获取演员相关视频
+const fetchActorVideos = async () => {
+  if (!actor.value.id) return;
+  
+  loadingVideos.value = true;
+  try {
+    const response = await api.get(`/video/search`, {
+      params: { actors: JSON.stringify([actor.value.id]) }
+    });
+    videos.value = response.data.data || [];
+  } catch (error) {
+    console.error('获取演员相关视频失败:', error);
+    videos.value = [];
+  } finally {
+    loadingVideos.value = false;
+  }
+};
+
+// 组件挂载时获取演员信息和相关视频
 onMounted(() => {
-  fetchActorInfo();
+  fetchActorInfo().then(() => {
+    fetchActorVideos();
+  });
 });
 </script>
 
@@ -199,6 +234,26 @@ onMounted(() => {
   width: 100%;
 }
 
+/* 视频列表部分样式 */
+.actor-videos-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.section-header h2 {
+  color: #333;
+  margin: 0 0 30px 0;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  background: linear-gradient(135deg, #43d6b4 0%, #38b8a0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 @media (max-width: 768px) {
   .actor-profile-layout {
     flex-direction: column;
@@ -210,6 +265,11 @@ onMounted(() => {
   
   .image-frame {
     width: 100%;
+  }
+  
+  .actor-videos-section {
+    padding: 0 15px;
+    margin: 30px auto;
   }
 }
 </style>
