@@ -172,13 +172,17 @@ const goToVideo = (videoId) => {
 
 .video-meta {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   margin-bottom: 10px;
 }
 
 .video-duration {
   font-size: 13px;
   color: #666;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
 .video-actors, .video-tags {
