@@ -66,8 +66,12 @@ const loadingVideos = ref(false);
 
 // 获取演员信息
 const fetchActorInfo = async () => {
-  const response = await api.get(`/actor/page/${route.params.id}`);
-  actor.value = response.data.data;
+  try {
+    const response = await api.get(`/actor/page/${route.params.id}`);
+    actor.value = response.data.data;
+  } finally {
+    actor.value = {};
+  }
 };
 
 // 获取演员相关视频

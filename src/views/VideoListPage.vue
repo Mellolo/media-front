@@ -183,11 +183,6 @@ const fetchVideos = async (params = {}) => {
     videos.value = response.data.data || []
   } catch (error) {
     console.error('获取视频列表失败:', error)
-    if (error.response && error.response.data) {
-      alert('获取视频列表失败: ' + error.response.data.message)
-    } else {
-      alert('网络错误，请检查连接')
-    }
     videos.value = []
   } finally {
     loading.value = false

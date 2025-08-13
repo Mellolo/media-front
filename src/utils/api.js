@@ -51,11 +51,15 @@ api.interceptors.response.use(
         window.location.href = '/';
       } else {
         // 如果是其他错误，弹窗提示报错信息
-        customAlert({ 
-          message: error.response.data.data.errorMsg,
-          uuid: error.response.data.data.uuid,
-          stack: error.response.data.data.stack
-        });
+        if (error.response.data) {
+          customAlert({ 
+            message: error.response.data.data.errorMsg,
+            uuid: error.response.data.data.uuid,
+            stack: error.response.data.data.stack
+          });
+        } else {
+          alert('网络错误，请检查连接');
+        }
       }
     }
     
