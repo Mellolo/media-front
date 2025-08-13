@@ -18,9 +18,10 @@
               <div class="info-value">{{ actor.description || '暂无描述' }}</div>
             </div>
             
-            <!-- 编辑按钮 -->
-            <div class="edit-button-container">
+            <!-- 操作按钮 -->
+            <div class="action-buttons">
               <button @click="goToEditPage" class="edit-button">编辑演员信息</button>
+              <button @click="deleteActor" class="delete-button">删除演员</button>
             </div>
           </div>
           
@@ -81,6 +82,23 @@ const fetchActorInfo = async () => {
 // 跳转到编辑页面
 const goToEditPage = () => {
   router.push({ name: 'EditActor', params: { id: route.params.id } });
+};
+
+// 删除演员
+const deleteActor = async () => {
+  // 弹窗确认是否删除
+  if (confirm(`确定要删除演员 "${actor.value.name}" 吗？此操作不可恢复。`)) {
+    try {
+      // 发送删除请求
+      await api.delete(`/auth/actor/delete/${route.params.id}`);
+      alert('演员删除成功');
+      // 删除成功后跳转到演员列表页面
+      router.push({ name: 'ActorList' });
+    } catch (error) {
+      console.error('删除演员失败:', error);
+      alert('删除演员失败: ' + (error.response?.data?.message || '未知错误'));
+    }
+  }
 };
 
 // 组件挂载时获取演员信息
@@ -174,8 +192,10 @@ watch(() => route.query, (newQuery) => {
   text-align: left;
 }
 
-/* 编辑按钮样式 */
-.edit-button-container {
+/* 操作按钮样式 */
+.action-buttons {
+  display: flex;
+  gap: 10px;
   margin-top: 20px;
 }
 
@@ -189,10 +209,29 @@ watch(() => route.query, (newQuery) => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex: 1;
 }
 
 .edit-button:hover {
   box-shadow: 0 5px 15px rgba(67, 214, 180, 0.3);
+  transform: translateY(-2px);
+}
+
+.delete-button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #ff7f7f 0%, #ff6b6b 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+}
+
+.delete-button:hover {
+  box-shadow: 0 5px 15px rgba(255, 127, 127, 0.3);
   transform: translateY(-2px);
 }
 
@@ -293,6 +332,10 @@ watch(() => route.query, (newQuery) => {
   .actor-videos-section {
     padding: 0 15px;
     margin: 30px auto;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
   }
 }
 </style>
