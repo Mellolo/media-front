@@ -47,7 +47,7 @@
       <div class="section-header">
         <h2>相关视频</h2>
       </div>
-      <VideoList :videos="actor.videos || []" :items-per-page="5" />
+      <VideoList :videos="actor.videos || []" :items-per-page="2" />
     </div>
   </div>
 </template>
@@ -305,8 +305,7 @@ watch(() => route.query, (newQuery) => {
   padding: 30px;
   background: white;
   border-radius: 30px;
-  width: 100%;
-  max-width: 2000px;
+  width: 1200px;
   margin: 0 auto;
   margin-top: 60px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
