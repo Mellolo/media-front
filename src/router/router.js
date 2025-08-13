@@ -7,6 +7,7 @@ import ActorProfilePage from '@/views/ActorProfilePage.vue'
 import ActorListPage from '@/views/ActorListPage.vue'
 import VideoUploadPage from '@/views/VideoUploadPage.vue'
 import VideoListPage from '@/views/VideoListPage.vue'
+import TagSearchVideoListPage from '@/views/TagSearchVideoListPage.vue'
 
 const routes = [
   {
@@ -45,6 +46,11 @@ const routes = [
     path: '/video/list',
     name: 'VideoList',
     component: VideoListPage
+  },
+  {
+    path: '/video/tag/search',
+    name: 'TagSearchVideoList',
+    component: TagSearchVideoListPage
   },
   {
     path: '/user/login',

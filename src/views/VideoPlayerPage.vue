@@ -46,6 +46,7 @@
               v-for="tag in videoData.tags" 
               :key="tag" 
               class="tag-item"
+              @click="searchByTag(tag)"
             >
               {{ tag }}
             </span>
@@ -58,7 +59,7 @@
 
 <script>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import api from '@/utils/api.js';
 import API_CONFIG from '@/config/api.js';
 import VideoPlayer from '@/components/VideoPlayer.vue';
@@ -70,6 +71,7 @@ export default {
   },
   setup() {
     const route = useRoute();
+    const router = useRouter();
     const videoData = ref({});
     const videoSrc = ref('');
     const loading = ref(true);
@@ -91,6 +93,14 @@ export default {
       }
     };
     
+    // 标签搜索功能
+    const searchByTag = (tag) => {
+      router.push({
+        name: 'TagSearchVideoList',
+        query: { tag: tag }
+      });
+    };
+    
     onMounted(() => {
       fetchVideoData();
     });
@@ -101,7 +111,8 @@ export default {
       videoSrc,
       loading,
       error,
-      fetchVideoData
+      fetchVideoData,
+      searchByTag
     };
   }
 };
@@ -312,6 +323,14 @@ export default {
   border-radius: 20px;
   font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tag-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* 响应式设计 */
