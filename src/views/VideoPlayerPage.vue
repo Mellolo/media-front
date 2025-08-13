@@ -42,14 +42,14 @@
         <div v-if="videoData.tags && videoData.tags.length > 0" class="video-tags">
           <h2 class="section-title">标签</h2>
           <div class="tags-list">
-            <span 
+            <a 
               v-for="tag in videoData.tags" 
               :key="tag" 
+              :href="getTagSearchUrl(tag)"
               class="tag-item"
-              @click="searchByTag(tag)"
             >
               {{ tag }}
-            </span>
+            </a>
           </div>
         </div>
       </div>
@@ -93,12 +93,12 @@ export default {
       }
     };
     
-    // 标签搜索功能
-    const searchByTag = (tag) => {
-      router.push({
+    // 获取标签搜索URL
+    const getTagSearchUrl = (tag) => {
+      return router.resolve({
         name: 'TagSearchVideoList',
         query: { tag: tag }
-      });
+      }).href;
     };
     
     onMounted(() => {
@@ -112,7 +112,7 @@ export default {
       loading,
       error,
       fetchVideoData,
-      searchByTag
+      getTagSearchUrl
     };
   }
 };
