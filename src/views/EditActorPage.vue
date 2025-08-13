@@ -67,7 +67,6 @@ const fileInput = ref(null);
 
 // 表单数据
 const actorForm = reactive({
-  id: route.params.id,
   name: '',
   description: '',
   cover: null
@@ -130,7 +129,7 @@ const fetchActorInfo = async () => {
     
     // 设置现有封面图
     if (actorData.id) {
-      existingCover.value = `${API_CONFIG.BASE_URL}/actor/cover/${actorData.id}`;
+      existingCover.value = `${API_CONFIG.BASE_URL}/actor/cover/${actorData.id}?t=${new Date().getTime()}`;
     }
   } catch (error) {
     console.error('获取演员信息失败:', error);
@@ -160,7 +159,7 @@ const handleSubmit = async () => {
   
   try {
     const formData = new FormData();
-    formData.append('id', actorForm.id);
+    formData.append('id', route.params.id); // 将ID添加到请求体中
     formData.append('name', actorForm.name);
     formData.append('description', actorForm.description);
     
@@ -169,6 +168,7 @@ const handleSubmit = async () => {
       formData.append('cover', actorForm.cover);
     }
 
+    // 修改API端点，不再在URL中包含ID
     const response = await api.post(`/auth/actor/update`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -177,11 +177,16 @@ const handleSubmit = async () => {
 
     if (response.data) {
       alert('演员信息更新成功');
-      // 跳转到演员展示页面
-      router.push({ name: 'ActorProfile', params: { id: route.params.id } });
+      // 跳转到演员展示页面，并添加时间戳参数以确保刷新数据和图片
+      router.push({ 
+        name: 'ActorProfile', 
+        params: { id: route.params.id },
+        query: { t: new Date().getTime() } // 添加时间戳确保刷新
+      });
     }
   } catch (error) {
     console.error('更新演员失败:', error);
+    alert('更新演员失败');
   } finally {
     isSubmitting.value = false;
   }

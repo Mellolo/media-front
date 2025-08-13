@@ -31,7 +31,7 @@
               </div>
               <div class="image-frame-content">
                 <div class="image-preview" v-if="actor.id">
-                  <img :src="`${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`" :alt="actor.name" />
+                  <img :src="`${API_CONFIG.BASE_URL}/actor/cover/${actor.id}?t=${imageTimestamp}`" :alt="actor.name" />
                 </div>
                 <div v-else class="no-image">暂无封面图</div>
               </div>
@@ -67,10 +67,15 @@ const actor = ref({
   videos: []
 });
 
+// 图片时间戳，用于刷新缓存
+const imageTimestamp = ref(Date.now());
+
 // 获取演员信息
 const fetchActorInfo = async () => {
   const response = await api.get(`/actor/page/${route.params.id}`);
   actor.value = response.data.data;
+  // 更新时间戳以刷新图片
+  imageTimestamp.value = Date.now();
 };
 
 // 跳转到编辑页面
@@ -81,6 +86,14 @@ const goToEditPage = () => {
 // 组件挂载时获取演员信息
 onMounted(() => {
   fetchActorInfo();
+});
+
+// 监听路由变化，如果查询参数中有时间戳，则刷新数据
+import { watch } from 'vue';
+watch(() => route.query, (newQuery) => {
+  if (newQuery.t) {
+    fetchActorInfo();
+  }
 });
 </script>
 
