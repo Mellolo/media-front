@@ -9,46 +9,30 @@
       <div 
         v-for="video in paginatedVideos" 
         :key="video.id" 
-        class="video-card"
-        @click="goToVideo(video.id)"
+        class="video-card-wrapper"
       >
-        <div class="video-card-content">
-          <div class="video-thumbnail">
-            <img 
-              v-if="video.id" 
-              :src="`${API_CONFIG.BASE_URL}/video/cover/${video.id}`" 
-              :alt="video.name"
-              @error="handleImageError"
-            />
-            <div v-else class="no-image">暂无封面</div>
-          </div>
-          <div class="video-info">
-            <h3 class="video-name">{{ video.name }}</h3>
-            <div class="video-meta">
-              <span class="video-duration">{{ formatDuration(video.duration) }}</span>
+        <a
+          :href="getVideoUrl(video.id)"
+          class="video-card"
+        >
+          <div class="video-card-content">
+            <div class="video-thumbnail">
+              <img 
+                v-if="video.id" 
+                :src="`${API_CONFIG.BASE_URL}/video/cover/${video.id}`" 
+                :alt="video.name"
+                @error="handleImageError"
+              />
+              <div v-else class="no-image">暂无封面</div>
             </div>
-            <div v-if="video.actors && video.actors.length" class="video-actors">
-              <span 
-                v-for="actor in video.actors.slice(0, 3)" 
-                :key="actor.id"
-                class="actor-tag"
-              >
-                {{ actor.name }}
-              </span>
-              <span v-if="video.actors.length > 3" class="actor-tag more">...</span>
-            </div>
-            <div v-if="video.tags && video.tags.length" class="video-tags">
-              <span 
-                v-for="tag in video.tags.slice(0, 3)" 
-                :key="tag"
-                class="tag"
-              >
-                {{ tag }}
-              </span>
-              <span v-if="video.tags.length > 3" class="tag more">...</span>
+            <div class="video-info">
+              <h3 class="video-name">{{ video.name }}</h3>
+              <div class="video-meta">
+                <span class="video-duration">{{ formatDuration(video.duration) }}</span>
+              </div>
             </div>
           </div>
-        </div>
+        </a>
       </div>
     </div>
     
@@ -183,9 +167,10 @@ const formatDuration = (seconds) => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
 
-// 跳转到视频播放页
-const goToVideo = (videoId) => {
-  router.push({ name: 'VideoPlayer', params: { id: videoId } })
+// 获取视频URL
+const getVideoUrl = (videoId) => {
+  const routeData = router.resolve({ name: 'VideoPlayer', params: { id: videoId } });
+  return routeData.href;
 }
 </script>
 
@@ -213,7 +198,13 @@ const goToVideo = (videoId) => {
   margin: 0 auto;
 }
 
+.video-card-wrapper {
+  height: 100%;
+}
+
 .video-card {
+  text-decoration: none;
+  color: inherit;
   border: 1px solid #e1e1e1;
   border-radius: 8px;
   overflow: hidden;
@@ -222,6 +213,7 @@ const goToVideo = (videoId) => {
   cursor: pointer;
   transition: all 0.3s ease;
   height: 100%;
+  display: block;
 }
 
 .video-card:hover {
