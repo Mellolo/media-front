@@ -2,7 +2,7 @@
   <div 
     v-if="visible" 
     class="actor-preview"
-    :style="style"
+    :style="previewStyle"
   >
     <div v-if="loading" class="preview-loading">加载中...</div>
     <img 
@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import API_CONFIG from '@/config/api.js'
 
 // 定义组件属性
@@ -44,18 +44,49 @@ const loading = ref(false)
 const imageUrl = ref('')
 const error = ref(false)
 
-// 样式计算
-const style = reactive({
-  top: props.position.top || '0px',
-  left: props.position.left || '0px'
+// 计算样式，确保预览框不会超出视窗边界
+const previewStyle = computed(() => {
+  let top = parseInt(props.position.top) || 0;
+  let left = parseInt(props.position.left) || 0;
+  
+  // 检查是否在浏览器环境中
+  if (typeof window !== 'undefined') {
+    // 预览框尺寸
+    const previewWidth = 150;
+    const previewHeight = 150;
+    
+    // 获取视窗尺寸
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // 确保预览框不会超出右边界
+    if (left + previewWidth > viewportWidth) {
+      left = viewportWidth - previewWidth - 10; // 留10px边距
+    }
+    
+    // 确保预览框不会超出左边界
+    if (left < 0) {
+      left = 10; // 留10px边距
+    }
+    
+    // 确保预览框不会超出下边界
+    if (top + previewHeight > viewportHeight) {
+      top = viewportHeight - previewHeight - 10; // 留10px边距
+    }
+    
+    // 确保预览框不会超出上边界
+    if (top < 0) {
+      top = 10; // 留10px边距
+    }
+  }
+  
+  return {
+    top: `${top}px`,
+    left: `${left}px`
+  }
 })
 
 // 监听属性变化
-watch(() => props.position, (newPosition) => {
-  style.top = newPosition.top || '0px'
-  style.left = newPosition.left || '0px'
-})
-
 watch(() => props.actorId, (newActorId) => {
   if (newActorId) {
     loadActorCover(newActorId)
