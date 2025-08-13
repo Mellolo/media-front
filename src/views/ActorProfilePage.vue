@@ -39,9 +39,9 @@
     <!-- 视频列表展示 -->
     <div class="actor-videos-section">
       <div class="section-header">
-        <h2>出演视频</h2>
+        <h2>相关视频</h2>
       </div>
-      <VideoList :videos="videos" :loading="loadingVideos" />
+      <VideoList :videos="videos" :loading="loadingVideos" :items-per-page="5" />
     </div>
   </div>
 </template>
@@ -102,6 +102,7 @@ onMounted(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  min-height: calc(80vh - 60px);
   padding: 100px;
   background: white;
   border-radius: 80px;

@@ -118,6 +118,10 @@ const props = defineProps({
   loading: {
     type: Boolean,
     default: false
+  },
+  itemsPerPage: {
+    type: Number,
+    default: 20
   }
 })
 
@@ -125,7 +129,6 @@ const router = useRouter()
 
 // 分页相关
 const currentPage = ref(1)
-const itemsPerPage = ref(20) // 每页显示20个视频
 const inputPage = ref(1) // 用于输入页码的响应式数据
 
 // 监听当前页变化，同步更新输入框的值
@@ -141,14 +144,14 @@ watch(() => props.videos, () => {
 
 // 计算分页后的视频列表
 const paginatedVideos = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
+  const start = (currentPage.value - 1) * props.itemsPerPage
+  const end = start + props.itemsPerPage
   return props.videos.slice(start, end)
 })
 
 // 计算总页数
 const totalPages = computed(() => {
-  return Math.ceil(props.videos.length / itemsPerPage.value)
+  return Math.ceil(props.videos.length / props.itemsPerPage)
 })
 
 // 跳转到指定页数
