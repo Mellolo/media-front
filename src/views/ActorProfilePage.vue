@@ -47,7 +47,7 @@
       <div class="section-header">
         <h2>相关视频</h2>
       </div>
-      <VideoList :videos="actor.videos || []" :items-per-page="2" />
+      <VideoList :videos="actor.videos || []" :items-per-page="5" />
     </div>
   </div>
 </template>
