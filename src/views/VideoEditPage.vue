@@ -247,7 +247,7 @@ const resetForm = () => {
     // 恢复演员数据
     selectedActors.value = originalVideoData.value.actors ? 
       [...originalVideoData.value.actors] : [];
-    form.value.actorIds = originalVideoData.value.actorIds || [];
+    form.value.actorIds = selectedActors.value.map(actor => actor.id);
   }
   
   // 清空搜索相关状态
@@ -270,28 +270,28 @@ const handleSubmit = async () => {
   try {
     updating.value = true;
     
-    // 创建更新数据对象
+    // 创建更新数据对象，包含ID和其他所有参数
     const updateData = {
+      id: route.params.id,
       name: form.value.name,
       description: form.value.description,
       actorIds: form.value.actorIds,
       tags: form.value.tags
     };
     
-    // 发送更新请求到正确的API地址
-    await api.put(`/auth/video/edit/${route.params.id}`, updateData);
+    // 发送更新请求到正确的API地址，使用POST方法并将所有参数放入请求体
+    await api.post(`/auth/video/update`, updateData);
     
     // 更新成功，跳转到视频播放页面
     router.push({ name: 'VideoPlayer', params: { id: route.params.id } });
   } catch (error) {
     console.error('更新失败:', error);
-    alert('更新失败: ' + (error.response?.data?.message || error.message));
   } finally {
     updating.value = false;
   }
 };
 
-// 获取视频信息
+// 获取视频信息（保持原来的调用方式不变）
 const fetchVideoData = async () => {
   try {
     const response = await api.get(`/video/page/${route.params.id}`);
@@ -302,8 +302,7 @@ const fetchVideoData = async () => {
       name: videoData.name,
       description: videoData.description || '',
       tags: videoData.tags ? [...videoData.tags] : [],
-      actors: videoData.actors ? [...videoData.actors] : [],
-      actorIds: videoData.actorIds || []
+      actors: videoData.actors ? [...videoData.actors] : []
     };
     
     // 填充表单数据
@@ -318,7 +317,6 @@ const fetchVideoData = async () => {
     }
   } catch (error) {
     console.error('获取视频数据失败:', error);
-    alert('获取视频数据失败: ' + (error.response?.data?.message || error.message));
   }
 };
 
