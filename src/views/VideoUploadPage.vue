@@ -488,25 +488,37 @@ onMounted(() => {
 .search-results {
   border: 1px solid #e1e1e1;
   border-radius: 8px;
-  max-height: 200px;
+  max-height: 300px;
   overflow-y: auto;
   margin-top: 5px;
   background: white;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   z-index: 10;
   position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  padding: 10px;
 }
 
 .search-result-item {
   padding: 10px 15px;
   cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
-  color: #000; /* 黑色字体 */
+  color: #000;
   position: relative;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  transition: all 0.2s ease;
 }
 
 .search-result-item:hover {
   background-color: #f8f9fa;
+  border-color: #43d6b4;
 }
 
 .search-result-item:last-child {
