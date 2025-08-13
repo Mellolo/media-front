@@ -270,9 +270,9 @@ const handleSubmit = async () => {
   try {
     updating.value = true;
     
-    // 创建更新数据对象，包含ID和其他所有参数
+    // 创建更新数据对象，包含ID和其他所有参数，将ID转换为int64类型
     const updateData = {
-      id: route.params.id,
+      id: parseInt(route.params.id), // 将ID转换为int64类型
       name: form.value.name,
       description: form.value.description,
       actorIds: form.value.actorIds,
@@ -286,6 +286,7 @@ const handleSubmit = async () => {
     router.push({ name: 'VideoPlayer', params: { id: route.params.id } });
   } catch (error) {
     console.error('更新失败:', error);
+    // 移除alert错误提示，仅在控制台输出错误信息
   } finally {
     updating.value = false;
   }
@@ -317,6 +318,7 @@ const fetchVideoData = async () => {
     }
   } catch (error) {
     console.error('获取视频数据失败:', error);
+    // 移除alert错误提示，仅在控制台输出错误信息
   }
 };
 
