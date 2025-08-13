@@ -32,8 +32,8 @@
               :key="actor.id" 
               :to="`/actor/profile/${actor.id}`"
               class="actor-tag"
-              @mouseenter="loadActorCover(actor.id, $event)"
-              @mouseleave="clearActorPreview"
+              @mouseenter="showActorPreview(actor.id, $event)"
+              @mouseleave="hideActorPreview"
             >
               {{ actor.name }}
             </router-link>
@@ -58,21 +58,11 @@
     </div>
     
     <!-- 演员封面预览 -->
-    <div 
-      v-if="actorPreview.visible" 
-      class="actor-preview"
-      :style="actorPreview.style"
-    >
-      <div v-if="actorPreview.loading" class="preview-loading">加载中...</div>
-      <img 
-        v-else-if="actorPreview.imageUrl && !actorPreview.error"
-        :src="actorPreview.imageUrl" 
-        alt="演员封面"
-        class="preview-image"
-        @error="handlePreviewImageError"
-      />
-      <div v-else class="preview-error">图片加载失败</div>
-    </div>
+    <ActorCoverPreview
+      v-model:visible="actorPreview.visible"
+      :actor-id="actorPreview.actorId"
+      :position="actorPreview.position"
+    />
   </div>
 </template>
 
@@ -82,11 +72,13 @@ import { useRoute, useRouter } from 'vue-router';
 import api from '@/utils/api.js';
 import API_CONFIG from '@/config/api.js';
 import VideoPlayer from '@/components/VideoPlayer.vue';
+import ActorCoverPreview from '@/components/ActorCoverPreview.vue';
 
 export default {
   name: 'VideoPlayerPage',
   components: {
-    VideoPlayer
+    VideoPlayer,
+    ActorCoverPreview
   },
   setup() {
     const route = useRoute();
@@ -99,10 +91,8 @@ export default {
     // 演员封面预览状态
     const actorPreview = reactive({
       visible: false,
-      loading: false,
-      imageUrl: '',
-      error: false,
-      style: {
+      actorId: null,
+      position: {
         top: '0px',
         left: '0px'
       }
@@ -132,35 +122,18 @@ export default {
       }).href;
     };
     
-    // 加载演员封面图
-    const loadActorCover = (actorId, event) => {
-      // 显示预览框
-      actorPreview.visible = true;
-      actorPreview.loading = true;
-      actorPreview.error = false;
-      
-      // 计算预览框位置
+    // 显示演员预览
+    const showActorPreview = (actorId, event) => {
       const rect = event.target.getBoundingClientRect();
-      actorPreview.style.top = `${rect.bottom + 10}px`;
-      actorPreview.style.left = `${rect.left}px`;
-      
-      // 构造图片URL
-      actorPreview.imageUrl = `${API_CONFIG.BASE_URL}/actor/cover/${actorId}`;
-      actorPreview.loading = false;
+      actorPreview.position.top = `${rect.bottom + 10}px`;
+      actorPreview.position.left = `${rect.left}px`;
+      actorPreview.actorId = actorId;
+      actorPreview.visible = true;
     };
     
-    // 清除演员预览
-    const clearActorPreview = () => {
+    // 隐藏演员预览
+    const hideActorPreview = () => {
       actorPreview.visible = false;
-      actorPreview.loading = false;
-      actorPreview.imageUrl = '';
-      actorPreview.error = false;
-    };
-    
-    // 处理预览图片加载错误
-    const handlePreviewImageError = () => {
-      actorPreview.loading = false;
-      actorPreview.error = true;
     };
     
     onMounted(() => {
@@ -176,9 +149,8 @@ export default {
       fetchVideoData,
       getTagSearchUrl,
       actorPreview,
-      loadActorCover,
-      clearActorPreview,
-      handlePreviewImageError
+      showActorPreview,
+      hideActorPreview
     };
   }
 };
@@ -401,34 +373,6 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* 演员封面预览 */
-.actor-preview {
-  position: fixed;
-  width: 150px;
-  height: 150px;
-  background: #333;
-  border: 1px solid #43d6b4;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-}
-
-.preview-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.preview-loading,
-.preview-error {
-  color: #fff;
-  font-size: 14px;
-}
-
 /* 响应式设计 */
 @media (max-width: 768px) {
   .video-player-page {
@@ -470,11 +414,6 @@ export default {
     font-size: 13px;
     padding: 5px 10px;
   }
-  
-  .actor-preview {
-    width: 120px;
-    height: 120px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -499,11 +438,6 @@ export default {
   .tag-item {
     font-size: 12px;
     padding: 4px 8px;
-  }
-  
-  .actor-preview {
-    width: 100px;
-    height: 100px;
   }
 }
 </style>

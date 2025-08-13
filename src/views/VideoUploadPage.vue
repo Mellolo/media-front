@@ -54,8 +54,8 @@
                 v-for="actor in actorSearchResults" 
                 :key="actor.id"
                 class="search-result-item"
-                @mouseenter="event => loadActorImage(event, actor)"
-                @mouseleave="clearActorImage"
+                @mouseenter="event => showActorPreview(event, actor)"
+                @mouseleave="hideActorPreview"
                 @click="addActor(actor)"
               >
                 {{ actor.name }}
@@ -138,54 +138,42 @@
       </div>
     </form>
     
-    <!-- 悬停图片预览 -->
-    <div 
-      v-if="hoveredActorId" 
-      class="actor-image-preview"
-      :style="previewStyle"
-    >
-      <img 
-        v-if="hoveredActorImage && !imageLoadError"
-        :src="hoveredActorImage" 
-        :alt="currentActorName"
-        @error="handleImageError"
-      />
-      <div v-else-if="imageLoadError" class="image-error">
-        图片加载失败
-      </div>
-      <div v-else class="image-loading">加载中...</div>
-    </div>
+    <!-- 演员封面预览 -->
+    <ActorCoverPreview
+      v-model:visible="actorPreview.visible"
+      :actor-id="actorPreview.actorId"
+      :position="actorPreview.position"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/utils/api.js';
 import API_CONFIG from '@/config/api.js';
+import ActorCoverPreview from '@/components/ActorCoverPreview.vue';
 
 const router = useRouter();
 const tagInput = ref('');
 const uploading = ref(false);
 const uploadProgress = ref(0);
 
+// 演员封面预览状态
+const actorPreview = reactive({
+  visible: false,
+  actorId: null,
+  position: {
+    top: '0px',
+    left: '0px'
+  }
+});
+
 // 演员搜索相关状态
 const actorSearchKeyword = ref('');
 const actorSearchResults = ref([]);
 const actorSearchLoading = ref(false);
 const searchResultsRef = ref(null);
-
-// 悬停显示演员图片相关状态
-const hoveredActorImage = ref('');
-const hoveredActorId = ref(null);
-const hoveredActorLoading = ref(false);
-const currentActorName = ref('');
-const imageCache = ref({}); // 缓存已加载的图片
-const previewStyle = ref({
-  top: '0px',
-  left: '0px'
-});
-const imageLoadError = ref(false); // 图片加载错误状态
 
 // 已选择的演员列表
 const selectedActors = ref([]);
@@ -202,18 +190,30 @@ const form = ref({
 const nameError = ref(false);
 const fileError = ref(false);
 
-// 防抖搜索函数
-const debouncedSearch = debounce(async (keyword) => {
-  if (!keyword.trim()) {
+// 显示演员预览
+const showActorPreview = (event, actor) => {
+  const rect = event.target.getBoundingClientRect();
+  actorPreview.position.top = `${rect.bottom + 10}px`;
+  actorPreview.position.left = `${rect.left}px`;
+  actorPreview.actorId = actor.id;
+  actorPreview.visible = true;
+};
+
+// 隐藏演员预览
+const hideActorPreview = () => {
+  actorPreview.visible = false;
+};
+
+// 处理演员搜索
+const handleActorSearch = async () => {
+  if (!actorSearchKeyword.value.trim()) {
     actorSearchResults.value = [];
-    actorSearchLoading.value = false;
     return;
   }
 
   try {
-    const response = await api.get('/actor/search', {
-      params: { keyword }
-    });
+    actorSearchLoading.value = true;
+    const response = await api.get(`/actor/search?keyword=${encodeURIComponent(actorSearchKeyword.value)}`);
     actorSearchResults.value = response.data.data || [];
   } catch (error) {
     console.error('搜索演员失败:', error);
@@ -221,121 +221,26 @@ const debouncedSearch = debounce(async (keyword) => {
   } finally {
     actorSearchLoading.value = false;
   }
-}, 300);
-
-// 处理演员搜索
-const handleActorSearch = () => {
-  actorSearchLoading.value = true;
-  debouncedSearch(actorSearchKeyword.value);
 };
 
-// 加载演员图片
-const loadActorImage = async (event, actor) => {
-  // 设置当前悬停的演员名称
-  currentActorName.value = actor.name;
-  
-  // 计算预览位置
-  const rect = event.target.getBoundingClientRect();
-  previewStyle.value = {
-    top: `${rect.top - 160}px`,
-    left: `${rect.right + 10}px`
-  };
-  
-  // 重置错误状态
-  imageLoadError.value = false;
-  
-  // 如果图片已缓存，直接使用
-  if (imageCache.value[actor.id]) {
-    hoveredActorImage.value = imageCache.value[actor.id];
-    hoveredActorId.value = actor.id;
-    hoveredActorLoading.value = false;
-    return;
-  }
-  
-  // 如果演员没有ID，不加载图片
-  if (!actor.id) {
-    return;
-  }
-  
-  try {
-    // 构造图片URL（使用与api.js相同的baseURL配置）
-    // 直接使用api实例的defaults.baseURL，并处理可能的相对路径
-    const imageUrl = `${API_CONFIG.BASE_URL}/actor/cover/${actor.id}`;
-    console.log('请求演员图片URL:', imageUrl); // 调试日志
-    
-    // 设置加载状态
-    hoveredActorId.value = actor.id;
-    hoveredActorLoading.value = true;
-    
-    // 创建图片对象用于预加载
-    const img = new Image();
-    img.src = imageUrl;
-    
-    // 图片加载完成后的处理
-    img.onload = () => {
-      // 直接设置图片URL，让Vue自动处理图片加载
-      hoveredActorImage.value = imageUrl;
-      
-      // 缓存图片URL
-      imageCache.value[actor.id] = imageUrl;
-      
-      // 清除加载状态
-      hoveredActorLoading.value = false;
-    };
-    
-    // 图片加载错误处理
-    img.onerror = (e) => {
-      console.error('图片加载失败:', e);
-      // 设置错误状态
-      imageLoadError.value = true;
-      // 清除加载状态
-      hoveredActorLoading.value = false;
-    };
-  } catch (error) {
-    console.error('加载演员图片异常:', error);
-    // 清除加载状态
-    hoveredActorLoading.value = false;
-    // 设置错误状态
-    imageLoadError.value = true;
-  }
-};
-
-// 清除演员图片
-const clearActorImage = () => {
-  hoveredActorImage.value = '';
-  hoveredActorId.value = null;
-  hoveredActorLoading.value = false;
-  currentActorName.value = '';
-  imageLoadError.value = false; // 清除错误状态
-};
-
-// 处理图片加载错误
-const handleImageError = (event) => {
-  console.error('图片显示错误:', event.target.src);
-  // 设置错误状态，显示错误提示
-  imageLoadError.value = true;
-  // 隐藏图片元素
-  event.target.style.display = 'none';
-};
-
-// 添加演员到已选列表
+// 添加演员到已选择列表
 const addActor = (actor) => {
-  // 检查是否已选择该演员
-  if (!selectedActors.value.some(selected => selected.id === actor.id)) {
+  // 检查是否已添加
+  if (!selectedActors.value.some(a => a.id === actor.id)) {
     selectedActors.value.push(actor);
+    // 更新表单数据
+    form.value.actorIds = selectedActors.value.map(a => a.id);
   }
-  
-  // 清空搜索关键词和结果
+  // 清空搜索结果和关键字
   actorSearchKeyword.value = '';
   actorSearchResults.value = [];
-  
-  // 清除悬停图片
-  clearActorImage();
 };
 
 // 从已选列表中移除演员
 const removeActor = (index) => {
   selectedActors.value.splice(index, 1);
+  // 更新表单数据
+  form.value.actorIds = selectedActors.value.map(a => a.id);
 };
 
 // 处理文件选择
@@ -343,6 +248,7 @@ const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
     form.value.file = file;
+    fileError.value = false;
   }
 };
 
@@ -391,104 +297,73 @@ const resetForm = () => {
 // 提交表单
 const handleSubmit = async () => {
   // 重置错误状态
-  nameError.value = false;
-  fileError.value = false;
+  nameError.value = !form.value.name.trim();
+  fileError.value = !form.value.file;
   
-  // 验证表单
-  let isValid = true;
-  
-  if (!form.value.name.trim()) {
-    nameError.value = true;
-    isValid = false;
-  }
-  
-  if (!form.value.file) {
-    fileError.value = true;
-    isValid = false;
-  }
-  
-  // 如果验证失败，不提交表单
-  if (!isValid) {
+  // 如果有必填字段错误，不提交表单
+  if (nameError.value || fileError.value) {
     return;
   }
-
-  // 收集所有选中的演员ID
-  const actorIds = selectedActors.value.map(actor => actor.id);
-
-  uploading.value = true;
-  uploadProgress.value = 0;
-
+  
   try {
+    uploading.value = true;
+    uploadProgress.value = 0;
+    
     // 创建FormData对象
     const formData = new FormData();
     formData.append('name', form.value.name);
-    formData.append('description', form.value.description);
-    
-    // 添加演员ID列表（作为JSON字符串）
-    formData.append('actors', JSON.stringify(actorIds));
-    
-    // 添加标签列表（作为JSON字符串）
-    formData.append('tags', JSON.stringify(form.value.tags));
-    
-    // 添加视频文件
+    if (form.value.description) {
+      formData.append('description', form.value.description);
+    }
+    if (form.value.actorIds.length > 0) {
+      form.value.actorIds.forEach(id => {
+        formData.append('actorIds', id);
+      });
+    }
+    if (form.value.tags.length > 0) {
+      form.value.tags.forEach(tag => {
+        formData.append('tags', tag);
+      });
+    }
     formData.append('file', form.value.file);
-
-    // 发送POST请求
+    
+    // 发送请求
     const response = await api.post('/auth/video/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       },
       onUploadProgress: (progressEvent) => {
         if (progressEvent.lengthComputable) {
-          // 计算并更新上传进度
-          const progress = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          uploadProgress.value = progress;
-          
-          // 可选：添加进度变化的调试日志
-          console.log(`上传进度: ${progress}%`);
-        } else {
-          // 对于无法计算进度的情况，显示"上传中"
-          console.log('上传中，无法计算具体进度');
+          uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
         }
       }
     });
-
-    alert('视频上传成功');
-    resetForm();
     
-    // 可以选择跳转到其他页面
-    // router.push('/videos');
+    // 上传成功，跳转到视频播放页面
+    router.push({ name: 'VideoPlayer', params: { id: response.data.data.id } });
   } catch (error) {
-    console.error('视频上传失败:', error);
-    if (error.response && error.response.data) {
-      alert('视频上传失败: ' + error.response.data.message);
-    } else {
-      alert('网络错误，请检查连接');
-    }
+    console.error('上传失败:', error);
+    alert('上传失败: ' + (error.response?.data?.message || error.message));
   } finally {
     uploading.value = false;
   }
 };
 
 // 组件挂载时不需要获取所有演员
-onMounted(() => {
-  // 不需要预先加载演员列表
-});
+// 清理事件监听器
+// 注意：在Vue 3中，组件卸载时会自动清理addEventListener添加的事件监听器
+// 但在某些情况下可能需要手动清理
 
-// 防抖函数实现
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
+// 点击其他地方关闭搜索结果
+const handleClickOutside = (event) => {
+  if (searchResultsRef.value && !searchResultsRef.value.contains(event.target)) {
+    actorSearchResults.value = [];
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
 </script>
 
 <style scoped>
@@ -636,40 +511,6 @@ function debounce(func, wait) {
 
 .search-result-item:last-child {
   border-bottom: none;
-}
-
-.actor-image-preview {
-  position: fixed;
-  width: 150px;
-  height: 150px;
-  background-color: #f8f9fa;
-  border: 1px solid #e1e1e1;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.actor-image-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.image-loading {
-  color: #666;
-  font-size: 12px;
-}
-
-.image-error {
-  color: #ff4d4f;
-  font-size: 12px;
-  text-align: center;
-  padding: 10px;
 }
 
 .selected-actors-container {
