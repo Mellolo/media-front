@@ -8,6 +8,7 @@ import ActorListPage from '@/views/ActorListPage.vue'
 import VideoUploadPage from '@/views/VideoUploadPage.vue'
 import VideoListPage from '@/views/VideoListPage.vue'
 import TagSearchVideoListPage from '@/views/TagSearchVideoListPage.vue'
+import EditActorPage from '@/views/EditActorPage.vue'
 
 const routes = [
   {
@@ -30,6 +31,12 @@ const routes = [
     path: '/actor/profile/:id',
     name: 'ActorProfile',
     component: ActorProfilePage,
+    props: true
+  },
+  {
+    path: '/actor/edit/:id',
+    name: 'EditActor',
+    component: EditActorPage,
     props: true
   },
   {

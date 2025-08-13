@@ -17,6 +17,11 @@
               <label class="info-label">描述</label>
               <div class="info-value">{{ actor.description || '暂无描述' }}</div>
             </div>
+            
+            <!-- 编辑按钮 -->
+            <div class="edit-button-container">
+              <button @click="goToEditPage" class="edit-button">编辑演员信息</button>
+            </div>
           </div>
           
           <div class="actor-image-section">
@@ -48,12 +53,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import api from '@/utils/api.js';
 import API_CONFIG from '@/config/api.js';
 import VideoList from '@/components/VideoList.vue';
 
 const route = useRoute();
+const router = useRouter();
 const actor = ref({
   id: '',
   name: '',
@@ -65,6 +71,11 @@ const actor = ref({
 const fetchActorInfo = async () => {
   const response = await api.get(`/actor/page/${route.params.id}`);
   actor.value = response.data.data;
+};
+
+// 跳转到编辑页面
+const goToEditPage = () => {
+  router.push({ name: 'EditActor', params: { id: route.params.id } });
 };
 
 // 组件挂载时获取演员信息
@@ -150,6 +161,28 @@ onMounted(() => {
   text-align: left;
 }
 
+/* 编辑按钮样式 */
+.edit-button-container {
+  margin-top: 20px;
+}
+
+.edit-button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #43d6b4 0%, #38b8a0 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.edit-button:hover {
+  box-shadow: 0 5px 15px rgba(67, 214, 180, 0.3);
+  transform: translateY(-2px);
+}
+
 .actor-image-section {
   width: 400px;
   display: flex;
@@ -217,12 +250,6 @@ onMounted(() => {
   max-width: 1200px;
   margin: 40px auto;
   padding: 0 20px;
-  border-radius: 80px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-sizing: border-box;
-  padding: 50px;
-  background: white;
 }
 
 .section-header h2 {
