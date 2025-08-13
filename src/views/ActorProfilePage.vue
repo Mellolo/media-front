@@ -41,7 +41,7 @@
       <div class="section-header">
         <h2>相关视频</h2>
       </div>
-      <VideoList :videos="videos" :loading="loadingVideos" :items-per-page="5" />
+      <VideoList :videos="actor.videos || []" :items-per-page="5" />
     </div>
   </div>
 </template>
@@ -58,11 +58,8 @@ const actor = ref({
   id: '',
   name: '',
   description: '',
+  videos: []
 });
-
-// 视频列表相关
-const videos = ref([]);
-const loadingVideos = ref(false);
 
 // 获取演员信息
 const fetchActorInfo = async () => {
@@ -70,29 +67,9 @@ const fetchActorInfo = async () => {
   actor.value = response.data.data;
 };
 
-// 获取演员相关视频
-const fetchActorVideos = async () => {
-  if (!actor.value.id) return;
-  
-  loadingVideos.value = true;
-  try {
-    const response = await api.get(`/video/search`, {
-      params: { actors: JSON.stringify([actor.value.id]) }
-    });
-    videos.value = response.data.data || [];
-  } catch (error) {
-    console.error('获取演员相关视频失败:', error);
-    videos.value = [];
-  } finally {
-    loadingVideos.value = false;
-  }
-};
-
-// 组件挂载时获取演员信息和相关视频
+// 组件挂载时获取演员信息
 onMounted(() => {
-  fetchActorInfo().then(() => {
-    fetchActorVideos();
-  });
+  fetchActorInfo();
 });
 </script>
 
