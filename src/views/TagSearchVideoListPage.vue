@@ -26,18 +26,15 @@ const videos = ref([])
 const loading = ref(false)
 
 // 获取视频列表
-const fetchVideos = async (params = {}) => {
+const fetchVideos = async (tag) => {
   loading.value = true
   try {
-    const response = await api.get('/video/search', { params })
+    const response = await api.get('/video/search/tag', { 
+      params: { tag: tag }
+    })
     videos.value = response.data.data || []
   } catch (error) {
     console.error('获取视频列表失败:', error)
-    if (error.response && error.response.data) {
-      alert('获取视频列表失败: ' + error.response.data.message)
-    } else {
-      alert('网络错误，请检查连接')
-    }
     videos.value = []
   } finally {
     loading.value = false
@@ -48,10 +45,10 @@ const fetchVideos = async (params = {}) => {
 onMounted(() => {
   if (route.query.tag) {
     tagSearchKeyword.value = route.query.tag
-    fetchVideos({ tags: JSON.stringify([route.query.tag]) })
+    fetchVideos(route.query.tag)
   } else {
     // 如果没有标签参数，获取所有视频
-    fetchVideos()
+    fetchVideos('')
   }
 })
 </script>
