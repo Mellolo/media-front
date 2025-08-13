@@ -298,10 +298,20 @@ watch(() => route.query, (newQuery) => {
 
 /* 视频列表部分样式 */
 .actor-videos-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  background: white;
+  border-radius: 30px;
   width: 100%;
-  max-width: 1200px;
-  margin: 40px auto;
-  padding: 0 20px;
+  max-width: 2000px;
+  margin: 0 auto;
+  margin-top: 60px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-sizing: border-box;
 }
 
 .section-header h2 {
