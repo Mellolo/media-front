@@ -155,6 +155,9 @@ const searchResultsRef = ref(null);
 // 已选择的演员列表
 const selectedActors = ref([]);
 
+// 原始视频数据（用于重置）
+const originalVideoData = ref(null);
+
 const form = ref({
   name: '',
   description: '',
@@ -233,8 +236,21 @@ const removeTag = (index) => {
   form.value.tags.splice(index, 1);
 };
 
-// 重置表单
+// 重置表单（恢复原始数据）
 const resetForm = () => {
+  if (originalVideoData.value) {
+    // 恢复原始数据
+    form.value.name = originalVideoData.value.name;
+    form.value.description = originalVideoData.value.description || '';
+    form.value.tags = [...(originalVideoData.value.tags || [])];
+    
+    // 恢复演员数据
+    selectedActors.value = originalVideoData.value.actors ? 
+      [...originalVideoData.value.actors] : [];
+    form.value.actorIds = originalVideoData.value.actorIds || [];
+  }
+  
+  // 清空搜索相关状态
   tagInput.value = '';
   actorSearchKeyword.value = '';
   actorSearchResults.value = [];
@@ -262,8 +278,8 @@ const handleSubmit = async () => {
       tags: form.value.tags
     };
     
-    // 发送更新请求
-    await api.put(`/auth/video/${route.params.id}`, updateData);
+    // 发送更新请求到正确的API地址
+    await api.put(`/auth/video/edit/${route.params.id}`, updateData);
     
     // 更新成功，跳转到视频播放页面
     router.push({ name: 'VideoPlayer', params: { id: route.params.id } });
@@ -280,6 +296,15 @@ const fetchVideoData = async () => {
   try {
     const response = await api.get(`/video/page/${route.params.id}`);
     const videoData = response.data.data;
+    
+    // 保存原始数据用于重置
+    originalVideoData.value = {
+      name: videoData.name,
+      description: videoData.description || '',
+      tags: videoData.tags ? [...videoData.tags] : [],
+      actors: videoData.actors ? [...videoData.actors] : [],
+      actorIds: videoData.actorIds || []
+    };
     
     // 填充表单数据
     form.value.name = videoData.name;
