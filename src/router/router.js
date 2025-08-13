@@ -9,6 +9,7 @@ import VideoUploadPage from '@/views/VideoUploadPage.vue'
 import VideoListPage from '@/views/VideoListPage.vue'
 import TagSearchVideoListPage from '@/views/TagSearchVideoListPage.vue'
 import EditActorPage from '@/views/EditActorPage.vue'
+import VideoEditPage from '@/views/VideoEditPage.vue'
 
 const routes = [
   {
@@ -63,6 +64,12 @@ const routes = [
     path: '/user/login',
     name: 'Login',
     component: LoginPage
+  },
+  {
+    path: '/video/edit/:id',
+    name: 'VideoEdit',
+    component: VideoEditPage,
+    props: true
   }
 ]
 

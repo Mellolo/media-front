@@ -13,6 +13,8 @@
     <div v-else class="video-content">
       <div class="video-header">
         <h1 class="video-name">{{ videoData.name }}</h1>
+        <!-- 编辑按钮 -->
+        <button @click="editVideo" class="edit-button">编辑视频</button>
       </div>
       <div class="video-player-wrapper">
         <VideoPlayer :src="videoSrc" />
@@ -33,7 +35,7 @@
               :to="`/actor/profile/${actor.id}`"
               class="actor-tag"
               @mouseenter="showActorPreview(actor.id, $event)"
-              @mouseleave="hideActorPreview"
+              @mouseleave="clearActorPreview"
             >
               {{ actor.name }}
             </router-link>
@@ -132,8 +134,13 @@ export default {
     };
     
     // 隐藏演员预览
-    const hideActorPreview = () => {
+    const clearActorPreview = () => {
       actorPreview.visible = false;
+    };
+    
+    // 跳转到编辑页面
+    const editVideo = () => {
+      router.push({ name: 'VideoEdit', params: { id: route.params.id } });
     };
     
     onMounted(() => {
@@ -150,7 +157,8 @@ export default {
       getTagSearchUrl,
       actorPreview,
       showActorPreview,
-      hideActorPreview
+      clearActorPreview,
+      editVideo
     };
   }
 };
@@ -250,6 +258,9 @@ export default {
   width: 100%;
   margin-bottom: 20px;
   text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .video-name {
@@ -259,6 +270,24 @@ export default {
   color: #43d6b4;
   line-height: 1.3;
   text-align: center;
+  flex: 1;
+}
+
+.edit-button {
+  background: #43d6b4;
+  color: #000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.edit-button:hover {
+  background: #3ab09e;
 }
 
 .video-meta {
@@ -413,6 +442,15 @@ export default {
   .tag-item {
     font-size: 13px;
     padding: 5px 10px;
+  }
+  
+  .video-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .video-name {
+    margin-bottom: 10px;
   }
 }
 
