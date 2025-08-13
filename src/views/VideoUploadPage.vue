@@ -234,6 +234,8 @@ const addActor = (actor) => {
   // 清空搜索结果和关键字
   actorSearchKeyword.value = '';
   actorSearchResults.value = [];
+  // 隐藏演员预览
+  hideActorPreview();
 };
 
 // 从已选列表中移除演员
