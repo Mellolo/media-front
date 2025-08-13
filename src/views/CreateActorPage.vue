@@ -223,7 +223,7 @@ const handleSubmit = async () => {
 .form-group input,
 .form-group textarea {
   width: 100%;
-  min-width: 300px;
+  min-width: 500px;
   padding: 15px 20px;
   border: 2px solid #e1e1e1;
   border-radius: 10px;
@@ -255,26 +255,6 @@ const handleSubmit = async () => {
 }
 
 /* 文件输入框样式 */
-.form-group input[type="file"] {
-  padding: 15px 20px;
-  background-color: #f8f9fa;
-  cursor: pointer;
-}
-
-.form-group input[type="file"]::-webkit-file-upload-button {
-  background-color: #43d6b4;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 8px 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.form-group input[type="file"]::-webkit-file-upload-button:hover {
-  background-color: #38b8a0;
-}
 
 /* 错误状态下的输入框样式 */
 .form-group input.input-error,

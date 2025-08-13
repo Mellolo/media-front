@@ -249,19 +249,21 @@ onMounted(() => {
 }
 
 .form-label {
-  display: block;
+   display: block;
+  text-align: left;
+  color: #38b8a0;
+  font-weight: 500;
   margin-bottom: 8px;
-  font-weight: 600;
-  color: #333;
   font-size: 16px;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 15px;
+  min-width: 500px;
+  padding: 15px 20px;
   border: 2px solid #e1e1e1;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 16px;
   box-sizing: border-box;
   transition: all 0.3s ease;
@@ -280,6 +282,7 @@ onMounted(() => {
 .form-group textarea {
   resize: vertical;
   min-height: 120px;
+  min-width: 500px;
 }
 
 .form-group input.input-error {
@@ -288,9 +291,13 @@ onMounted(() => {
 }
 
 .error-message {
-  color: #ff4d4f;
+  color: #ff4757;
   font-size: 14px;
-  margin-top: 5px;
+  margin-top: 8px;
+  text-align: left;
+  font-weight: 500;
+  display: block;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .image-preview {
@@ -313,14 +320,17 @@ onMounted(() => {
 
 .submit-button,
 .reset-button {
-  padding: 15px 30px;
+  padding: 16px 30px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 10px;
+  font-size: 18px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  white-space: nowrap;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  flex: 1;
 }
 
 .submit-button {
@@ -351,12 +361,9 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .edit-actor-container {
-    padding: 30px 20px;
-    margin-top: 60px;
-  }
-  
-  .edit-actor-header h1 {
-    font-size: 24px;
+    padding: 30px;
+    margin: 20px auto;
+    width: 95%;
   }
   
   .form-actions {
@@ -366,7 +373,6 @@ onMounted(() => {
   .submit-button,
   .reset-button {
     width: 100%;
-    padding: 15px;
   }
 }
 </style>
