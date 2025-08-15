@@ -133,7 +133,9 @@ const fetchActorInfo = async () => {
     }
   } catch (error) {
     console.error('获取演员信息失败:', error);
-    alert('获取演员信息失败');
+    router.push({
+        name: 'ActorList',
+      });
   }
 };
 

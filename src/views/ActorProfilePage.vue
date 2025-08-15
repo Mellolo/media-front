@@ -73,10 +73,17 @@ const imageTimestamp = ref(Date.now());
 
 // 获取演员信息
 const fetchActorInfo = async () => {
-  const response = await api.get(`/actor/page/${route.params.id}`);
-  actor.value = response.data.data;
-  // 更新时间戳以刷新图片
-  imageTimestamp.value = Date.now();
+  try {
+    const response = await api.get(`/actor/page/${route.params.id}`);
+    actor.value = response.data.data;
+    // 更新时间戳以刷新图片
+    imageTimestamp.value = Date.now();
+  } catch (error) {
+    console.error('获取演员信息失败:', error);
+    router.push({
+        name: 'ActorList',
+      });
+  }
 };
 
 // 跳转到编辑页面
