@@ -121,14 +121,34 @@
           multiple
         />
         <div v-if="filesError" class="error-message">请选择至少一张图片</div>
-        <div v-if="form.files.length > 0" class="files-info">
-          已选择 {{ form.files.length }} 张图片:
-          <ul class="files-list">
-            <li v-for="(file, index) in form.files" :key="index">
-              {{ file.name }} ({{ formatFileSize(file.size) }})
-              <button type="button" @click="removeFile(index)" class="remove-file-button">×</button>
-            </li>
-          </ul>
+        
+        <!-- 图片预览区域 -->
+        <div v-if="form.files.length > 0" class="image-preview-container">
+          <div 
+            v-for="(file, index) in form.files" 
+            :key="index"
+            class="image-preview-item"
+          >
+            <div class="image-preview-wrapper">
+              <img 
+                :src="getImagePreviewUrl(file)" 
+                :alt="file.name"
+                class="image-preview"
+              />
+              <div class="image-info">
+                <div class="image-name">{{ file.name }}</div>
+                <div class="image-size">{{ formatFileSize(file.size) }}</div>
+              </div>
+              <button 
+                type="button" 
+                @click="removeFile(index)" 
+                class="remove-image-button"
+                title="移除图片"
+              >
+                ×
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -254,6 +274,11 @@ const removeActor = (index) => {
   form.value.actorIds = selectedActors.value.map(a => a.id);
 };
 
+// 获取图片预览URL
+const getImagePreviewUrl = (file) => {
+  return URL.createObjectURL(file);
+};
+
 // 处理文件选择
 const handleFileChange = (event) => {
   const files = Array.from(event.target.files);
@@ -266,6 +291,8 @@ const handleFileChange = (event) => {
 // 移除选定的文件
 const removeFile = (index) => {
   form.value.files.splice(index, 1);
+  // 重新渲染页面以更新文件数量提示
+  form.value = { ...form.value };
 };
 
 // 添加标签
@@ -653,32 +680,81 @@ onMounted(() => {
   color: #666;
 }
 
-.files-list {
-  margin-top: 10px;
-  padding-left: 20px;
+.image-preview-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
 }
 
-.files-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 5px;
+.image-preview-item {
+  position: relative;
 }
 
-.remove-file-button {
-  background: none;
-  border: none;
+.image-preview-wrapper {
+  position: relative;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8f9fa;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.image-preview-wrapper:hover {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.image-preview {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+
+.image-info {
+  padding: 10px;
+  font-size: 12px;
+}
+
+.image-name {
+  font-weight: 500;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-size {
+  color: #666;
+  margin-top: 3px;
+}
+
+.remove-image-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ff4757;
   color: #ff4757;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  margin-left: 10px;
-  padding: 0;
-  width: 20px;
-  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.remove-image-button:hover {
+  background: #ff4757;
+  color: white;
+  transform: scale(1.1);
 }
 
 .form-actions {
