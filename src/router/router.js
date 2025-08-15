@@ -10,6 +10,7 @@ import VideoListPage from '@/views/VideoListPage.vue'
 import TagSearchVideoListPage from '@/views/TagSearchVideoListPage.vue'
 import EditActorPage from '@/views/EditActorPage.vue'
 import VideoEditPage from '@/views/VideoEditPage.vue'
+import NotFoundPage from '@/views/NotFoundPage.vue'
 
 const routes = [
   {
@@ -18,7 +19,7 @@ const routes = [
     component: HomePage
   },
   {
-    path: '/video/:id',
+    path: '/video/page/:id',
     name: 'VideoPlayer',
     component: VideoPlayerPage,
     props: true
@@ -70,6 +71,12 @@ const routes = [
     name: 'VideoEdit',
     component: VideoEditPage,
     props: true
+  },
+  // 通配符路由，将所有不存在的URL重定向到404页面
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFoundWildcard',
+    component: NotFoundPage
   }
 ]
 
