@@ -58,6 +58,12 @@ const routes = [
     component: GalleryUploadPage
   },
   {
+    path: '/gallery/page/:id',
+    name: 'GalleryView',
+    component: () => import('@/views/GalleryViewPage.vue'),
+    props: true
+  },
+  {
     path: '/video/list',
     name: 'VideoList',
     component: VideoListPage
