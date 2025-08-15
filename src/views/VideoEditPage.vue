@@ -286,7 +286,6 @@ const handleSubmit = async () => {
     router.push({ name: 'VideoPlayer', params: { id: route.params.id } });
   } catch (error) {
     console.error('更新失败:', error);
-    // 移除alert错误提示，仅在控制台输出错误信息
   } finally {
     updating.value = false;
   }
@@ -318,7 +317,6 @@ const fetchVideoData = async () => {
     }
   } catch (error) {
     console.error('获取视频数据失败:', error);
-    // 移除alert错误提示，仅在控制台输出错误信息
   }
 };
 
