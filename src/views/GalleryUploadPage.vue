@@ -128,6 +128,13 @@
             v-for="(file, index) in form.files" 
             :key="index"
             class="image-preview-item"
+            draggable="true"
+            @dragstart="dragStart(index, $event)"
+            @dragover.prevent="dragOver(index, $event)"
+            @dragenter="dragEnter(index, $event)"
+            @dragleave="dragLeave(index, $event)"
+            @drop="drop(index, $event)"
+            @dragend="dragEnd"
           >
             <div class="image-preview-wrapper">
               <img 
@@ -147,28 +154,6 @@
               >
                 ×
               </button>
-              
-              <!-- 图片排序按钮 -->
-              <div class="image-order-controls">
-                <button
-                  type="button"
-                  @click="moveFileUp(index)"
-                  :disabled="index === 0"
-                  class="order-button move-up-button"
-                  title="向前移动"
-                >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  @click="moveFileDown(index)"
-                  :disabled="index === form.files.length - 1"
-                  class="order-button move-down-button"
-                  title="向后移动"
-                >
-                  ↓
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -317,6 +302,76 @@ const handleFileChange = (event) => {
   }
 };
 
+// 拖拽相关状态
+const dragState = reactive({
+  draggingIndex: null,
+  targetIndex: null,
+  dragOverIndex: null
+});
+
+// 拖拽开始
+const dragStart = (index, event) => {
+  dragState.draggingIndex = index;
+  event.dataTransfer.effectAllowed = 'move';
+  // 添加拖拽样式
+  event.target.classList.add('dragging');
+};
+
+// 拖拽经过
+const dragOver = (index, event) => {
+  event.preventDefault();
+  dragState.dragOverIndex = index;
+};
+
+// 拖拽进入
+const dragEnter = (index, event) => {
+  event.preventDefault();
+  // 添加拖拽目标样式
+  if (index !== dragState.draggingIndex) {
+    event.target.classList.add('drag-over');
+  }
+};
+
+// 拖拽离开
+const dragLeave = (index, event) => {
+  // 移除拖拽目标样式
+  event.target.classList.remove('drag-over');
+};
+
+// 放置
+const drop = (index, event) => {
+  event.preventDefault();
+  dragState.targetIndex = index;
+  
+  // 移除所有拖拽样式
+  const previewItems = document.querySelectorAll('.image-preview-item');
+  previewItems.forEach(item => {
+    item.classList.remove('drag-over');
+    item.classList.remove('dragging');
+  });
+  
+  // 执行图片位置交换
+  if (dragState.draggingIndex !== null && dragState.targetIndex !== null && 
+      dragState.draggingIndex !== dragState.targetIndex) {
+    swapFiles(dragState.draggingIndex, dragState.targetIndex);
+  }
+};
+
+// 拖拽结束
+const dragEnd = (event) => {
+  // 移除所有拖拽样式
+  const previewItems = document.querySelectorAll('.image-preview-item');
+  previewItems.forEach(item => {
+    item.classList.remove('drag-over');
+    item.classList.remove('dragging');
+  });
+  
+  // 重置拖拽状态
+  dragState.draggingIndex = null;
+  dragState.targetIndex = null;
+  dragState.dragOverIndex = null;
+};
+
 // 移除选定的文件
 const removeFile = (index) => {
   form.value.files.splice(index, 1);
@@ -332,20 +387,6 @@ const swapFiles = (index1, index2) => {
     const newFiles = [...form.value.files];
     [newFiles[index1], newFiles[index2]] = [newFiles[index2], newFiles[index1]];
     form.value.files = newFiles;
-  }
-};
-
-// 向前移动图片
-const moveFileUp = (index) => {
-  if (index > 0) {
-    swapFiles(index, index - 1);
-  }
-};
-
-// 向后移动图片
-const moveFileDown = (index) => {
-  if (index < form.value.files.length - 1) {
-    swapFiles(index, index + 1);
   }
 };
 
@@ -734,6 +775,32 @@ onMounted(() => {
   color: #666;
 }
 
+.remove-image-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ff4757;
+  color: #ff4757;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.remove-image-button:hover {
+  background: #ff4757;
+  color: white;
+  transform: scale(1.1);
+}
+
 .image-preview-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -743,6 +810,20 @@ onMounted(() => {
 
 .image-preview-item {
   position: relative;
+  cursor: move;
+}
+
+.image-preview-item.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+  transition: all 0.2s ease;
+}
+
+.image-preview-item.drag-over {
+  transform: scale(1.05);
+  box-shadow: 0 5px 20px rgba(67, 214, 180, 0.5);
+  transition: all 0.2s ease;
+  z-index: 10;
 }
 
 .image-preview-wrapper {
@@ -783,74 +864,6 @@ onMounted(() => {
 .image-size {
   color: #666;
   margin-top: 3px;
-}
-
-.remove-image-button {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid #ff4757;
-  color: #ff4757;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  z-index: 2;
-}
-
-.remove-image-button:hover {
-  background: #ff4757;
-  color: white;
-  transform: scale(1.1);
-}
-
-.image-order-controls {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  z-index: 2;
-}
-
-.order-button {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid #43d6b4;
-  color: #43d6b4;
-  font-size: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.order-button:hover:not(:disabled) {
-  background: #43d6b4;
-  color: white;
-  transform: scale(1.1);
-}
-
-.order-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.move-up-button {
-  margin-bottom: 2px;
 }
 
 .form-actions {
