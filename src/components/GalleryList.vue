@@ -158,10 +158,9 @@ const handleImageError = (event) => {
   event.target.style.display = 'none'
 }
 
-// 获取缩略图URL
+// 获取缩略图URL (使用图集封面)
 const getThumbnailUrl = (galleryId) => {
-  // 使用第一页作为缩略图
-  return `${api.defaults.baseURL}/gallery/pic/${galleryId}/1`
+  return `${api.defaults.baseURL}/gallery/cover/${galleryId}`
 }
 
 // 获取图集URL

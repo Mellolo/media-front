@@ -114,6 +114,11 @@ export default {
       return `${api.defaults.baseURL}/gallery/pic/${route.params.id}/${page}`;
     };
     
+    // 获取缩略图URL (使用图集封面)
+    const getThumbnailUrl = () => {
+      return `${api.defaults.baseURL}/gallery/cover/${route.params.id}`;
+    };
+    
     const fetchGalleryData = async () => {
       try {
         loading.value = true;
@@ -125,7 +130,7 @@ export default {
         const pageCount = response.data.data.pageCount || 0;
         images.value = Array.from({ length: pageCount }, (_, i) => ({
           src: getImageUrl(i + 1),
-          thumb: getImageUrl(i + 1), // 这里可以使用缩略图URL
+          thumb: getThumbnailUrl(), // 使用图集封面作为缩略图
           index: i
         }));
       } catch (err) {
