@@ -13,6 +13,7 @@ import VideoEditPage from '@/views/VideoEditPage.vue'
 import NotFoundPage from '@/views/NotFoundPage.vue'
 import GalleryUploadPage from '@/views/GalleryUploadPage.vue'
 import GalleryListPage from '@/views/GalleryListPage.vue'
+import TagSearchGalleryPage from '@/views/TagSearchGalleryPage.vue'
 
 const routes = [
   {
@@ -89,6 +90,11 @@ const routes = [
     name: 'VideoEdit',
     component: VideoEditPage,
     props: true
+  },
+  {
+    path: '/gallery/tag/search',
+    name: 'TagSearchGallery',
+    component: TagSearchGalleryPage
   },
   // 通配符路由，将所有不存在的URL重定向到404页面
   {

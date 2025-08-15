@@ -149,7 +149,7 @@ export default {
     // 获取标签搜索URL
     const getTagSearchUrl = (tag) => {
       return router.resolve({
-        name: 'TagSearchVideoList',
+        name: 'TagSearchGallery',
         query: { tag: tag }
       }).href;
     };
