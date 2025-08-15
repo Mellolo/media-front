@@ -12,6 +12,7 @@ import EditActorPage from '@/views/EditActorPage.vue'
 import VideoEditPage from '@/views/VideoEditPage.vue'
 import NotFoundPage from '@/views/NotFoundPage.vue'
 import GalleryUploadPage from '@/views/GalleryUploadPage.vue'
+import GalleryListPage from '@/views/GalleryListPage.vue'
 
 const routes = [
   {
@@ -56,6 +57,11 @@ const routes = [
     path: '/gallery/upload',
     name: 'GalleryUpload',
     component: GalleryUploadPage
+  },
+  {
+    path: '/gallery/list',
+    name: 'GalleryList',
+    component: GalleryListPage
   },
   {
     path: '/gallery/page/:id',

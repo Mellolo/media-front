@@ -1,7 +1,7 @@
 <template>
-  <div class="video-list-container">
-    <div class="video-list-header">
-      <h1>视频列表</h1>
+  <div class="gallery-list-container">
+    <div class="gallery-list-header">
+      <h1>图集列表</h1>
     </div>
     
     <div class="search-section">
@@ -10,7 +10,7 @@
           <input 
             type="text" 
             v-model="searchKeyword" 
-            placeholder="请输入视频名称关键词" 
+            placeholder="请输入图集名称关键词" 
             class="search-input"
           />
           <button type="submit" class="search-button">搜索</button>
@@ -88,18 +88,18 @@
       </div>
     </div>
     
-    <VideoList :videos="videos" :loading="loading" />
+    <GalleryList :galleries="galleries" :loading="loading" />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '@/utils/api.js'
-import VideoList from '@/components/VideoList.vue'
+import GalleryList from '@/components/GalleryList.vue'
 import { debounce } from 'lodash-es'
 
 const searchKeyword = ref('')
-const videos = ref([])
+const galleries = ref([])
 const loading = ref(false)
 
 // 高级搜索展开状态，默认为收起
@@ -175,15 +175,15 @@ const removeTag = (index) => {
   selectedTags.value.splice(index, 1)
 }
 
-// 获取视频列表
-const fetchVideos = async (params = {}) => {
+// 获取图集列表
+const fetchGalleries = async (params = {}) => {
   loading.value = true
   try {
-    const response = await api.get('/video/search', { params })
-    videos.value = response.data.data || []
+    const response = await api.get('/gallery/search', { params })
+    galleries.value = response.data.data || []
   } catch (error) {
-    console.error('获取视频列表失败:', error)
-    videos.value = []
+    console.error('获取图集列表失败:', error)
+    galleries.value = []
   } finally {
     loading.value = false
   }
@@ -205,7 +205,7 @@ const handleSearch = () => {
     params.tags = JSON.stringify(selectedTags.value)
   }
   
-  fetchVideos(params)
+  fetchGalleries(params)
 }
 
 // 重置高级搜索（仅重置条件，不发送请求）
@@ -221,17 +221,17 @@ const resetAdvancedSearch = () => {
 const resetSearch = () => {
   searchKeyword.value = ''
   resetAdvancedSearch()
-  fetchVideos()
+  fetchGalleries()
 }
 
-// 组件挂载时获取所有视频列表
+// 组件挂载时获取所有图集列表
 onMounted(() => {
-  fetchVideos()
+  fetchGalleries()
 })
 </script>
 
 <style scoped>
-.video-list-container {
+.gallery-list-container {
   display: flex;
   flex-direction: column;
   align-items: normal;
@@ -248,13 +248,13 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-.video-list-header {
+.gallery-list-header {
   text-align: center;
   margin-bottom: 40px;
   width: 100%;
 }
 
-.video-list-header h1 {
+.gallery-list-header h1 {
   color: #333;
   margin: 0;
   font-size: 28px;
@@ -482,7 +482,7 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .video-list-container {
+  .gallery-list-container {
     padding: 30px 15px;
     margin-top: 60px;
   }
