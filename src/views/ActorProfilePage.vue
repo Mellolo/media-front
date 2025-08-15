@@ -96,7 +96,6 @@ const deleteActor = async () => {
       router.push({ name: 'ActorList' });
     } catch (error) {
       console.error('删除演员失败:', error);
-      alert('删除演员失败: ' + (error.response?.data?.message || '未知错误'));
     }
   }
 };

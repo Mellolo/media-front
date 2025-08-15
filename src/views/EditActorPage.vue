@@ -186,7 +186,6 @@ const handleSubmit = async () => {
     }
   } catch (error) {
     console.error('更新演员失败:', error);
-    alert('更新演员失败');
   } finally {
     isSubmitting.value = false;
   }

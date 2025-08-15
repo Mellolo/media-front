@@ -320,14 +320,10 @@ const handleSubmit = async () => {
       formData.append('description', form.value.description);
     }
     if (form.value.actorIds.length > 0) {
-      form.value.actorIds.forEach(id => {
-        formData.append('actorIds', id);
-      });
+      formData.append('actorIds', JSON.stringify(form.value.actorIds));
     }
     if (form.value.tags.length > 0) {
-      form.value.tags.forEach(tag => {
-        formData.append('tags', tag);
-      });
+      formData.append('tags', JSON.stringify(form.value.tags));
     }
     formData.append('file', form.value.file);
     
@@ -347,7 +343,6 @@ const handleSubmit = async () => {
     router.push({ name: 'VideoPlayer', params: { id: response.data.data.id } });
   } catch (error) {
     console.error('上传失败:', error);
-    alert('上传失败: ' + (error.response?.data?.message || error.message));
   } finally {
     uploading.value = false;
   }
