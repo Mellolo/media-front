@@ -49,6 +49,14 @@
       </div>
       <VideoList :videos="actor.videos || []" :items-per-page="5" />
     </div>
+
+    <!-- 图集列表展示 -->
+    <div class="actor-galleries-section">
+      <div class="section-header">
+        <h2>相关图集</h2>
+      </div>
+      <GalleryList :galleries="actor.galleries || []" :items-per-page="5" :show-pagination="false" />
+    </div>
   </div>
 </template>
 
@@ -58,6 +66,7 @@ import { useRoute, useRouter } from 'vue-router';
 import api from '@/utils/api.js';
 import API_CONFIG from '@/config/api.js';
 import VideoList from '@/components/VideoList.vue';
+import GalleryList from '@/components/GalleryList.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -65,7 +74,8 @@ const actor = ref({
   id: '',
   name: '',
   description: '',
-  videos: []
+  videos: [],
+  galleries: [] // 添加图集数据字段
 });
 
 // 图片时间戳，用于刷新缓存
@@ -76,6 +86,17 @@ const fetchActorInfo = async () => {
   try {
     const response = await api.get(`/actor/page/${route.params.id}`);
     actor.value = response.data.data;
+    
+    // 获取演员相关的图集数据
+    try {
+      const galleryResponse = await api.get(`/actor/galleries/${route.params.id}`);
+      // 将图集数据添加到演员对象中
+      actor.value.galleries = galleryResponse.data.data || [];
+    } catch (galleryError) {
+      console.error('获取演员相关图集失败:', galleryError);
+      actor.value.galleries = [];
+    }
+    
     // 更新时间戳以刷新图片
     imageTimestamp.value = Date.now();
   } catch (error) {
@@ -319,6 +340,23 @@ watch(() => route.query, (newQuery) => {
   box-sizing: border-box;
 }
 
+/* 图集列表部分样式 */
+.actor-galleries-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  background: white;
+  border-radius: 30px;
+  width: 1200px;
+  margin: 0 auto;
+  margin-top: 60px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-sizing: border-box;
+}
+
 .section-header h2 {
   color: #333;
   margin: 0 0 30px 0;
@@ -344,9 +382,11 @@ watch(() => route.query, (newQuery) => {
     width: 100%;
   }
   
-  .actor-videos-section {
+  .actor-videos-section,
+  .actor-galleries-section {
     padding: 0 15px;
     margin: 30px auto;
+    width: calc(100% - 30px);
   }
   
   .action-buttons {

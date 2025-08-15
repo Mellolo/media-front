@@ -37,7 +37,7 @@
     </div>
     
     <!-- 分页组件 -->
-    <div v-if="totalPages > 1" class="pagination">
+    <div v-if="totalPages > 1 && showPagination" class="pagination">
       <button 
         :disabled="currentPage === 1" 
         @click="currentPage = 1"
@@ -93,6 +93,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/utils/api.js'
+import API_CONFIG from '@/config/api.js'
 
 const props = defineProps({
   galleries: {
@@ -106,6 +107,10 @@ const props = defineProps({
   itemsPerPage: {
     type: Number,
     default: 20
+  },
+  showPagination: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -160,7 +165,7 @@ const handleImageError = (event) => {
 
 // 获取缩略图URL (使用图集封面)
 const getThumbnailUrl = (galleryId) => {
-  return `${api.defaults.baseURL}/gallery/cover/${galleryId}`
+  return `${API_CONFIG.BASE_URL}/gallery/cover/${galleryId}`
 }
 
 // 获取图集URL
