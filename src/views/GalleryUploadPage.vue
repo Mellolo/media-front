@@ -121,6 +121,9 @@
           multiple
         />
         <div v-if="filesError" class="error-message">请选择至少一张图片</div>
+        <div v-if="form.files.length > 0" class="file-selection-info">
+          已选择 {{ form.files.length }} 张图片
+        </div>
         
         <!-- 图片预览区域 -->
         <div v-if="form.files.length > 0" class="image-preview-container">
@@ -804,6 +807,13 @@ onMounted(() => {
   background: #ff4757;
   color: white;
   transform: scale(1.1);
+}
+
+.file-selection-info {
+  margin-top: 8px;
+  font-size: 14px;
+  color: black;
+  font-weight: 500;
 }
 
 .image-preview-container {
