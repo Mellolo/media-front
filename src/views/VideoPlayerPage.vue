@@ -133,8 +133,8 @@ export default {
     // 显示演员预览
     const showActorPreview = (actorId, event) => {
       const rect = event.target.getBoundingClientRect();
-      actorPreview.position.top = `${rect.bottom + 10}px`;
-      actorPreview.position.left = `${rect.left}px`;
+      actorPreview.position.top = `${rect.top}px`;
+      actorPreview.position.left = `${rect.right + 10}px`;
       actorPreview.actorId = actorId;
       actorPreview.visible = true;
     };
