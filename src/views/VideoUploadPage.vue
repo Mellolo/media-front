@@ -340,7 +340,7 @@ const handleSubmit = async () => {
     });
     
     // 上传成功，跳转到视频播放页面
-    router.push({ name: 'VideoPlayer', params: { id: response.data.data.id } });
+    router.push({ name: 'VideoList'});
   } catch (error) {
     console.error('上传失败:', error);
   } finally {
