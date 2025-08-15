@@ -15,14 +15,16 @@
         <h1 class="gallery-name">{{ galleryData.name }}</h1>
         <!-- 编辑和删除按钮 -->
         <div class="header-actions">
-          <button @click="editGallery" class="edit-button">编辑图集</button>
-          <button @click="deleteGallery" class="delete-button">删除图集</button>
+          <button class="edit-button">编辑图集</button>
+          <button class="delete-button">删除图集</button>
         </div>
       </div>
       <div class="gallery-viewer-wrapper">
-        <GalleryViewer 
-          :images="galleryImages" 
-          @image-change="onImageChange"
+        <!-- 图片浏览器组件 -->
+        <ImageBrowser 
+          :images="images" 
+          :initial-index="initialIndex"
+          @update-current-index="updateCurrentIndex"
         />
       </div>
       <div class="gallery-info">
@@ -75,26 +77,27 @@
 </template>
 
 <script>
-import { ref, onMounted, reactive } from 'vue';
+import { ref, onMounted, reactive, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '@/utils/api.js';
-import GalleryViewer from '@/components/GalleryViewer.vue';
+import ImageBrowser from '@/components/ImageBrowser.vue';
 import ActorCoverPreview from '@/components/ActorCoverPreview.vue';
 
 export default {
   name: 'GalleryViewPage',
   components: {
-    GalleryViewer,
+    ImageBrowser,
     ActorCoverPreview
   },
   setup() {
     const route = useRoute();
     const router = useRouter();
     const galleryData = ref({});
-    const galleryImages = ref([]);
     const loading = ref(true);
     const error = ref(null);
-    const currentImageIndex = ref(0);
+    const images = ref([]);
+    const initialIndex = ref(0);
+    const currentIndex = ref(0);
     
     // 演员封面预览状态
     const actorPreview = reactive({
@@ -106,31 +109,44 @@ export default {
       }
     });
     
-    // 获取图集数据
+    // 获取图片URL
+    const getImageUrl = (page) => {
+      return `${api.defaults.baseURL}/gallery/pic/${route.params.id}/${page}`;
+    };
+    
     const fetchGalleryData = async () => {
       try {
         loading.value = true;
         error.value = null;
-        
         const response = await api.get(`/gallery/page/${route.params.id}`);
         galleryData.value = response.data.data;
         
-        // 处理图片数据
-        if (galleryData.value.images) {
-          galleryImages.value = galleryData.value.images.map((image, index) => ({
-            id: image.id,
-            src: image.url,
-            thumb: image.thumbnailUrl || image.url,
-            alt: image.name || `图片 ${index + 1}`,
-            caption: image.name || `图片 ${index + 1}`
-          }));
-        }
+        // 构建图片数组
+        const pageCount = response.data.data.pageCount || 0;
+        images.value = Array.from({ length: pageCount }, (_, i) => ({
+          src: getImageUrl(i + 1),
+          thumb: getImageUrl(i + 1), // 这里可以使用缩略图URL
+          index: i
+        }));
       } catch (err) {
         console.error('获取图集数据失败:', err);
         error.value = '获取图集数据失败，请稍后重试';
       } finally {
         loading.value = false;
       }
+    };
+    
+    // 更新当前图片索引
+    const updateCurrentIndex = (index) => {
+      currentIndex.value = index;
+    };
+    
+    // 获取标签搜索URL
+    const getTagSearchUrl = (tag) => {
+      return router.resolve({
+        name: 'TagSearchVideoList',
+        query: { tag: tag }
+      }).href;
     };
     
     // 显示演员预览
@@ -142,58 +158,28 @@ export default {
       actorPreview.visible = true;
     };
     
-    // 清除演员预览
+    // 隐藏演员预览
     const clearActorPreview = () => {
       actorPreview.visible = false;
     };
     
-    // 获取标签搜索URL
-    const getTagSearchUrl = (tag) => {
-      return `/search/tag/${encodeURIComponent(tag)}`;
-    };
-    
-    // 编辑图集
-    const editGallery = () => {
-      router.push(`/gallery/edit/${route.params.id}`);
-    };
-    
-    // 删除图集
-    const deleteGallery = async () => {
-      if (confirm('确定要删除这个图集吗？此操作不可恢复。')) {
-        try {
-          await api.delete(`/gallery/${route.params.id}`);
-          router.push('/'); // 删除后跳转到首页
-        } catch (err) {
-          console.error('删除图集失败:', err);
-          alert('删除图集失败，请稍后重试');
-        }
-      }
-    };
-    
-    // 当图片切换时
-    const onImageChange = (index) => {
-      currentImageIndex.value = index;
-    };
-    
-    // 组件挂载时获取数据
     onMounted(() => {
       fetchGalleryData();
     });
     
     return {
       galleryData,
-      galleryImages,
       loading,
       error,
-      actorPreview,
-      currentImageIndex,
-      showActorPreview,
-      clearActorPreview,
+      images,
+      initialIndex,
+      currentIndex,
+      fetchGalleryData,
+      updateCurrentIndex,
       getTagSearchUrl,
-      editGallery,
-      deleteGallery,
-      onImageChange,
-      fetchGalleryData
+      actorPreview,
+      showActorPreview,
+      clearActorPreview
     };
   }
 };
@@ -201,12 +187,16 @@ export default {
 
 <style scoped>
 .gallery-view-page {
+  margin-top: 60px;
+  width: 1000px;
   min-height: 100vh;
   background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
-  padding: 20px 0;
+  color: #fff;
+  padding: 0;
   display: flex;
-  justify-content: center;
-  font-family: 'Arial', sans-serif;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
 }
 
 .loading-container {
@@ -474,7 +464,6 @@ export default {
   .gallery-viewer-wrapper {
     border-radius: 6px;
     margin-bottom: 20px;
-    min-height: 300px;
   }
   
   .actors-list,
