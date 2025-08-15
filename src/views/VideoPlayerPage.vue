@@ -163,7 +163,6 @@ export default {
         router.push({ name: 'VideoList' });
       } catch (err) {
         console.error('删除视频失败:', err);
-        alert('删除视频失败: ' + (err.response?.data?.message || err.message));
       }
     };
     

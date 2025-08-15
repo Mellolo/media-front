@@ -182,7 +182,6 @@ export default {
         router.push({ name: 'GalleryList' });
       } catch (err) {
         console.error('删除图集失败:', err);
-        alert('删除图集失败: ' + (err.response?.data?.message || err.message));
       }
     };
     
