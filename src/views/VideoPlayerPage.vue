@@ -111,6 +111,9 @@ export default {
       } catch (err) {
         console.error('获取视频数据失败:', err);
         error.value = '获取视频数据失败，请稍后重试';
+        router.push({
+            name: 'VideoList',
+          });
       } finally {
         loading.value = false;
       }

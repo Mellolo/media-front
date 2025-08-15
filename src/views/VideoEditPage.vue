@@ -319,6 +319,9 @@ const fetchVideoData = async () => {
     }
   } catch (error) {
     console.error('获取视频数据失败:', error);
+    router.push({
+        name: 'VideoList',
+      });
   }
 };
 
