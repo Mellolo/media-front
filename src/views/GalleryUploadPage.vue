@@ -147,6 +147,28 @@
               >
                 ×
               </button>
+              
+              <!-- 图片排序按钮 -->
+              <div class="image-order-controls">
+                <button
+                  type="button"
+                  @click="moveFileUp(index)"
+                  :disabled="index === 0"
+                  class="order-button move-up-button"
+                  title="向前移动"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  @click="moveFileDown(index)"
+                  :disabled="index === form.files.length - 1"
+                  class="order-button move-down-button"
+                  title="向后移动"
+                >
+                  ↓
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -283,16 +305,48 @@ const getImagePreviewUrl = (file) => {
 const handleFileChange = (event) => {
   const files = Array.from(event.target.files);
   if (files.length > 0) {
-    form.value.files = files;
+    // 将新选择的文件添加到现有文件列表的末尾
+    form.value.files = [...form.value.files, ...files];
     filesError.value = false;
+    
+    // 重置文件输入框，允许再次选择相同的文件
+    const fileInput = document.getElementById('galleryFiles');
+    if (fileInput) {
+      fileInput.value = '';
+    }
   }
 };
 
 // 移除选定的文件
 const removeFile = (index) => {
   form.value.files.splice(index, 1);
-  // 重新渲染页面以更新文件数量提示
-  form.value = { ...form.value };
+  // 确保响应式更新
+  form.value.files = [...form.value.files];
+};
+
+// 交换两张图片的位置
+const swapFiles = (index1, index2) => {
+  if (index1 >= 0 && index1 < form.value.files.length && 
+      index2 >= 0 && index2 < form.value.files.length && 
+      index1 !== index2) {
+    const newFiles = [...form.value.files];
+    [newFiles[index1], newFiles[index2]] = [newFiles[index2], newFiles[index1]];
+    form.value.files = newFiles;
+  }
+};
+
+// 向前移动图片
+const moveFileUp = (index) => {
+  if (index > 0) {
+    swapFiles(index, index - 1);
+  }
+};
+
+// 向后移动图片
+const moveFileDown = (index) => {
+  if (index < form.value.files.length - 1) {
+    swapFiles(index, index + 1);
+  }
 };
 
 // 添加标签
@@ -755,6 +809,48 @@ onMounted(() => {
   background: #ff4757;
   color: white;
   transform: scale(1.1);
+}
+
+.image-order-controls {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 2;
+}
+
+.order-button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #43d6b4;
+  color: #43d6b4;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.order-button:hover:not(:disabled) {
+  background: #43d6b4;
+  color: white;
+  transform: scale(1.1);
+}
+
+.order-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.move-up-button {
+  margin-bottom: 2px;
 }
 
 .form-actions {
