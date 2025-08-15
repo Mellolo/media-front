@@ -350,10 +350,10 @@ const drop = (index, event) => {
     item.classList.remove('dragging');
   });
   
-  // 执行图片位置交换
+  // 执行图片位置移动
   if (dragState.draggingIndex !== null && dragState.targetIndex !== null && 
       dragState.draggingIndex !== dragState.targetIndex) {
-    swapFiles(dragState.draggingIndex, dragState.targetIndex);
+    moveFile(dragState.draggingIndex, dragState.targetIndex);
   }
 };
 
@@ -379,13 +379,18 @@ const removeFile = (index) => {
   form.value.files = [...form.value.files];
 };
 
-// 交换两张图片的位置
-const swapFiles = (index1, index2) => {
-  if (index1 >= 0 && index1 < form.value.files.length && 
-      index2 >= 0 && index2 < form.value.files.length && 
-      index1 !== index2) {
+// 移动图片到新位置
+const moveFile = (fromIndex, toIndex) => {
+  if (fromIndex >= 0 && fromIndex < form.value.files.length && 
+      toIndex >= 0 && toIndex < form.value.files.length && 
+      fromIndex !== toIndex) {
+    // 创建新数组
     const newFiles = [...form.value.files];
-    [newFiles[index1], newFiles[index2]] = [newFiles[index2], newFiles[index1]];
+    // 取出要移动的文件
+    const [movedFile] = newFiles.splice(fromIndex, 1);
+    // 将文件插入到新位置
+    newFiles.splice(toIndex, 0, movedFile);
+    // 更新文件列表
     form.value.files = newFiles;
   }
 };
