@@ -544,9 +544,8 @@ const handleSubmit = async () => {
       }
     });
     
-    // 上传成功，跳转到图集播放页面（假设存在）
-    // 这里暂时跳转到首页，等图集播放页面创建后再修改
-    router.push({ name: 'Home' });
+    // 上传成功，跳转到图集列表页面
+    router.push({ name: 'GalleryList' });
   } catch (error) {
     console.error('上传失败:', error);
     alert('上传失败: ' + (error.response?.data?.message || error.message));
