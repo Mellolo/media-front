@@ -11,6 +11,7 @@ import TagSearchVideoListPage from '@/views/TagSearchVideoListPage.vue'
 import EditActorPage from '@/views/EditActorPage.vue'
 import VideoEditPage from '@/views/VideoEditPage.vue'
 import NotFoundPage from '@/views/NotFoundPage.vue'
+import GalleryUploadPage from '@/views/GalleryUploadPage.vue'
 
 const routes = [
   {
@@ -50,6 +51,11 @@ const routes = [
     path: '/video/upload',
     name: 'VideoUpload',
     component: VideoUploadPage
+  },
+  {
+    path: '/gallery/upload',
+    name: 'GalleryUpload',
+    component: GalleryUploadPage
   },
   {
     path: '/video/list',
