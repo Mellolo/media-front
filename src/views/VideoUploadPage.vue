@@ -291,10 +291,6 @@ const resetForm = () => {
   tagInput.value = '';
   actorSearchKeyword.value = '';
   actorSearchResults.value = [];
-  hoveredActorImage.value = '';
-  hoveredActorId.value = null;
-  hoveredActorLoading.value = false;
-  currentActorName.value = '';
   uploadProgress.value = 0;
 };
 
