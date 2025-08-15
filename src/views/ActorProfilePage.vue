@@ -87,16 +87,7 @@ const fetchActorInfo = async () => {
     const response = await api.get(`/actor/page/${route.params.id}`);
     actor.value = response.data.data;
     
-    // 获取演员相关的图集数据
-    try {
-      const galleryResponse = await api.get(`/actor/galleries/${route.params.id}`);
-      // 将图集数据添加到演员对象中
-      actor.value.galleries = galleryResponse.data.data || [];
-    } catch (galleryError) {
-      console.error('获取演员相关图集失败:', galleryError);
-      actor.value.galleries = [];
-    }
-    
+        
     // 更新时间戳以刷新图片
     imageTimestamp.value = Date.now();
   } catch (error) {
