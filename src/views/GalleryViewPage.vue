@@ -16,7 +16,7 @@
         <!-- 编辑和删除按钮 -->
         <div class="header-actions">
           <button class="edit-button">编辑图集</button>
-          <button class="delete-button">删除图集</button>
+          <button @click="deleteGallery" class="delete-button">删除图集</button>
         </div>
       </div>
       <div class="gallery-viewer-wrapper">
@@ -119,6 +119,14 @@ export default {
       return `${api.defaults.baseURL}/gallery/cover/${route.params.id}`;
     };
     
+    // 获取标签搜索URL
+    const getTagSearchUrl = (tag) => {
+      return router.resolve({
+        name: 'TagSearchGallery',
+        query: { tag: tag }
+      }).href;
+    };
+    
     const fetchGalleryData = async () => {
       try {
         loading.value = true;
@@ -146,14 +154,6 @@ export default {
       currentIndex.value = index;
     };
     
-    // 获取标签搜索URL
-    const getTagSearchUrl = (tag) => {
-      return router.resolve({
-        name: 'TagSearchGallery',
-        query: { tag: tag }
-      }).href;
-    };
-    
     // 显示演员预览
     const showActorPreview = (actorId, event) => {
       const rect = event.target.getBoundingClientRect();
@@ -166,6 +166,24 @@ export default {
     // 隐藏演员预览
     const clearActorPreview = () => {
       actorPreview.visible = false;
+    };
+    
+    // 删除图集
+    const deleteGallery = async () => {
+      if (!confirm(`确定要删除图集 "${galleryData.value.name}" 吗？此操作不可恢复。`)) {
+        return;
+      }
+      
+      try {
+        // 调用删除API
+        await api.delete(`/auth/gallery/delete/${route.params.id}`);
+        
+        // 删除成功，跳转到图集列表页面
+        router.push({ name: 'GalleryList' });
+      } catch (err) {
+        console.error('删除图集失败:', err);
+        alert('删除图集失败: ' + (err.response?.data?.message || err.message));
+      }
     };
     
     onMounted(() => {
@@ -184,7 +202,8 @@ export default {
       getTagSearchUrl,
       actorPreview,
       showActorPreview,
-      clearActorPreview
+      clearActorPreview,
+      deleteGallery
     };
   }
 };
