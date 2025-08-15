@@ -292,6 +292,12 @@ const resetForm = () => {
   actorSearchKeyword.value = '';
   actorSearchResults.value = [];
   uploadProgress.value = 0;
+  
+  // 重置文件输入框
+  const fileInput = document.getElementById('videoFile');
+  if (fileInput) {
+    fileInput.value = '';
+  }
 };
 
 // 提交表单
