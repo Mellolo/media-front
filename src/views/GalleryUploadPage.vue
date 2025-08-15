@@ -111,15 +111,39 @@
       
       <div class="form-group">
         <label for="galleryFiles">选择图片文件 *</label>
-        <input 
-          type="file" 
-          id="galleryFiles"
-          @change="handleFileChange" 
-          accept="image/*"
-          class="form-file"
-          :class="{ 'input-error': filesError }"
-          multiple
-        />
+        <div 
+          class="file-dropzone"
+          :class="{ 'file-dropzone-active': isDragging }"
+          @dragover.prevent="handleDragOver"
+          @dragenter.prevent="handleDragEnter"
+          @dragleave.prevent="handleDragLeave"
+          @drop.prevent="handleDrop"
+          @click="triggerFileSelect"
+        >
+          <input 
+            type="file" 
+            id="galleryFiles"
+            ref="fileInputRef"
+            @change="handleFileChange" 
+            accept="image/*"
+            class="form-file"
+            :class="{ 'input-error': filesError }"
+            multiple
+          />
+          <div class="dropzone-content">
+            <div class="dropzone-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#43d6b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <div class="dropzone-text">
+              <span v-if="form.files.length === 0">拖拽图片文件到此区域或点击选择</span>
+              <span v-else>拖拽图片文件到此区域或点击添加更多</span>
+            </div>
+          </div>
+        </div>
         <div v-if="filesError" class="error-message">请选择至少一张图片</div>
         <div v-if="form.files.length > 0" class="file-selection-info">
           已选择 {{ form.files.length }} 张图片
@@ -228,6 +252,8 @@ const form = ref({
 // 表单验证错误状态
 const nameError = ref(false);
 const filesError = ref(false);
+const isDragging = ref(false);
+const fileInputRef = ref(null);
 
 // 显示演员预览
 const showActorPreview = (event, actor) => {
@@ -241,6 +267,21 @@ const showActorPreview = (event, actor) => {
 // 隐藏演员预览
 const hideActorPreview = () => {
   actorPreview.visible = false;
+};
+
+// 处理文件选择
+const handleFileChange = (event) => {
+  const files = Array.from(event.target.files);
+  if (files.length > 0) {
+    // 将新选择的文件添加到现有文件列表的末尾
+    form.value.files = [...form.value.files, ...files];
+    filesError.value = false;
+    
+    // 重置文件输入框，允许再次选择相同的文件
+    if (fileInputRef.value) {
+      fileInputRef.value.value = '';
+    }
+  }
 };
 
 // 处理演员搜索
@@ -289,21 +330,6 @@ const getImagePreviewUrl = (file) => {
   return URL.createObjectURL(file);
 };
 
-// 处理文件选择
-const handleFileChange = (event) => {
-  const files = Array.from(event.target.files);
-  if (files.length > 0) {
-    // 将新选择的文件添加到现有文件列表的末尾
-    form.value.files = [...form.value.files, ...files];
-    filesError.value = false;
-    
-    // 重置文件输入框，允许再次选择相同的文件
-    const fileInput = document.getElementById('galleryFiles');
-    if (fileInput) {
-      fileInput.value = '';
-    }
-  }
-};
 
 // 拖拽相关状态
 const dragState = reactive({
@@ -375,6 +401,43 @@ const dragEnd = (event) => {
   dragState.dragOverIndex = null;
 };
 
+// 处理拖拽进入事件
+const handleDragEnter = () => {
+  isDragging.value = true;
+};
+
+// 处理拖拽离开事件
+const handleDragLeave = () => {
+  isDragging.value = false;
+};
+
+// 处理拖拽悬停事件
+const handleDragOver = () => {
+  isDragging.value = true;
+};
+
+// 处理文件拖拽放下事件
+const handleDrop = (event) => {
+  isDragging.value = false;
+  const files = Array.from(event.dataTransfer.files);
+  if (files.length > 0) {
+    // 过滤出图片文件
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    if (imageFiles.length > 0) {
+      // 将新选择的文件添加到现有文件列表的末尾
+      form.value.files = [...form.value.files, ...imageFiles];
+      filesError.value = false;
+    }
+  }
+};
+
+// 触发文件选择对话框
+const triggerFileSelect = () => {
+  if (fileInputRef.value) {
+    fileInputRef.value.click();
+  }
+};
+
 // 移除选定的文件
 const removeFile = (index) => {
   form.value.files.splice(index, 1);
@@ -435,11 +498,6 @@ const resetForm = () => {
   actorSearchResults.value = [];
   uploadProgress.value = 0;
   
-  // 重置文件输入框
-  const fileInput = document.getElementById('galleryFiles');
-  if (fileInput) {
-    fileInput.value = '';
-  }
 };
 
 // 提交表单
@@ -758,23 +816,14 @@ onMounted(() => {
 }
 
 .form-file {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  padding: 12px 15px;
-  border: 2px solid #e1e1e1;
-  border-radius: 8px;
-  font-size: 16px;
-  box-sizing: border-box;
-  transition: all 0.3s ease;
-  background-color: #f8f9fa;
-  color: #000;
-  min-width: 800px;
-}
-
-.form-file:focus {
-  outline: none;
-  border-color: #43d6b4;
-  background-color: #fff;
-  box-shadow: 0 5px 15px rgba(67, 214, 180, 0.1);
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: -1;
 }
 
 .files-info {
@@ -953,6 +1002,56 @@ onMounted(() => {
   color: #333;
 }
 
+/* 文件拖拽区域样式 */
+.file-dropzone {
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+  border: 2px dashed #e1e1e1;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fafafa;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.file-dropzone:hover {
+  border-color: #43d6b4;
+  background-color: #f0f9f7;
+}
+
+.file-dropzone.file-dropzone-active {
+  border-color: #43d6b4;
+  background-color: #e1f7f0;
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(67, 214, 180, 0.3);
+}
+
+.dropzone-content {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
+
+.dropzone-icon {
+  margin-bottom: 15px;
+}
+
+.dropzone-text {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.dropzone-text strong {
+  color: #43d6b4;
+  font-weight: 600;
+}
+
+/* 错误消息样式 */
 .error-message {
   color: #ff4757;
   font-size: 14px;
