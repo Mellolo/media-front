@@ -40,6 +40,7 @@
                 placeholder="搜索演员名称" 
                 class="form-input"
                 @input="handleActorSearch"
+                @keydown.enter.prevent
               />
             </div>
             
@@ -91,7 +92,8 @@
             v-model="tagInput" 
             placeholder="输入标签后按回车添加" 
             class="form-input"
-            @keyup.enter="addTag"
+            @keyup.enter.stop="addTag"
+            @keydown.enter.prevent
           />
           <button type="button" @click="addTag" class="add-tag-button">添加</button>
         </div>
