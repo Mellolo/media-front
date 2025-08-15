@@ -13,8 +13,11 @@
     <div v-else class="video-content">
       <div class="video-header">
         <h1 class="video-name">{{ videoData.name }}</h1>
-        <!-- 编辑按钮 -->
-        <button @click="editVideo" class="edit-button">编辑视频</button>
+        <!-- 编辑和删除按钮 -->
+        <div class="header-actions">
+          <button @click="editVideo" class="edit-button">编辑视频</button>
+          <button @click="deleteVideo" class="delete-button">删除视频</button>
+        </div>
       </div>
       <div class="video-player-wrapper">
         <VideoPlayer :src="videoSrc" />
@@ -146,6 +149,24 @@ export default {
       router.push({ name: 'VideoEdit', params: { id: route.params.id } });
     };
     
+    // 删除视频
+    const deleteVideo = async () => {
+      if (!confirm('确定要删除这个视频吗？此操作不可恢复。')) {
+        return;
+      }
+      
+      try {
+        // 调用删除API
+        await api.delete(`/auth/video/delete/${route.params.id}`);
+        
+        // 删除成功，跳转到视频列表页面
+        router.push({ name: 'VideoList' });
+      } catch (err) {
+        console.error('删除视频失败:', err);
+        alert('删除视频失败: ' + (err.response?.data?.message || err.message));
+      }
+    };
+    
     onMounted(() => {
       fetchVideoData();
     });
@@ -161,7 +182,8 @@ export default {
       actorPreview,
       showActorPreview,
       clearActorPreview,
-      editVideo
+      editVideo,
+      deleteVideo
     };
   }
 };
@@ -276,6 +298,11 @@ export default {
   flex: 1;
 }
 
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .edit-button {
   background: #43d6b4;
   color: #000;
@@ -287,10 +314,28 @@ export default {
   transition: background 0.3s ease;
   font-weight: 600;
   white-space: nowrap;
+  margin-right: 10px;
 }
 
 .edit-button:hover {
   background: #3ab09e;
+}
+
+.delete-button {
+  background: #ff4757;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.delete-button:hover {
+  background: #ff3742;
 }
 
 .video-meta {
