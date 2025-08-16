@@ -363,15 +363,15 @@ const handleSubmit = async () => {
     formData.append('name', form.value.name);
     formData.append('description', form.value.description || '');
     
-    // 添加演员ID
-    form.value.actorIds.forEach(id => {
-      formData.append('actorIds', id);
-    });
+    // 添加演员ID（使用JSON格式）
+    if (form.value.actorIds.length > 0) {
+      formData.append('actorIds', JSON.stringify(form.value.actorIds));
+    }
     
-    // 添加标签
-    form.value.tags.forEach(tag => {
-      formData.append('tags', tag);
-    });
+    // 添加标签（使用JSON格式）
+    if (form.value.tags.length > 0) {
+      formData.append('tags', JSON.stringify(form.value.tags));
+    }
     
     // 添加图片信息
     const pagesData = galleryImages.value.map((image, index) => ({
