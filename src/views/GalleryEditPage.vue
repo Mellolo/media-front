@@ -122,12 +122,17 @@
               'drag-over': dragState.dragOverIndex === index
             }"
             draggable="true"
+            :data-index="index"
             @dragstart="dragStart(index, $event)"
             @dragover.prevent="dragOver(index, $event)"
             @dragenter.prevent="dragEnter(index, $event)"
             @dragleave="dragLeave(index, $event)"
             @drop="drop(index, $event)"
             @dragend="dragEnd($event)"
+            @mousedown="handleMouseDown(index, $event)"
+            @touchstart="handleTouchStart(index, $event)"
+            @touchmove="handleTouchMove(index, $event)"
+            @touchend="handleTouchEnd(index, $event)"
           >
             <div class="image-wrapper">
               <img 
@@ -147,8 +152,11 @@
                   type="button" 
                   class="remove-image-button"
                   @click.stop="removeImage(index)"
+                  :disabled="isDeleting"
+                  :class="{ 'deleting': isDeleting }"
                 >
-                  删除
+                  <span v-if="!isDeleting">删除</span>
+                  <span v-else>删除中...</span>
                 </button>
               </div>
             </div>
@@ -223,6 +231,9 @@ const dragState = reactive({
   draggingIndex: null,
   dragOverIndex: null
 });
+
+// 删除相关状态
+const isDeleting = ref(false);
 
 // 演员搜索相关状态
 const actorSearchKeyword = ref('');
@@ -319,16 +330,97 @@ const removeTag = (index) => {
 
 // 移除图片
 const removeImage = (index) => {
-  galleryImages.value.splice(index, 1);
-  // 重新计算页码
-  recalculatePageNumbers();
-  // 确保响应式更新
-  galleryImages.value = [...galleryImages.value];
+  if (isDeleting.value) return;
+  
+  isDeleting.value = true;
+  
+  // 添加删除动画
+  const imageItem = document.querySelectorAll('.gallery-image-item')[index];
+  if (imageItem) {
+    imageItem.style.transition = 'all 0.3s ease';
+    imageItem.style.transform = 'scale(0.8)';
+    imageItem.style.opacity = '0';
+  }
+  
+  // 使用setTimeout模拟删除动画
+  setTimeout(() => {
+    galleryImages.value.splice(index, 1);
+    // 重新计算页码
+    recalculatePageNumbers();
+    // 确保响应式更新
+    galleryImages.value = [...galleryImages.value];
+    
+    // 重置删除状态
+    isDeleting.value = false;
+    
+    // 添加恢复动画
+    if (imageItem) {
+      imageItem.style.transform = 'scale(1)';
+      imageItem.style.opacity = '1';
+    }
+  }, 300);
 };
 
 // 获取图片预览URL
 const getImagePreviewUrl = (file) => {
   return URL.createObjectURL(file);
+};
+
+// 处理鼠标按下
+const handleMouseDown = (index, event) => {
+  // 只处理左键
+  if (event.button === 0) {
+    dragState.draggingIndex = index;
+    event.target.classList.add('dragging');
+  }
+};
+
+// 处理触摸开始
+const handleTouchStart = (index, event) => {
+  dragState.draggingIndex = index;
+  event.target.classList.add('dragging');
+  // 阻止默认的触摸滚动行为
+  event.preventDefault();
+};
+
+// 处理触摸移动
+const handleTouchMove = (index, event) => {
+  // 防止触发点击事件
+  if (dragState.draggingIndex !== null) {
+    event.preventDefault();
+  }
+};
+
+// 处理触摸结束
+const handleTouchEnd = (index, event) => {
+  if (dragState.draggingIndex !== null) {
+    // 在触摸结束时找到放置位置
+    const touch = event.changedTouches[0];
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    if (element) {
+      // 找到最近的gallery-image-item元素
+      const targetItem = element.closest('.gallery-image-item');
+      if (targetItem && targetItem !== event.target) {
+        const targetIndex = parseInt(targetItem.dataset.index);
+        if (!isNaN(targetIndex)) {
+          moveImage(dragState.draggingIndex, targetIndex);
+          recalculatePageNumbers();
+        }
+      }
+    }
+    
+    // 移除所有拖拽样式
+    const imageItems = document.querySelectorAll('.gallery-image-item');
+    imageItems.forEach(item => {
+      item.classList.remove('drag-over');
+      item.classList.remove('dragging');
+    });
+    
+    // 重置拖拽状态
+    dragState.draggingIndex = null;
+    dragState.dragOverIndex = null;
+  }
 };
 
 // 拖拽开始
@@ -337,6 +429,9 @@ const dragStart = (index, event) => {
   event.dataTransfer.effectAllowed = 'move';
   // 添加拖拽样式
   event.target.classList.add('dragging');
+  
+  // 设置拖拽数据（用于兼容某些浏览器）
+  event.dataTransfer.setData('text/plain', index);
 };
 
 // 拖拽经过
@@ -854,15 +949,20 @@ onMounted(() => {
 }
 
 .gallery-image-item.dragging {
-  opacity: 0.5;
-  transform: scale(0.95);
+  opacity: 0.7;
+  transform: scale(0.93);
   z-index: 1000;
+  box-shadow: 0 5px 15px rgba(67, 214, 180, 0.4);
+  transition: all 0.3s ease;
 }
 
 .gallery-image-item.drag-over {
-  transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(67, 214, 180, 0.8);
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(67, 214, 180, 0.6);
   z-index: 999;
+  border: 2px dashed #43d6b4;
+  background-color: #f0fbf7;
+  transition: all 0.3s ease;
 }
 
 .image-wrapper {
@@ -870,6 +970,7 @@ onMounted(() => {
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid #e1e1e1;
+  transition: border-color 0.3s ease;
 }
 
 .gallery-image {
@@ -879,6 +980,7 @@ onMounted(() => {
   display: block;
   user-drag: none;
   -webkit-user-drag: none;
+  pointer-events: none;
 }
 
 .image-overlay {
@@ -907,6 +1009,21 @@ onMounted(() => {
   border-radius: 4px;
   cursor: pointer;
   font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+}
+
+.remove-image-button.deleting {
+  background: #ff7f7f;
+  cursor: not-allowed;
+}
+
+.remove-image-button:disabled {
+  background: #ff7f7f;
+  cursor: not-allowed;
 }
 
 .image-info {
