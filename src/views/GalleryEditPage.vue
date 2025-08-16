@@ -660,14 +660,25 @@ const handleSubmit = async () => {
     }
     
     // 添加图片信息（按照要求的格式组织）
-    const pagesData = galleryImages.value.map((image) => ({
-      isNewUploaded: image.isNewUploaded || false,
-      index: image.originalPage || image.page // 使用原始页码，如果没有则使用当前页码
-    }));
+    const pagesData = galleryImages.value.map((image, index) => {
+      if (image.isNewUploaded) {
+        // 如果是新增图片，isNewUploaded为true，index为新增图片在参数中的位置（从1开始）
+        return {
+          isNewUploaded: true,
+          index: index + 1
+        };
+      } else {
+        // 如果是缓存图片，isNewUploaded为false，index为缓存图片原先的页码
+        return {
+          isNewUploaded: false,
+          index: image.originalPage
+        };
+      }
+    });
     
     formData.append('pages', JSON.stringify(pagesData));
     
-    // 添加新上传的文件
+    // 添加新上传的文件（只添加新上传的文件，按照在新上传文件列表中的位置添加）
     const newUploadedImages = galleryImages.value.filter(image => image.isNewUploaded);
     newUploadedImages.forEach(image => {
       if (image.file) {
