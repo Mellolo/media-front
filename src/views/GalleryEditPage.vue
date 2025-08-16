@@ -111,23 +111,42 @@
       
       <div class="form-group">
         <label>图集图片</label>
+        <div class="hint">拖拽图片可调整顺序</div>
         <div class="gallery-images-container">
           <div 
             v-for="(image, index) in galleryImages" 
             :key="index"
             class="gallery-image-item"
+            :class="{ 
+              'dragging': dragState.draggingIndex === index,
+              'drag-over': dragState.dragOverIndex === index
+            }"
+            draggable="true"
+            @dragstart="dragStart(index, $event)"
+            @dragover.prevent="dragOver(index, $event)"
+            @dragenter.prevent="dragEnter(index, $event)"
+            @dragleave="dragLeave(index, $event)"
+            @drop="drop(index, $event)"
+            @dragend="dragEnd($event)"
           >
             <div class="image-wrapper">
               <img 
+                v-if="!image.isNewUploaded"
                 :src="`${apiBaseUrl}/gallery/pic/${route.params.id}/${image.page}?t=${cacheBuster}`" 
                 :alt="`图集图片 ${image.page}`"
+                class="gallery-image"
+              />
+              <img 
+                v-else
+                :src="getImagePreviewUrl(image.file)"
+                :alt="`新上传图片 ${index + 1}`"
                 class="gallery-image"
               />
               <div class="image-overlay">
                 <button 
                   type="button" 
                   class="remove-image-button"
-                  @click="removeImage(index)"
+                  @click.stop="removeImage(index)"
                 >
                   删除
                 </button>
@@ -135,6 +154,7 @@
             </div>
             <div class="image-info">
               第 {{ image.page }} 页
+              <span v-if="image.isNewUploaded" class="new-tag">新</span>
             </div>
           </div>
           
@@ -196,6 +216,12 @@ const actorPreview = reactive({
     top: '0px',
     left: '0px'
   }
+});
+
+// 拖拽相关状态
+const dragState = reactive({
+  draggingIndex: null,
+  dragOverIndex: null
 });
 
 // 演员搜索相关状态
@@ -294,6 +320,105 @@ const removeTag = (index) => {
 // 移除图片
 const removeImage = (index) => {
   galleryImages.value.splice(index, 1);
+  // 重新计算页码
+  recalculatePageNumbers();
+  // 确保响应式更新
+  galleryImages.value = [...galleryImages.value];
+};
+
+// 获取图片预览URL
+const getImagePreviewUrl = (file) => {
+  return URL.createObjectURL(file);
+};
+
+// 拖拽开始
+const dragStart = (index, event) => {
+  dragState.draggingIndex = index;
+  event.dataTransfer.effectAllowed = 'move';
+  // 添加拖拽样式
+  event.target.classList.add('dragging');
+};
+
+// 拖拽经过
+const dragOver = (index, event) => {
+  event.preventDefault();
+  dragState.dragOverIndex = index;
+};
+
+// 拖拽进入
+const dragEnter = (index, event) => {
+  event.preventDefault();
+  // 添加拖拽目标样式
+  if (index !== dragState.draggingIndex) {
+    event.target.classList.add('drag-over');
+  }
+};
+
+// 拖拽离开
+const dragLeave = (index, event) => {
+  // 移除拖拽目标样式
+  event.target.classList.remove('drag-over');
+};
+
+// 放置
+const drop = (index, event) => {
+  event.preventDefault();
+  
+  // 移除所有拖拽样式
+  const imageItems = document.querySelectorAll('.gallery-image-item');
+  imageItems.forEach(item => {
+    item.classList.remove('drag-over');
+    item.classList.remove('dragging');
+  });
+  
+  // 执行图片位置移动
+  if (dragState.draggingIndex !== null && 
+      dragState.draggingIndex !== index) {
+    moveImage(dragState.draggingIndex, index);
+  }
+  
+  // 重置拖拽状态
+  dragState.draggingIndex = null;
+  dragState.dragOverIndex = null;
+};
+
+// 拖拽结束
+const dragEnd = (event) => {
+  // 移除所有拖拽样式
+  const imageItems = document.querySelectorAll('.gallery-image-item');
+  imageItems.forEach(item => {
+    item.classList.remove('drag-over');
+    item.classList.remove('dragging');
+  });
+  
+  // 重置拖拽状态
+  dragState.draggingIndex = null;
+  dragState.dragOverIndex = null;
+};
+
+// 移动图片到新位置
+const moveImage = (fromIndex, toIndex) => {
+  if (fromIndex >= 0 && fromIndex < galleryImages.value.length && 
+      toIndex >= 0 && toIndex < galleryImages.value.length && 
+      fromIndex !== toIndex) {
+    // 创建新数组
+    const newImages = [...galleryImages.value];
+    // 取出要移动的图片
+    const [movedImage] = newImages.splice(fromIndex, 1);
+    // 将图片插入到新位置
+    newImages.splice(toIndex, 0, movedImage);
+    // 更新图片列表
+    galleryImages.value = newImages;
+    // 重新计算页码
+    recalculatePageNumbers();
+  }
+};
+
+// 重新计算页码
+const recalculatePageNumbers = () => {
+  galleryImages.value.forEach((image, index) => {
+    image.page = index + 1;
+  });
 };
 
 // 处理文件选择
@@ -342,6 +467,10 @@ const resetForm = () => {
   if (fileInput.value) {
     fileInput.value.value = '';
   }
+  
+  // 重置拖拽状态
+  dragState.draggingIndex = null;
+  dragState.dragOverIndex = null;
 };
 
 // 提交表单
@@ -373,17 +502,18 @@ const handleSubmit = async () => {
       formData.append('tags', JSON.stringify(form.value.tags));
     }
     
-    // 添加图片信息
-    const pagesData = galleryImages.value.map((image, index) => ({
+    // 添加图片信息（按照要求的格式组织）
+    const pagesData = galleryImages.value.map((image) => ({
       isNewUploaded: image.isNewUploaded || false,
-      index: index + 1
+      index: image.page
     }));
     
     formData.append('pages', JSON.stringify(pagesData));
     
     // 添加新上传的文件
-    galleryImages.value.forEach(image => {
-      if (image.isNewUploaded && image.file) {
+    const newUploadedImages = galleryImages.value.filter(image => image.isNewUploaded);
+    newUploadedImages.forEach(image => {
+      if (image.file) {
         formData.append('files', image.file);
       }
     });
@@ -718,6 +848,21 @@ onMounted(() => {
 .gallery-image-item {
   width: 150px;
   position: relative;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: move;
+}
+
+.gallery-image-item.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+  z-index: 1000;
+}
+
+.gallery-image-item.drag-over {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(67, 214, 180, 0.8);
+  z-index: 999;
 }
 
 .image-wrapper {
@@ -732,6 +877,8 @@ onMounted(() => {
   height: 200px;
   object-fit: cover;
   display: block;
+  user-drag: none;
+  -webkit-user-drag: none;
 }
 
 .image-overlay {
@@ -767,6 +914,15 @@ onMounted(() => {
   margin-top: 8px;
   font-size: 14px;
   color: #666;
+}
+
+.new-tag {
+  background: #43d6b4;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-left: 5px;
 }
 
 .upload-new-images {
