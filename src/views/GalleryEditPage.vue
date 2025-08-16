@@ -350,8 +350,10 @@ const removeImage = (index) => {
   // 注意：对于缓存图片，不删除imageCache中的内容，因为初始页码映射永远不变
   
   galleryImages.value.splice(index, 1);
-  // 重新计算页码和新上传图片的uploadIndex
-  recalculatePageNumbers();
+  
+  // 只有在删除图片时才重新计算新上传图片的uploadIndex
+  recalculateNewUploadIndexes();
+  
   // 确保响应式更新
   galleryImages.value = [...galleryImages.value];
 };
@@ -514,7 +516,19 @@ const recalculatePageNumbers = () => {
     image.page = index + 1;
   });
   
-  // 重新计算新上传图片的uploadIndex
+  // 不再重新计算新上传图片的uploadIndex，保持其原始值不变
+  // 只需要更新新上传图片的缓存键名以匹配新的位置
+};
+
+// 只在删除图片时重新计算新上传图片的索引
+const recalculateNewUploadIndexes = () => {
+  // 重新计算所有图片的显示页码
+  galleryImages.value.forEach((image, index) => {
+    // 更新显示页码
+    image.page = index + 1;
+  });
+  
+  // 重新计算新上传图片的uploadIndex（只在删除时）
   const newUploadedImages = galleryImages.value
     .filter(image => image.isNewUploaded)
     .map((image, index) => {
@@ -549,16 +563,16 @@ const handleFileSelect = (event) => {
   if (files.length > 0) {
     // 添加新文件到列表
     files.forEach(file => {
-      // 计算新上传图片的索引（只计算新上传的图片）
-      const newUploadCount = galleryImages.value.filter(img => img.isNewUploaded).length;
-      const uploadIndex = newUploadCount + 1;
+      // 计算新上传图片的索引（全局唯一，不因删除而改变）
+      const totalNewUploads = galleryImages.value.filter(img => img.isNewUploaded).length;
+      const uploadIndex = totalNewUploads + 1;
       
       galleryImages.value.push({
         file: file,
         isNewUploaded: true,
         page: galleryImages.value.length + 1,
         originalPage: null, // 新上传的图片没有原始页码
-        uploadIndex: uploadIndex // 新上传图片的顺序索引
+        uploadIndex: uploadIndex // 新上传图片的顺序索引（全局唯一）
       });
       
       // 为新上传的文件创建预览URL并存储在缓存中
