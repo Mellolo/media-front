@@ -114,9 +114,9 @@ export default {
       return `${api.defaults.baseURL}/gallery/pic/${route.params.id}/${page}`;
     };
     
-    // 获取缩略图URL (使用图集封面)
-    const getThumbnailUrl = () => {
-      return `${api.defaults.baseURL}/gallery/cover/${route.params.id}`;
+    // 获取缩略图URL (使用实际的图片URL)
+    const getThumbnailUrl = (page) => {
+      return `${api.defaults.baseURL}/gallery/pic/${route.params.id}/${page}`;
     };
     
     // 获取标签搜索URL
@@ -138,7 +138,7 @@ export default {
         const pageCount = response.data.data.pageCount || 0;
         images.value = Array.from({ length: pageCount }, (_, i) => ({
           src: getImageUrl(i + 1),
-          thumb: getThumbnailUrl(), // 使用图集封面作为缩略图
+          thumb: getThumbnailUrl(i + 1), // 使用实际的图片URL作为缩略图
           index: i
         }));
       } catch (err) {
