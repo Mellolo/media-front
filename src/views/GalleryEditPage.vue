@@ -137,14 +137,14 @@
             <div class="image-wrapper">
               <img 
                 v-if="!image.isNewUploaded"
-                :src="`${apiBaseUrl}/gallery/pic/${route.params.id}/${image.page}?t=${cacheBuster}`" 
+                :src="getCachedImageUrl(image.originalPage)" 
                 :alt="`图集图片 ${image.page}`"
                 class="gallery-image"
               />
               <img 
                 v-else
-                :src="getImagePreviewUrl(image.file)"
-                :alt="`新上传图片 ${index + 1}`"
+                :src="getCachedImageUrl(`new_${image.page}`)"
+                :alt="`新上传图片 ${image.page}`"
                 class="gallery-image"
               />
               <div class="image-overlay">
@@ -163,6 +163,7 @@
             <div class="image-info">
               第 {{ image.page }} 页
               <span v-if="image.isNewUploaded" class="new-tag">新</span>
+              <span v-else class="original-page-tag">原:{{ image.originalPage }}</span>
             </div>
           </div>
           
@@ -203,7 +204,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive, watch } from 'vue';
+import { ref, onMounted, reactive, watch, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '@/utils/api.js';
 import ActorCoverPreview from '@/components/ActorCoverPreview.vue';
@@ -249,6 +250,9 @@ const originalGalleryData = ref(null);
 
 // 图集图片列表
 const galleryImages = ref([]);
+
+// 图片缓存对象，用于存储所有图片的Blob数据
+const imageCache = ref({});
 
 const form = ref({
   name: '',
@@ -330,35 +334,22 @@ const removeTag = (index) => {
 
 // 移除图片
 const removeImage = (index) => {
-  if (isDeleting.value) return;
+  const imageToRemove = galleryImages.value[index];
   
-  isDeleting.value = true;
-  
-  // 添加删除动画
-  const imageItem = document.querySelectorAll('.gallery-image-item')[index];
-  if (imageItem) {
-    imageItem.style.transition = 'all 0.3s ease';
-    imageItem.style.transform = 'scale(0.8)';
-    imageItem.style.opacity = '0';
+  // 如果是新上传的图片，清理对应的预览URL
+  if (imageToRemove.isNewUploaded) {
+    const previewUrl = imageCache.value[`new_${imageToRemove.page}`];
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      delete imageCache.value[`new_${imageToRemove.page}`];
+    }
   }
   
-  // 使用setTimeout模拟删除动画
-  setTimeout(() => {
-    galleryImages.value.splice(index, 1);
-    // 重新计算页码
-    recalculatePageNumbers();
-    // 确保响应式更新
-    galleryImages.value = [...galleryImages.value];
-    
-    // 重置删除状态
-    isDeleting.value = false;
-    
-    // 添加恢复动画
-    if (imageItem) {
-      imageItem.style.transform = 'scale(1)';
-      imageItem.style.opacity = '1';
-    }
-  }, 300);
+  galleryImages.value.splice(index, 1);
+  // 重新计算页码（只更新显示页码，不更新原始页码）
+  recalculatePageNumbers();
+  // 确保响应式更新
+  galleryImages.value = [...galleryImages.value];
 };
 
 // 获取图片预览URL
@@ -502,17 +493,82 @@ const moveImage = (fromIndex, toIndex) => {
     const [movedImage] = newImages.splice(fromIndex, 1);
     // 将图片插入到新位置
     newImages.splice(toIndex, 0, movedImage);
+    
     // 更新图片列表
     galleryImages.value = newImages;
+    
+    // 保存旧的页码映射
+    const oldPageMap = {};
+    galleryImages.value.forEach((image, index) => {
+      oldPageMap[image.page] = index;
+    });
+    
     // 重新计算页码
     recalculatePageNumbers();
+    
+    // 更新缓存键名
+    const newPageMap = {};
+    galleryImages.value.forEach((image, index) => {
+      newPageMap[index + 1] = image;
+      // 如果图片有原始页码，更新原始页码到新页码的映射
+      if (image.originalPage !== null && image.originalPage !== undefined) {
+        image.originalPage = index + 1;
+      }
+    });
+    
+    // 创建新的图片缓存对象
+    const newImageCache = {};
+    
+    // 复制旧缓存中仍然有效的条目，并使用新的页码键
+    Object.keys(imageCache.value).forEach(key => {
+      // 如果是数字键（即原始图片缓存）
+      if (!isNaN(Number(key))) {
+        const oldPage = Number(key);
+        // 如果该页码在旧映射中存在
+        if (oldPageMap[oldPage] !== undefined) {
+          const newPage = oldPageMap[oldPage] + 1;
+          newImageCache[newPage] = imageCache.value[key];
+        }
+      } else {
+        // 保留新上传图片的缓存（如new_1, new_2等）
+        newImageCache[key] = imageCache.value[key];
+      }
+    });
+    
+    // 更新图片缓存
+    imageCache.value = newImageCache;
   }
 };
 
 // 重新计算页码
 const recalculatePageNumbers = () => {
+  const newUploadedImages = [];
+  
   galleryImages.value.forEach((image, index) => {
+    // 更新显示页码
     image.page = index + 1;
+    
+    // 收集新上传的图片
+    if (image.isNewUploaded) {
+      newUploadedImages.push({
+        image,
+        oldPage: image.page
+      });
+    }
+  });
+  
+  // 更新新上传图片的缓存键名
+  newUploadedImages.forEach(({ image, oldPage }) => {
+    const newPage = image.page;
+    if (oldPage !== newPage) {
+      const oldKey = `new_${oldPage}`;
+      const newKey = `new_${newPage}`;
+      
+      if (imageCache.value[oldKey]) {
+        imageCache.value[newKey] = imageCache.value[oldKey];
+        delete imageCache.value[oldKey];
+      }
+    }
   });
 };
 
@@ -522,11 +578,17 @@ const handleFileSelect = (event) => {
   if (files.length > 0) {
     // 添加新文件到列表
     files.forEach(file => {
+      const pageIndex = galleryImages.value.length + 1;
       galleryImages.value.push({
         file: file,
         isNewUploaded: true,
-        page: galleryImages.value.length + 1
+        page: pageIndex,
+        originalPage: null // 新上传的图片没有原始页码
       });
+      
+      // 为新上传的文件创建预览URL并存储在缓存中
+      const previewUrl = URL.createObjectURL(file);
+      imageCache.value[`new_${pageIndex}`] = previewUrl;
     });
     
     // 重置文件输入
@@ -600,7 +662,7 @@ const handleSubmit = async () => {
     // 添加图片信息（按照要求的格式组织）
     const pagesData = galleryImages.value.map((image) => ({
       isNewUploaded: image.isNewUploaded || false,
-      index: image.page
+      index: image.originalPage || image.page // 使用原始页码，如果没有则使用当前页码
     }));
     
     formData.append('pages', JSON.stringify(pagesData));
@@ -656,14 +718,18 @@ const fetchGalleryData = async () => {
       form.value.actorIds = galleryData.actors.map(actor => actor.id);
     }
     
-    // 处理图片数据
+    // 处理图片数据，记住每张图片的原始页码
     const pageCount = galleryData.pageCount || 0;
     galleryImages.value = Array.from({ length: pageCount }, (_, i) => ({
       page: i + 1,
+      originalPage: i + 1, // 记住原始页码
       isNewUploaded: false
     }));
     
     originalGalleryData.value.images = [...galleryImages.value];
+    
+    // 缓存所有图片
+    await cacheAllImages(pageCount);
   } catch (error) {
     console.error('获取图集数据失败:', error);
     router.push({
@@ -688,6 +754,37 @@ onMounted(() => {
   document.addEventListener('click', handleClickOutside);
   fetchGalleryData();
 });
+
+onUnmounted(() => {
+  // 清理图片缓存，避免内存泄漏
+  Object.values(imageCache.value).forEach(url => {
+    URL.revokeObjectURL(url);
+  });
+});
+
+// 缓存所有图片
+const cacheAllImages = async (pageCount) => {
+  try {
+    for (let i = 1; i <= pageCount; i++) {
+      const imageUrl = `${apiBaseUrl}/gallery/pic/${route.params.id}/${i}`;
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      imageCache.value[i] = URL.createObjectURL(blob);
+    }
+  } catch (error) {
+    console.error('缓存图片失败:', error);
+  }
+};
+
+const getCachedImageUrl = (page) => {
+  // 如果是新上传的图片，使用特殊键名获取
+  if (page === null) {
+    // 这里需要根据实际情况处理新上传的图片
+    return '';
+  }
+  return imageCache.value[page] || '';
+};
+
 </script>
 
 <style scoped>
@@ -1034,6 +1131,15 @@ onMounted(() => {
 
 .new-tag {
   background: #43d6b4;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+.original-page-tag {
+  background: #38b8a0;
   color: white;
   padding: 2px 6px;
   border-radius: 4px;
