@@ -254,6 +254,9 @@ const galleryImages = ref([]);
 // 图片缓存对象，用于存储所有图片的Blob数据
 const imageCache = ref({});
 
+// 初始页码映射，用于存储一开始缓存的所有页码（永远不变）
+const initialPageMap = ref({});
+
 const form = ref({
   name: '',
   description: '',
@@ -344,6 +347,7 @@ const removeImage = (index) => {
       delete imageCache.value[`new_${imageToRemove.page}`];
     }
   }
+  // 注意：对于缓存图片，不删除imageCache中的内容，因为初始页码映射永远不变
   
   galleryImages.value.splice(index, 1);
   // 重新计算页码（只更新显示页码，不更新原始页码）
@@ -497,46 +501,8 @@ const moveImage = (fromIndex, toIndex) => {
     // 更新图片列表
     galleryImages.value = newImages;
     
-    // 保存旧的页码映射
-    const oldPageMap = {};
-    galleryImages.value.forEach((image, index) => {
-      oldPageMap[image.page] = index;
-    });
-    
-    // 重新计算页码
+    // 重新计算页码（只更新显示页码，不更新原始页码）
     recalculatePageNumbers();
-    
-    // 更新缓存键名
-    const newPageMap = {};
-    galleryImages.value.forEach((image, index) => {
-      newPageMap[index + 1] = image;
-      // 如果图片有原始页码，更新原始页码到新页码的映射
-      if (image.originalPage !== null && image.originalPage !== undefined) {
-        image.originalPage = index + 1;
-      }
-    });
-    
-    // 创建新的图片缓存对象
-    const newImageCache = {};
-    
-    // 复制旧缓存中仍然有效的条目，并使用新的页码键
-    Object.keys(imageCache.value).forEach(key => {
-      // 如果是数字键（即原始图片缓存）
-      if (!isNaN(Number(key))) {
-        const oldPage = Number(key);
-        // 如果该页码在旧映射中存在
-        if (oldPageMap[oldPage] !== undefined) {
-          const newPage = oldPageMap[oldPage] + 1;
-          newImageCache[newPage] = imageCache.value[key];
-        }
-      } else {
-        // 保留新上传图片的缓存（如new_1, new_2等）
-        newImageCache[key] = imageCache.value[key];
-      }
-    });
-    
-    // 更新图片缓存
-    imageCache.value = newImageCache;
   }
 };
 
@@ -555,6 +521,7 @@ const recalculatePageNumbers = () => {
         oldPage: image.page
       });
     }
+    // 注意：不修改image.originalPage，保持初始页码映射不变
   });
   
   // 更新新上传图片的缓存键名
@@ -612,6 +579,11 @@ const resetForm = () => {
     // 恢复图片数据
     galleryImages.value = originalGalleryData.value.images ?
       [...originalGalleryData.value.images] : [];
+      
+    // 恢复初始页码映射
+    for (let i = 1; i <= galleryImages.value.length; i++) {
+      initialPageMap.value[i] = galleryImages.value[i - 1].originalPage || i;
+    }
   }
   
   // 清空搜索相关状态
@@ -668,7 +640,7 @@ const handleSubmit = async () => {
           index: index + 1
         };
       } else {
-        // 如果是缓存图片，isNewUploaded为false，index为缓存图片原先的页码
+        // 如果是缓存图片，isNewUploaded为false，index为缓存图片原先的页码（初始页码映射）
         return {
           isNewUploaded: false,
           index: image.originalPage
@@ -709,15 +681,6 @@ const fetchGalleryData = async () => {
     const response = await api.get(`/gallery/page/${route.params.id}`);
     const galleryData = response.data.data;
     
-    // 保存原始数据用于重置
-    originalGalleryData.value = {
-      name: galleryData.name,
-      description: galleryData.description || '',
-      tags: galleryData.tags ? [...galleryData.tags] : [],
-      actors: galleryData.actors ? [...galleryData.actors] : [],
-      images: []
-    };
-    
     // 填充表单数据
     form.value.name = galleryData.name;
     form.value.description = galleryData.description || '';
@@ -727,6 +690,9 @@ const fetchGalleryData = async () => {
     if (galleryData.actors && galleryData.actors.length > 0) {
       selectedActors.value = [...galleryData.actors];
       form.value.actorIds = galleryData.actors.map(actor => actor.id);
+    } else {
+      selectedActors.value = [];
+      form.value.actorIds = [];
     }
     
     // 处理图片数据，记住每张图片的原始页码
@@ -737,10 +703,22 @@ const fetchGalleryData = async () => {
       isNewUploaded: false
     }));
     
-    originalGalleryData.value.images = [...galleryImages.value];
+    // 保存原始数据用于重置
+    originalGalleryData.value = {
+      name: galleryData.name,
+      description: galleryData.description || '',
+      tags: galleryData.tags ? [...galleryData.tags] : [],
+      actors: galleryData.actors ? [...galleryData.actors] : [],
+      images: [...galleryImages.value]
+    };
     
     // 缓存所有图片
     await cacheAllImages(pageCount);
+    
+    // 保存初始页码映射（永远不变）
+    for (let i = 1; i <= pageCount; i++) {
+      initialPageMap.value[i] = i;
+    }
   } catch (error) {
     console.error('获取图集数据失败:', error);
     router.push({
