@@ -14,6 +14,7 @@ import NotFoundPage from '@/views/NotFoundPage.vue'
 import GalleryUploadPage from '@/views/GalleryUploadPage.vue'
 import GalleryListPage from '@/views/GalleryListPage.vue'
 import TagSearchGalleryPage from '@/views/TagSearchGalleryPage.vue'
+import GalleryEditPage from '@/views/GalleryEditPage.vue'
 
 const routes = [
   {
@@ -68,6 +69,12 @@ const routes = [
     path: '/gallery/page/:id',
     name: 'GalleryView',
     component: () => import('@/views/GalleryViewPage.vue'),
+    props: true
+  },
+  {
+    path: '/gallery/edit/:id',
+    name: 'GalleryEdit',
+    component: GalleryEditPage,
     props: true
   },
   {

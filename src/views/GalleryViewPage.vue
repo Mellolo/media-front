@@ -15,7 +15,7 @@
         <h1 class="gallery-name">{{ galleryData.name }}</h1>
         <!-- 编辑和删除按钮 -->
         <div class="header-actions">
-          <button class="edit-button">编辑图集</button>
+          <button @click="editGallery" class="edit-button">编辑图集</button>
           <button @click="deleteGallery" class="delete-button">删除图集</button>
         </div>
       </div>
@@ -127,6 +127,14 @@ export default {
       }).href;
     };
     
+    // 编辑图集
+    const editGallery = () => {
+      router.push({ 
+        name: 'GalleryEdit', 
+        params: { id: route.params.id } 
+      });
+    };
+    
     const fetchGalleryData = async () => {
       try {
         loading.value = true;
@@ -202,7 +210,8 @@ export default {
       actorPreview,
       showActorPreview,
       clearActorPreview,
-      deleteGallery
+      deleteGallery,
+      editGallery
     };
   }
 };
