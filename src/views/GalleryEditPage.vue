@@ -978,7 +978,6 @@ onMounted(() => {
   height: 200px;
   object-fit: cover;
   display: block;
-  user-drag: none;
   -webkit-user-drag: none;
   pointer-events: none;
 }
