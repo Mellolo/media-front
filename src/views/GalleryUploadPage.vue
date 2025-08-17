@@ -154,7 +154,7 @@
           <div 
             v-for="(file, index) in form.files" 
             :key="index"
-            class="image-preview-item"
+            class="gallery-image-item"
             draggable="true"
             @dragstart="dragStart(index, $event)"
             @dragover.prevent="dragOver(index, $event)"
@@ -163,24 +163,25 @@
             @drop="drop(index, $event)"
             @dragend="dragEnd"
           >
-            <div class="image-preview-wrapper">
+            <div class="image-wrapper">
               <img 
                 :src="getImagePreviewUrl(file)" 
                 :alt="file.name"
-                class="image-preview"
+                class="gallery-image"
               />
-              <div class="image-info">
-                <div class="image-name">{{ file.name }}</div>
-                <div class="image-size">{{ formatFileSize(file.size) }}</div>
+              <div class="image-overlay">
+                <button 
+                  type="button" 
+                  @click="removeFile(index)" 
+                  class="remove-image-button"
+                  title="移除图片"
+                >
+                  删除
+                </button>
               </div>
-              <button 
-                type="button" 
-                @click="removeFile(index)" 
-                class="remove-image-button"
-                title="移除图片"
-              >
-                ×
-              </button>
+            </div>
+            <div class="image-info">
+              第 {{ index + 1 }} 页
             </div>
           </div>
         </div>
@@ -825,11 +826,7 @@ onMounted(() => {
   z-index: -1;
 }
 
-.files-info {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #666;
-}
+/* 删除了冗余的 .files-info 类，因为它与 .file-selection-info 功能重复 */
 
 .remove-image-button {
   position: absolute;
@@ -865,68 +862,107 @@ onMounted(() => {
 }
 
 .image-preview-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
-  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
 }
 
-.image-preview-item {
+.gallery-image-item {
+  width: 150px;
   position: relative;
+  border-radius: 8px;
+  transition: all 0.2s ease;
   cursor: move;
 }
 
-.image-preview-item.dragging {
-  opacity: 0.5;
-  transform: scale(0.95);
-  transition: all 0.2s ease;
-}
-
-.image-preview-item.drag-over {
-  transform: scale(1.05);
-  box-shadow: 0 5px 20px rgba(67, 214, 180, 0.5);
-  transition: all 0.2s ease;
-  z-index: 10;
-}
-
-.image-preview-wrapper {
-  position: relative;
-  border: 1px solid #e1e1e1;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #f8f9fa;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+.gallery-image-item.dragging {
+  opacity: 0.7;
+  transform: scale(0.93);
+  z-index: 1000;
+  box-shadow: 0 5px 15px rgba(67, 214, 180, 0.4);
   transition: all 0.3s ease;
 }
 
-.image-preview-wrapper:hover {
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  transform: translateY(-2px);
+.gallery-image-item.drag-over {
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(67, 214, 180, 0.6);
+  z-index: 999;
+  border: 2px dashed #43d6b4;
+  background-color: #f0fbf7;
+  transition: all 0.3s ease;
 }
 
-.image-preview {
+.image-wrapper {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e1e1e1;
+  transition: border-color 0.3s ease;
+}
+
+.gallery-image {
   width: 100%;
-  height: 150px;
+  height: 200px;
   object-fit: cover;
   display: block;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.image-wrapper:hover .image-overlay {
+  opacity: 1;
+}
+
+.remove-image-button {
+  background: #ff4757;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+}
+
+.remove-image-button:hover {
+  background: #ff6b81;
+  transform: scale(1.05);
+}
+
+.remove-image-button:active {
+  transform: scale(0.95);
+}
+
+.remove-image-button:disabled {
+  background: #ff7f7f;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .image-info {
-  padding: 10px;
-  font-size: 12px;
-}
-
-.image-name {
-  font-weight: 500;
-  color: #333;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.image-size {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 14px;
   color: #666;
-  margin-top: 3px;
 }
 
 .form-actions {
