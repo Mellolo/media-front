@@ -143,7 +143,7 @@
               />
               <img 
                 v-else
-                :src="getCachedImageUrl(`new_${index + 1}`)"
+                :src="image.previewUrl"
                 :alt="`新上传图片 ${index + 1}`"
                 class="gallery-image"
               />
@@ -254,9 +254,6 @@ const galleryImages = ref([]);
 // 图片缓存对象，用于存储所有图片的Blob数据
 const imageCache = ref({});
 
-// 初始页码映射，用于存储一开始缓存的所有页码（永远不变）
-const initialPageMap = ref({});
-
 const form = ref({
   name: '',
   description: '',
@@ -341,11 +338,8 @@ const removeImage = (index) => {
   
   // 如果是新上传的图片，清理对应的预览URL
   if (imageToRemove.isNewUploaded) {
-    // 使用index+1作为缓存键名
-    const previewUrl = imageCache.value[`new_${index + 1}`];
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-      delete imageCache.value[`new_${index + 1}`];
+    if (imageToRemove.previewUrl) {
+      URL.revokeObjectURL(imageToRemove.previewUrl);
     }
   }
   // 注意：对于缓存图片，不删除imageCache中的内容，因为初始页码映射永远不变
@@ -517,28 +511,7 @@ const recalculatePageNumbers = () => {
     image.page = index + 1;
   });
   
-  // 更新新上传图片的缓存键名
-  const newUploadedImages = galleryImages.value
-    .map((image, index) => {
-      return {
-        image,
-        oldIndex: index, // 在数组中的旧索引
-        newIndex: index  // 在数组中的新索引（实际上与旧索引相同）
-      };
-    });
-  
-  // 由于图片顺序可能已经改变，需要更新所有新上传图片的缓存键名
-  newUploadedImages.forEach(({ image, oldIndex, newIndex }) => {
-    if (image.isNewUploaded) {
-      const oldKey = `new_${oldIndex + 1}`;
-      const newKey = `new_${newIndex + 1}`;
-      
-      if (imageCache.value[oldKey]) {
-        imageCache.value[newKey] = imageCache.value[oldKey];
-        delete imageCache.value[oldKey];
-      }
-    }
-  });
+  // 不再需要更新新上传图片的缓存键名，因为预览图直接存储在元素中
 };
 
 
@@ -548,19 +521,16 @@ const handleFileSelect = (event) => {
   if (files.length > 0) {
     // 添加新文件到列表
     files.forEach(file => {
+      // 为新上传的文件创建预览URL
+      const previewUrl = URL.createObjectURL(file);
+      
       galleryImages.value.push({
         file: file,
         isNewUploaded: true,
         page: galleryImages.value.length + 1,
-        originalPage: null // 新上传的图片没有原始页码
-        // 不再记录uploadIndex
+        originalPage: null, // 新上传的图片没有原始页码
+        previewUrl: previewUrl // 直接将预览图存储在元素中
       });
-      
-      // 为新上传的文件创建预览URL并存储在缓存中
-      const previewUrl = URL.createObjectURL(file);
-      // 使用galleryImages的长度作为缓存键名
-      const cacheIndex = galleryImages.value.length;
-      imageCache.value[`new_${cacheIndex}`] = previewUrl;
     });
     
     // 重置文件输入
@@ -586,9 +556,6 @@ const resetForm = () => {
       [...originalGalleryData.value.images] : [];
       
     // 恢复初始页码映射
-    for (let i = 1; i <= galleryImages.value.length; i++) {
-      initialPageMap.value[i] = galleryImages.value[i - 1].originalPage || i;
-    }
   }
   
   // 清空搜索相关状态
@@ -637,15 +604,21 @@ const handleSubmit = async () => {
     }
     
     // 添加图片信息（按照要求的格式组织）
+    // 先获取所有新上传的图片及其索引
+    const newUploadedImages = galleryImages.value
+      .map((image, index) => ({ image, index }))
+      .filter(({ image }) => image.isNewUploaded);
+    
     const pagesData = galleryImages.value.map((image, index) => {
       if (image.isNewUploaded) {
-        // 如果是新增图片，isNewUploaded为true，index为图片在galleryImages中的顺序（从1开始）
+        // 如果是新增图片，isNewUploaded为true，index为图片在新上传图片中的顺序（从1开始）
+        const newUploadIndex = newUploadedImages.findIndex(item => item.index === index);
         return {
           isNewUploaded: true,
-          index: index + 1
+          index: newUploadIndex + 1
         };
       } else {
-        // 如果是缓存图片，isNewUploaded为false，index为缓存图片原先的页码（初始页码映射）
+        // 如果是缓存图片，isNewUploaded为false，index为缓存图片原先的页码
         return {
           isNewUploaded: false,
           index: image.originalPage
@@ -656,10 +629,7 @@ const handleSubmit = async () => {
     formData.append('pages', JSON.stringify(pagesData));
     
     // 添加新上传的文件（只添加新上传的文件，按照在galleryImages中的顺序添加）
-    const newUploadedImages = galleryImages.value
-      .filter(image => image.isNewUploaded);
-      
-    newUploadedImages.forEach(image => {
+    newUploadedImages.forEach(({ image }) => {
       if (image.file) {
         formData.append('files', image.file);
       }
@@ -723,9 +693,6 @@ const fetchGalleryData = async () => {
     await cacheAllImages(pageCount);
     
     // 保存初始页码映射（永远不变）
-    for (let i = 1; i <= pageCount; i++) {
-      initialPageMap.value[i] = i;
-    }
   } catch (error) {
     console.error('获取图集数据失败:', error);
     router.push({
