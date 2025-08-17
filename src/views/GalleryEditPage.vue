@@ -143,8 +143,8 @@
               />
               <img 
                 v-else
-                :src="getCachedImageUrl(`new_${image.uploadIndex}`)"
-                :alt="`新上传图片 ${image.uploadIndex}`"
+                :src="getCachedImageUrl(`new_${index + 1}`)"
+                :alt="`新上传图片 ${index + 1}`"
                 class="gallery-image"
               />
               <div class="image-overlay">
@@ -162,7 +162,7 @@
             </div>
             <div class="image-info">
               第 {{ image.page }} 页
-              <span v-if="image.isNewUploaded" class="new-tag">新({{ image.uploadIndex }})</span>
+              <span v-if="image.isNewUploaded" class="new-tag">新</span>
               <span v-else class="original-page-tag">原:{{ image.originalPage }}</span>
             </div>
           </div>
@@ -341,18 +341,19 @@ const removeImage = (index) => {
   
   // 如果是新上传的图片，清理对应的预览URL
   if (imageToRemove.isNewUploaded) {
-    const previewUrl = imageCache.value[`new_${imageToRemove.uploadIndex}`];
+    // 使用index+1作为缓存键名
+    const previewUrl = imageCache.value[`new_${index + 1}`];
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
-      delete imageCache.value[`new_${imageToRemove.uploadIndex}`];
+      delete imageCache.value[`new_${index + 1}`];
     }
   }
   // 注意：对于缓存图片，不删除imageCache中的内容，因为初始页码映射永远不变
   
   galleryImages.value.splice(index, 1);
   
-  // 只有在删除图片时才重新计算新上传图片的uploadIndex
-  recalculateNewUploadIndexes();
+  // 重新计算页码
+  recalculatePageNumbers();
   
   // 确保响应式更新
   galleryImages.value = [...galleryImages.value];
@@ -516,29 +517,30 @@ const recalculatePageNumbers = () => {
     image.page = index + 1;
   });
   
-  // 不再重新计算新上传图片的uploadIndex，保持其原始值不变
-  // 只需要更新新上传图片的缓存键名以匹配新的位置
+  // 更新新上传图片的缓存键名
+  const newUploadedImages = galleryImages.value
+    .map((image, index) => {
+      return {
+        image,
+        oldIndex: index, // 在数组中的旧索引
+        newIndex: index  // 在数组中的新索引（实际上与旧索引相同）
+      };
+    });
+  
+  // 由于图片顺序可能已经改变，需要更新所有新上传图片的缓存键名
+  newUploadedImages.forEach(({ image, oldIndex, newIndex }) => {
+    if (image.isNewUploaded) {
+      const oldKey = `new_${oldIndex + 1}`;
+      const newKey = `new_${newIndex + 1}`;
+      
+      if (imageCache.value[oldKey]) {
+        imageCache.value[newKey] = imageCache.value[oldKey];
+        delete imageCache.value[oldKey];
+      }
+    }
+  });
 };
 
-// 只在删除图片时重新计算新上传图片的索引
-const recalculateNewUploadIndexes = () => {
-  // 重新计算所有图片的显示页码
-  galleryImages.value.forEach((image, index) => {
-    // 更新显示页码
-    image.page = index + 1;
-  });
-  
-  // 获取所有新上传的图片
-  const newUploadedImages = galleryImages.value
-    .filter(image => image.isNewUploaded)
-    .sort((a, b) => a.uploadIndex - b.uploadIndex);
-  
-  // 更新新上传图片的uploadIndex
-  newUploadedImages.forEach((item, newIndex) => {
-    // 更新uploadIndex
-    item.uploadIndex = newIndex + 1;
-  });
-};
 
 // 处理文件选择
 const handleFileSelect = (event) => {
@@ -546,21 +548,19 @@ const handleFileSelect = (event) => {
   if (files.length > 0) {
     // 添加新文件到列表
     files.forEach(file => {
-      // 计算新上传图片的索引（全局唯一，不因删除而改变）
-      const totalNewUploads = galleryImages.value.filter(img => img.isNewUploaded).length;
-      const uploadIndex = totalNewUploads + 1;
-      
       galleryImages.value.push({
         file: file,
         isNewUploaded: true,
         page: galleryImages.value.length + 1,
-        originalPage: null, // 新上传的图片没有原始页码
-        uploadIndex: uploadIndex // 新上传图片的顺序索引（全局唯一）
+        originalPage: null // 新上传的图片没有原始页码
+        // 不再记录uploadIndex
       });
       
       // 为新上传的文件创建预览URL并存储在缓存中
       const previewUrl = URL.createObjectURL(file);
-      imageCache.value[`new_${uploadIndex}`] = previewUrl;
+      // 使用galleryImages的长度作为缓存键名
+      const cacheIndex = galleryImages.value.length;
+      imageCache.value[`new_${cacheIndex}`] = previewUrl;
     });
     
     // 重置文件输入
@@ -639,10 +639,10 @@ const handleSubmit = async () => {
     // 添加图片信息（按照要求的格式组织）
     const pagesData = galleryImages.value.map((image, index) => {
       if (image.isNewUploaded) {
-        // 如果是新增图片，isNewUploaded为true，index为新上传图片的顺序索引
+        // 如果是新增图片，isNewUploaded为true，index为图片在galleryImages中的顺序（从1开始）
         return {
           isNewUploaded: true,
-          index: image.uploadIndex
+          index: index + 1
         };
       } else {
         // 如果是缓存图片，isNewUploaded为false，index为缓存图片原先的页码（初始页码映射）
@@ -655,10 +655,9 @@ const handleSubmit = async () => {
     
     formData.append('pages', JSON.stringify(pagesData));
     
-    // 添加新上传的文件（只添加新上传的文件，按照uploadIndex顺序添加）
+    // 添加新上传的文件（只添加新上传的文件，按照在galleryImages中的顺序添加）
     const newUploadedImages = galleryImages.value
-      .filter(image => image.isNewUploaded)
-      .sort((a, b) => a.uploadIndex - b.uploadIndex);
+      .filter(image => image.isNewUploaded);
       
     newUploadedImages.forEach(image => {
       if (image.file) {
