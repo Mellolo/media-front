@@ -175,8 +175,10 @@
                   @click="removeFile(index)" 
                   class="remove-image-button"
                   title="移除图片"
+                  :disabled="isDeleting"
                 >
-                  删除
+                  <span v-if="!isDeleting">删除</span>
+                  <span v-else>删除中...</span>
                 </button>
               </div>
             </div>
@@ -254,6 +256,7 @@ const form = ref({
 const nameError = ref(false);
 const filesError = ref(false);
 const isDragging = ref(false);
+const isDeleting = ref(false);
 const fileInputRef = ref(null);
 
 // 显示演员预览
@@ -441,9 +444,20 @@ const triggerFileSelect = () => {
 
 // 移除选定的文件
 const removeFile = (index) => {
-  form.value.files.splice(index, 1);
-  // 确保响应式更新
-  form.value.files = [...form.value.files];
+  isDeleting.value = true; // 设置删除状态
+  try {
+    // 清理预览URL以释放内存
+    const fileToRemove = form.value.files[index];
+    if (fileToRemove) {
+      URL.revokeObjectURL(getImagePreviewUrl(fileToRemove));
+    }
+    
+    form.value.files.splice(index, 1);
+    // 确保响应式更新
+    form.value.files = [...form.value.files];
+  } finally {
+    isDeleting.value = false; // 重置删除状态
+  }
 };
 
 // 移动图片到新位置
@@ -829,29 +843,33 @@ onMounted(() => {
 /* 删除了冗余的 .files-info 类，因为它与 .file-selection-info 功能重复 */
 
 .remove-image-button {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid #ff4757;
-  color: #ff4757;
-  font-size: 16px;
-  font-weight: bold;
+  background: #ff4757;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
   cursor: pointer;
-  display: flex;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  z-index: 2;
+  min-width: 60px;
 }
 
 .remove-image-button:hover {
-  background: #ff4757;
-  color: white;
-  transform: scale(1.1);
+  background: #ff6b81;
+  transform: scale(1.05);
+}
+
+.remove-image-button:active {
+  transform: scale(0.95);
+}
+
+.remove-image-button:disabled {
+  background: #ff7f7f;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .file-selection-info {
