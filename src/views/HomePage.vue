@@ -1,6 +1,7 @@
 <template>
   <div class="home-page">
     <div class="home-header">
+      <h1>欢迎来到媒体站</h1>
       <router-link to="/actor/list" class="actor-list-button">
         演员列表
       </router-link>
