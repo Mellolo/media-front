@@ -1,5 +1,11 @@
 <template>
   <div class="home-page">
+    <div class="home-header">
+      <router-link to="/actor/list" class="actor-list-button">
+        演员列表
+      </router-link>
+    </div>
+    
     <!-- 视频推荐部分 -->
     <div class="recommendation-section">
       <div class="section-header">
@@ -137,15 +143,36 @@ onMounted(() => {
   margin: 0 auto;
 }
 
-.home-page h1 {
-  text-align: center;
-  color: #041004;
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 60px;
   margin-bottom: 30px;
+}
+
+.home-header h1 {
+  color: #041004;
+  margin: 0;
   font-size: 2rem;
 }
 
+.actor-list-button {
+  background: #43d6b4;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.actor-list-button:hover {
+  background: #38b8a0;
+  transform: translateY(-2px);
+}
+
 .recommendation-section {
-  margin-top: 60px;
   margin-bottom: 40px;
 }
 
@@ -156,6 +183,7 @@ onMounted(() => {
   margin-bottom: 20px;
   padding-bottom: 10px;
   border-bottom: 2px solid #43d6b4;
+  width: 1200px;
 }
 
 .section-header h2 {
