@@ -874,7 +874,6 @@ onMounted(() => {
 .remove-image-button:disabled {
   background: #ff7f7f;
   cursor: not-allowed;
-  transform: none;
 }
 
 .file-selection-info {
@@ -978,7 +977,6 @@ onMounted(() => {
 .remove-image-button:disabled {
   background: #ff7f7f;
   cursor: not-allowed;
-  transform: none;
 }
 
 .image-info {

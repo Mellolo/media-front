@@ -153,10 +153,8 @@
                   class="remove-image-button"
                   @click.stop="removeImage(index)"
                   :disabled="isDeleting"
-                  :class="{ 'deleting': isDeleting }"
                 >
-                  <span v-if="!isDeleting">删除</span>
-                  <span v-else>删除中...</span>
+                  {{ isDeleting ? '删除中...' : '删除' }}
                 </button>
               </div>
             </div>
@@ -1075,12 +1073,12 @@ const getCachedImageUrl = (page) => {
 }
 
 .remove-image-button.deleting {
-  background: #ff7f7f;
+  background: #ff4757;
   cursor: not-allowed;
 }
 
 .remove-image-button:disabled {
-  background: #ff7f7f;
+  background: #ff4757;
   cursor: not-allowed;
 }
 
