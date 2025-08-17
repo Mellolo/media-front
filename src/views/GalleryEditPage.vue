@@ -611,11 +611,10 @@ const handleSubmit = async () => {
     
     const pagesData = galleryImages.value.map((image, index) => {
       if (image.isNewUploaded) {
-        // 如果是新增图片，isNewUploaded为true，index为图片在新上传图片中的顺序（从1开始）
-        const newUploadIndex = newUploadedImages.findIndex(item => item.index === index);
+        // 如果是新增图片，isNewUploaded为true，index为空
         return {
           isNewUploaded: true,
-          index: newUploadIndex + 1
+          index: null
         };
       } else {
         // 如果是缓存图片，isNewUploaded为false，index为缓存图片原先的页码
