@@ -244,6 +244,11 @@ export default {
   background-color: rgba(0, 0, 0, 0.95) !important; /* 更高的透明度 */
 }
 
+/* 深度选择器确保子组件样式生效 */
+:deep(.current-image) {
+  cursor: zoom-in !important; /* 强制覆盖子组件样式 */
+}
+
 .no-images {
   display: flex;
   align-items: center;
@@ -399,9 +404,19 @@ export default {
   }
 }
 
+@media (max-width: 768px) {
+  .current-image {
+    cursor: zoom-in;
+  }
+}
+
 @media (max-width: 480px) {
   .current-image-container {
     height: 300px;
+  }
+  
+  .current-image {
+    cursor: zoom-in;
   }
   
   .nav-button {
