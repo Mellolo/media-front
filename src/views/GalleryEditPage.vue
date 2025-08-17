@@ -251,6 +251,9 @@ const originalGalleryData = ref(null);
 // 图集图片列表
 const galleryImages = ref([]);
 
+// 新上传的图片文件列表
+const uploadedFiles = ref([]);
+
 // 图片缓存对象，用于存储所有图片的Blob数据
 const imageCache = ref({});
 
@@ -339,12 +342,19 @@ const removeTag = (index) => {
 const removeImage = (index) => {
   const imageToRemove = galleryImages.value[index];
   
-  // 如果是新上传的图片，清理对应的预览URL
+  // 如果是新上传的图片，清理对应的预览URL和文件
   if (imageToRemove.isNewUploaded) {
     const previewUrl = imageCache.value[`new_${imageToRemove.uploadIndex}`];
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
       delete imageCache.value[`new_${imageToRemove.uploadIndex}`];
+    }
+    
+    // 从uploadedFiles中移除对应的文件
+    // 找到对应uploadIndex的文件在uploadedFiles中的位置
+    const fileIndex = imageToRemove.uploadIndex - 1;
+    if (fileIndex >= 0 && fileIndex < uploadedFiles.value.length) {
+      uploadedFiles.value.splice(fileIndex, 1);
     }
   }
   // 注意：对于缓存图片，不删除imageCache中的内容，因为初始页码映射永远不变
@@ -528,33 +538,30 @@ const recalculateNewUploadIndexes = () => {
     image.page = index + 1;
   });
   
-  // 重新计算新上传图片的uploadIndex（只在删除时）
+  // 获取所有新上传的图片
   const newUploadedImages = galleryImages.value
     .filter(image => image.isNewUploaded)
-    .map((image, index) => {
-      return {
-        image,
-        oldUploadIndex: image.uploadIndex,
-        newUploadIndex: index + 1
-      };
-    });
+    .sort((a, b) => a.uploadIndex - b.uploadIndex);
   
-  // 更新新上传图片的uploadIndex和缓存键名
-  newUploadedImages.forEach(({ image, oldUploadIndex, newUploadIndex }) => {
+  // 创建新的文件列表
+  const newUploadedFiles = [];
+  
+  // 更新新上传图片的uploadIndex并重建文件列表
+  newUploadedImages.forEach((item, newIndex) => {
     // 更新uploadIndex
-    image.uploadIndex = newUploadIndex;
+    item.uploadIndex = newIndex + 1;
     
-    // 更新缓存键名
-    if (oldUploadIndex !== newUploadIndex) {
-      const oldKey = `new_${oldUploadIndex}`;
-      const newKey = `new_${newUploadIndex}`;
-      
-      if (imageCache.value[oldKey]) {
-        imageCache.value[newKey] = imageCache.value[oldKey];
-        delete imageCache.value[oldKey];
-      }
+    // 找到对应的文件在原始文件列表中的位置
+    const oldFileIndex = item.uploadIndex - 1;
+    
+    // 如果文件存在于原始文件列表中
+    if (oldFileIndex >= 0 && oldFileIndex < uploadedFiles.value.length) {
+      newUploadedFiles.push(uploadedFiles.value[oldFileIndex]);
     }
   });
+  
+  // 更新文件列表
+  uploadedFiles.value = newUploadedFiles;
 };
 
 // 处理文件选择
@@ -568,12 +575,14 @@ const handleFileSelect = (event) => {
       const uploadIndex = totalNewUploads + 1;
       
       galleryImages.value.push({
-        file: file,
         isNewUploaded: true,
         page: galleryImages.value.length + 1,
         originalPage: null, // 新上传的图片没有原始页码
         uploadIndex: uploadIndex // 新上传图片的顺序索引（全局唯一）
       });
+      
+      // 将新上传的文件存储到uploadedFiles数组中
+      uploadedFiles.value.push(file);
       
       // 为新上传的文件创建预览URL并存储在缓存中
       const previewUrl = URL.createObjectURL(file);
@@ -607,6 +616,9 @@ const resetForm = () => {
       initialPageMap.value[i] = galleryImages.value[i - 1].originalPage || i;
     }
   }
+  
+  // 清空上传的文件列表
+  uploadedFiles.value = [];
   
   // 清空搜索相关状态
   tagInput.value = '';
@@ -673,11 +685,8 @@ const handleSubmit = async () => {
     formData.append('pages', JSON.stringify(pagesData));
     
     // 添加新上传的文件（只添加新上传的文件，按照在新上传文件列表中的位置添加）
-    const newUploadedImages = galleryImages.value.filter(image => image.isNewUploaded);
-    newUploadedImages.forEach(image => {
-      if (image.file) {
-        formData.append('files', image.file);
-      }
+    uploadedFiles.value.forEach(file => {
+      formData.append('files', file);
     });
     
     // 发送更新请求
