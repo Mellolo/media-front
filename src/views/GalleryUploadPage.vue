@@ -440,27 +440,33 @@ const triggerFileSelect = () => {
 const removeFile = (index) => {
   isDeleting.value = true; // 设置删除状态
   
-  try {
-    // 清理预览URL以释放内存
-    const fileToRemove = form.value.files[index];
-    if (fileToRemove) {
-      URL.revokeObjectURL(getImagePreviewUrl(fileToRemove));
+  // 给要删除的图片添加视觉效果
+  dragState.draggingIndex = index;
+  
+  // 添加延迟让用户能看到视觉效果
+  setTimeout(() => {
+    try {
+      // 清理预览URL以释放内存
+      const fileToRemove = form.value.files[index];
+      if (fileToRemove) {
+        URL.revokeObjectURL(getImagePreviewUrl(fileToRemove));
+      }
+      
+      form.value.files.splice(index, 1);
+      // 确保响应式更新
+      form.value.files = [...form.value.files];
+    } finally {
+      isDeleting.value = false; // 重置删除状态
+      
+      // 清理所有拖拽相关的样式类，防止显示异常
+      setTimeout(() => {
+        // 重置拖拽状态
+        dragState.draggingIndex = null;
+        dragState.targetIndex = null;
+        dragState.dragOverIndex = null;
+      }, 0);
     }
-    
-    form.value.files.splice(index, 1);
-    // 确保响应式更新
-    form.value.files = [...form.value.files];
-  } finally {
-    isDeleting.value = false; // 重置删除状态
-    
-    // 清理所有拖拽相关的样式类，防止显示异常
-    setTimeout(() => {
-      // 重置拖拽状态
-      dragState.draggingIndex = null;
-      dragState.targetIndex = null;
-      dragState.dragOverIndex = null;
-    }, 0);
-  }
+  }, 300); // 延迟300毫秒执行实际删除操作
 };
 
 // 移动图片到新位置
