@@ -16,7 +16,7 @@
           v-else
           :videos="recommendedVideos" 
           :loading="false"
-          :items-per-page="4"
+          :items-per-page="10"
           class="recommend-list"
         />
       </div>
@@ -38,7 +38,7 @@
           v-else
           :galleries="recommendedGalleries"
           :loading="false"
-          :items-per-page="4"
+          :items-per-page="10"
           :show-pagination="false"
           class="recommend-list"
         />
