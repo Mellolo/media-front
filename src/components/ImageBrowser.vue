@@ -232,6 +232,7 @@ export default {
   max-height: 100%;
   object-fit: contain;
   display: block;
+  height: 400px;
 }
 
 .image-placeholder {
@@ -359,7 +360,7 @@ export default {
 
 @media (max-width: 480px) {
   .current-image-container {
-    min-height: 300px;
+    height: 300px;
   }
   
   .nav-button {
