@@ -19,6 +19,7 @@
           class="current-image"
           @load="onImageLoad"
           @error="onImageError"
+          @click="showLightbox"
         >
         <div v-else class="image-placeholder">
           加载中...
@@ -49,7 +50,7 @@
         
         <button 
           class="nav-button next-button"
-          :disabled="currentIndex === images.length - 1"
+          :disabled="currentIndex >= images.length - 1"
           @click="nextImage"
         >
           下一张
@@ -58,29 +59,41 @@
       
       <!-- 缩略图列表 -->
       <div class="thumbnail-list">
-        <div 
-          v-for="(image, index) in images" 
+        <div
+          v-for="(image, index) in images"
           :key="index"
           class="thumbnail-item"
           :class="{ active: index === currentIndex }"
           @click="setCurrentImage(index)"
         >
           <img 
-            :src="image.thumb" 
+            :src="image.src" 
             :alt="`缩略图 ${index + 1}`"
             @error="onThumbnailError(index, $event)"
           >
         </div>
       </div>
     </div>
+    
+    <!-- 图片放大查看器 -->
+    <VueEasyLightbox
+      :visible="visible"
+      :imgs="lightboxImages"
+      :index="currentIndex"
+      @hide="hideLightbox"
+    />
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import VueEasyLightbox from 'vue-easy-lightbox';
 
 export default {
   name: 'ImageBrowser',
+  components: {
+    VueEasyLightbox
+  },
   props: {
     images: {
       type: Array,
@@ -96,28 +109,34 @@ export default {
     const imageBrowserRef = ref(null);
     const currentIndex = ref(props.initialIndex);
     const imageLoadError = ref(false);
-    
-    // 当前显示的图片
+    const visible = ref(false); // 控制图片放大查看器的显示状态
+
+    // 计算当前图片
     const currentImage = computed(() => {
       return props.images[currentIndex.value];
     });
-    
+
+    // 计算用于放大查看的图片列表
+    const lightboxImages = computed(() => {
+      return props.images.map(image => image.src);
+    });
+
     // 图片加载成功处理
     const onImageLoad = () => {
       imageLoadError.value = false;
     };
-    
+
     // 图片加载失败处理
     const onImageError = () => {
       imageLoadError.value = true;
     };
-    
+
     // 缩略图加载失败处理
     const onThumbnailError = (index, event) => {
       // 可以在这里处理缩略图加载失败的情况
       console.warn(`缩略图 ${index + 1} 加载失败`);
     };
-    
+
     // 设置当前图片
     const setCurrentImage = (index) => {
       if (index >= 0 && index < props.images.length) {
@@ -126,30 +145,43 @@ export default {
         emit('update-current-index', index);
       }
     };
-    
+
     // 上一张图片
     const prevImage = () => {
       if (currentIndex.value > 0) {
         setCurrentImage(currentIndex.value - 1);
       }
     };
-    
+
     // 下一张图片
     const nextImage = () => {
       if (currentIndex.value < props.images.length - 1) {
         setCurrentImage(currentIndex.value + 1);
       }
     };
-    
+
+    // 显示图片放大查看器
+    const showLightbox = () => {
+      visible.value = true;
+    };
+
+    // 关闭图片放大查看器
+    const hideLightbox = () => {
+      visible.value = false;
+    };
+
     // 键盘事件处理
     const handleKeyDown = (event) => {
       if (event.key === 'ArrowLeft') {
         prevImage();
       } else if (event.key === 'ArrowRight') {
         nextImage();
+      } else if (event.key === 'Escape' && visible.value) {
+        // 按ESC键关闭放大查看器
+        hideLightbox();
       }
     };
-    
+
     // 监听images变化，重置currentIndex
     watch(() => props.images, (newImages) => {
       if (newImages.length > 0) {
@@ -162,33 +194,37 @@ export default {
       }
       imageLoadError.value = false;
     });
-    
+
     // 监听currentIndex变化
     watch(currentIndex, (newIndex) => {
       emit('update-current-index', newIndex);
     });
-    
+
     onMounted(() => {
       // 添加键盘事件监听
       window.addEventListener('keydown', handleKeyDown);
     });
-    
+
     onUnmounted(() => {
       // 移除键盘事件监听
       window.removeEventListener('keydown', handleKeyDown);
     });
-    
+
     return {
       imageBrowserRef,
       currentIndex,
       currentImage,
       imageLoadError,
+      visible,
+      lightboxImages,
       onImageLoad,
       onImageError,
       onThumbnailError,
       setCurrentImage,
       prevImage,
-      nextImage
+      nextImage,
+      showLightbox,
+      hideLightbox
     };
   }
 };
