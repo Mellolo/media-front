@@ -349,6 +349,18 @@ const removeImage = (index) => {
   
   // 确保响应式更新
   galleryImages.value = [...galleryImages.value];
+  
+  // 清理所有拖拽相关的样式类，防止显示异常
+  setTimeout(() => {
+    const imageItems = document.querySelectorAll('.gallery-image-item');
+    imageItems.forEach(item => {
+      item.classList.remove('drag-over', 'dragging');
+    });
+    
+    // 重置拖拽状态
+    dragState.draggingIndex = null;
+    dragState.dragOverIndex = null;
+  }, 0);
 };
 
 // 获取图片预览URL
