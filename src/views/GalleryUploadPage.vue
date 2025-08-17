@@ -112,45 +112,9 @@
       <div class="form-group">
         <label for="galleryFiles">选择图片文件 *</label>
         <div 
-          class="file-dropzone"
-          :class="{ 'file-dropzone-active': isDragging }"
-          @dragover.prevent="handleDragOver"
-          @dragenter.prevent="handleDragEnter"
-          @dragleave.prevent="handleDragLeave"
-          @drop.prevent="handleDrop"
-          @click="triggerFileSelect"
+          v-if="form.files.length > 0" 
+          class="image-preview-container"
         >
-          <input 
-            type="file" 
-            id="galleryFiles"
-            ref="fileInputRef"
-            @change="handleFileChange" 
-            accept="image/*"
-            class="form-file"
-            :class="{ 'input-error': filesError }"
-            multiple
-          />
-          <div class="dropzone-content">
-            <div class="dropzone-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#43d6b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-            </div>
-            <div class="dropzone-text">
-              <span v-if="form.files.length === 0">拖拽图片文件到此区域或点击选择</span>
-              <span v-else>拖拽图片文件到此区域或点击添加更多</span>
-            </div>
-          </div>
-        </div>
-        <div v-if="filesError" class="error-message">请选择至少一张图片</div>
-        <div v-if="form.files.length > 0" class="file-selection-info">
-          已选择 {{ form.files.length }} 张图片
-        </div>
-        
-        <!-- 图片预览区域 -->
-        <div v-if="form.files.length > 0" class="image-preview-container">
           <div 
             v-for="(file, index) in form.files" 
             :key="index"
@@ -190,6 +154,45 @@
               第 {{ index + 1 }} 页
             </div>
           </div>
+          
+          <div class="upload-new-images">
+            <label class="upload-label">
+              <input 
+                type="file" 
+                ref="fileInputRef"
+                @change="handleFileChange"
+                accept="image/*"
+                multiple
+                class="file-input"
+              />
+              <div class="upload-placeholder">
+                <span class="plus-icon">+</span>
+                <span>上传新图片</span>
+              </div>
+            </label>
+          </div>
+        </div>
+        
+        <div v-else class="upload-new-images">
+          <label class="upload-label">
+            <input 
+              type="file" 
+              ref="fileInputRef"
+              @change="handleFileChange"
+              accept="image/*"
+              multiple
+              class="file-input"
+            />
+            <div class="upload-placeholder">
+              <span class="plus-icon">+</span>
+              <span>上传新图片</span>
+            </div>
+          </label>
+        </div>
+        
+        <div v-if="filesError" class="error-message">请选择至少一张图片</div>
+        <div v-if="form.files.length > 0" class="file-selection-info">
+          已选择 {{ form.files.length }} 张图片
         </div>
       </div>
       
@@ -896,14 +899,6 @@ onMounted(() => {
   transition: all 0.3s ease;
 }
 
-.gallery-image-item.drag-over {
-  transform: scale(1.08);
-  box-shadow: 0 0 20px rgba(67, 214, 180, 0.6);
-  z-index: 999;
-  border: 2px dashed #43d6b4;
-  background-color: #f0fbf7;
-  transition: all 0.3s ease;
-}
 
 .image-wrapper {
   position: relative;
@@ -956,16 +951,11 @@ onMounted(() => {
 }
 
 .remove-image-button:hover {
-  background: #ff6b81;
-  transform: scale(1.05);
-}
-
-.remove-image-button:active {
-  transform: scale(0.95);
+  background: #ff4757;
 }
 
 .remove-image-button:disabled {
-  background: #ff7f7f;
+  background: #ff4757;
   cursor: not-allowed;
 }
 
@@ -974,6 +964,70 @@ onMounted(() => {
   margin-top: 8px;
   font-size: 14px;
   color: #666;
+}
+
+.upload-new-images {
+  width: 150px;
+  height: 200px;
+}
+
+.upload-label {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-placeholder {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed #e1e1e1;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  transition: all 0.3s ease;
+}
+
+.upload-placeholder:hover {
+  border-color: #43d6b4;
+  color: #43d6b4;
+}
+
+.plus-icon {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.remove-image-button {
+  background: #ff4757;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+}
+
+.remove-image-button:hover {
+  background: #ff4757;
+}
+
+.remove-image-button:disabled {
+  background: #ff4757;
+  cursor: not-allowed;
 }
 
 .form-actions {
@@ -1048,54 +1102,6 @@ onMounted(() => {
   color: #333;
 }
 
-/* 文件拖拽区域样式 */
-.file-dropzone {
-  position: relative;
-  width: 100%;
-  min-height: 200px;
-  border: 2px dashed #e1e1e1;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #fafafa;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  margin-bottom: 15px;
-  overflow: hidden;
-}
-
-.file-dropzone:hover {
-  border-color: #43d6b4;
-  background-color: #f0f9f7;
-}
-
-.file-dropzone.file-dropzone-active {
-  border-color: #43d6b4;
-  background-color: #e1f7f0;
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(67, 214, 180, 0.3);
-}
-
-.dropzone-content {
-  text-align: center;
-  color: #666;
-  padding: 20px;
-}
-
-.dropzone-icon {
-  margin-bottom: 15px;
-}
-
-.dropzone-text {
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-.dropzone-text strong {
-  color: #43d6b4;
-  font-weight: 600;
-}
 
 /* 错误消息样式 */
 .error-message {
@@ -1103,6 +1109,137 @@ onMounted(() => {
   font-size: 14px;
   margin-top: 5px;
   text-align: left;
+}
+
+.image-preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.gallery-image-item {
+  width: 150px;
+  position: relative;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: move;
+}
+
+.gallery-image-item.dragging {
+  opacity: 0.7;
+  transform: scale(0.93);
+  z-index: 1000;
+  box-shadow: 0 5px 15px rgba(67, 214, 180, 0.4);
+  transition: all 0.3s ease;
+}
+
+.gallery-image-item.drag-over {
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(67, 214, 180, 0.6);
+  z-index: 999;
+  border: 2px dashed #43d6b4;
+  background-color: #f0fbf7;
+  transition: all 0.3s ease;
+}
+
+.image-wrapper {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e1e1e1;
+  transition: border-color 0.3s ease;
+}
+
+.gallery-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.image-wrapper:hover .image-overlay {
+  opacity: 1;
+}
+
+.upload-new-images {
+  width: 150px;
+  height: 200px;
+}
+
+.upload-label {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-placeholder {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed #e1e1e1;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  transition: all 0.3s ease;
+}
+
+.upload-placeholder:hover {
+  border-color: #43d6b4;
+  color: #43d6b4;
+}
+
+.plus-icon {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.remove-image-button {
+  background: #ff4757;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+}
+
+.remove-image-button:hover {
+  background: #ff4757;
+}
+
+.remove-image-button:disabled {
+  background: #ff4757;
+  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {
