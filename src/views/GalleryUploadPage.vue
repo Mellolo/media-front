@@ -155,6 +155,10 @@
             v-for="(file, index) in form.files" 
             :key="index"
             class="gallery-image-item"
+            :class="{
+              'dragging': dragState.draggingIndex === index,
+              'drag-over': dragState.dragOverIndex === index
+            }"
             draggable="true"
             @dragstart="dragStart(index, $event)"
             @dragover.prevent="dragOver(index, $event)"
@@ -346,8 +350,8 @@ const dragState = reactive({
 const dragStart = (index, event) => {
   dragState.draggingIndex = index;
   event.dataTransfer.effectAllowed = 'move';
-  // 添加拖拽样式
-  event.target.classList.add('dragging');
+  // 设置拖拽数据（用于兼容某些浏览器）
+  event.dataTransfer.setData('text/plain', index);
 };
 
 // 拖拽经过
@@ -359,29 +363,18 @@ const dragOver = (index, event) => {
 // 拖拽进入
 const dragEnter = (index, event) => {
   event.preventDefault();
-  // 添加拖拽目标样式
-  if (index !== dragState.draggingIndex) {
-    event.target.classList.add('drag-over');
-  }
+  // 拖拽目标样式现在通过动态类绑定处理
 };
 
 // 拖拽离开
 const dragLeave = (index, event) => {
-  // 移除拖拽目标样式
-  event.target.classList.remove('drag-over');
+  // 拖拽目标样式现在通过动态类绑定处理
 };
 
 // 放置
 const drop = (index, event) => {
   event.preventDefault();
   dragState.targetIndex = index;
-  
-  // 移除所有拖拽样式
-  const previewItems = document.querySelectorAll('.gallery-image-item');
-  previewItems.forEach(item => {
-    item.classList.remove('drag-over');
-    item.classList.remove('dragging');
-  });
   
   // 执行图片位置移动
   if (dragState.draggingIndex !== null && dragState.targetIndex !== null && 
@@ -397,13 +390,6 @@ const drop = (index, event) => {
 
 // 拖拽结束
 const dragEnd = (event) => {
-  // 移除所有拖拽样式
-  const previewItems = document.querySelectorAll('.gallery-image-item');
-  previewItems.forEach(item => {
-    item.classList.remove('drag-over');
-    item.classList.remove('dragging');
-  });
-  
   // 重置拖拽状态
   dragState.draggingIndex = null;
   dragState.targetIndex = null;
@@ -450,6 +436,7 @@ const triggerFileSelect = () => {
 // 移除选定的文件
 const removeFile = (index) => {
   isDeleting.value = true; // 设置删除状态
+  
   try {
     // 清理预览URL以释放内存
     const fileToRemove = form.value.files[index];
@@ -462,6 +449,14 @@ const removeFile = (index) => {
     form.value.files = [...form.value.files];
   } finally {
     isDeleting.value = false; // 重置删除状态
+    
+    // 清理所有拖拽相关的样式类，防止显示异常
+    setTimeout(() => {
+      // 重置拖拽状态
+      dragState.draggingIndex = null;
+      dragState.targetIndex = null;
+      dragState.dragOverIndex = null;
+    }, 0);
   }
 };
 
