@@ -19,7 +19,7 @@
             </div>
             
             <!-- 操作按钮 -->
-            <div class="action-buttons">
+            <div class="action-buttons" v-if="userLoginStatus.loggedIn">
               <button @click="goToEditPage" class="edit-button">编辑演员信息</button>
               <button @click="deleteActor" class="delete-button">删除演员</button>
             </div>
@@ -78,6 +78,22 @@ const actor = ref({
   galleries: [] // 添加图集数据字段
 });
 
+// 用户登录状态
+const userLoginStatus = ref({
+  loggedIn: false
+});
+
+// 检查用户登录状态
+const checkLoginStatus = async () => {
+  try {
+    const response = await api.get('/user/login/status');
+    userLoginStatus.value.loggedIn = response.data.data.loggedIn;
+  } catch (error) {
+    console.error('检查登录状态失败:', error);
+    userLoginStatus.value.loggedIn = false;
+  }
+};
+
 // 图片时间戳，用于刷新缓存
 const imageTimestamp = ref(Date.now());
 
@@ -119,9 +135,10 @@ const deleteActor = async () => {
   }
 };
 
-// 组件挂载时获取演员信息
+// 组件挂载时获取演员信息和检查登录状态
 onMounted(() => {
   fetchActorInfo();
+  checkLoginStatus(); // 检查用户登录状态
 });
 
 // 监听路由变化，如果查询参数中有时间戳，则刷新数据
