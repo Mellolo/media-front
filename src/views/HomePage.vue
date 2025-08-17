@@ -1,7 +1,5 @@
 <template>
   <div class="home-page">
-    <h1>欢迎来到媒体推荐中心</h1>
-    
     <!-- 视频推荐部分 -->
     <div class="recommendation-section">
       <div class="section-header">
@@ -13,6 +11,7 @@
       <div class="recommendation-content">
         <div v-if="videoLoading" class="loading">加载中...</div>
         <div v-else-if="videoError" class="error">加载失败: {{ videoError }}</div>
+        <div v-else-if="recommendedVideos.length === 0" class="no-data">暂无推荐视频</div>
         <VideoList 
           v-else
           :videos="recommendedVideos" 
@@ -34,6 +33,7 @@
       <div class="recommendation-content">
         <div v-if="galleryLoading" class="loading">加载中...</div>
         <div v-else-if="galleryError" class="error">加载失败: {{ galleryError }}</div>
+        <div v-else-if="recommendedGalleries.length === 0" class="no-data">暂无推荐图集</div>
         <GalleryList 
           v-else
           :galleries="recommendedGalleries"
@@ -69,11 +69,25 @@ const fetchRecommendedVideo = async () => {
   videoError.value = null
   try {
     const response = await api.get('/video/recommend')
-    // 将单个推荐视频放入数组中
-    recommendedVideos.value = [response.data.data]
+    // 检查响应数据结构并正确处理
+    if (response.data && response.data.data) {
+      // 确保数据是数组格式
+      let videos = []
+      if (Array.isArray(response.data.data)) {
+        videos = response.data.data
+      } else {
+        // 如果是单个对象，放入数组中
+        videos = [response.data.data]
+      }
+      // 限制最多显示4个推荐视频
+      recommendedVideos.value = videos.slice(0, 4)
+    } else {
+      recommendedVideos.value = []
+    }
   } catch (error) {
     console.error('获取推荐视频失败:', error)
     videoError.value = error.message || '获取推荐视频失败'
+    recommendedVideos.value = []
   } finally {
     videoLoading.value = false
   }
@@ -85,11 +99,25 @@ const fetchRecommendedGallery = async () => {
   galleryError.value = null
   try {
     const response = await api.get('/gallery/recommend')
-    // 将单个推荐图集放入数组中
-    recommendedGalleries.value = [response.data.data]
+    // 检查响应数据结构并正确处理
+    if (response.data && response.data.data) {
+      // 确保数据是数组格式
+      let galleries = []
+      if (Array.isArray(response.data.data)) {
+        galleries = response.data.data
+      } else {
+        // 如果是单个对象，放入数组中
+        galleries = [response.data.data]
+      }
+      // 限制最多显示4个推荐图集
+      recommendedGalleries.value = galleries.slice(0, 4)
+    } else {
+      recommendedGalleries.value = []
+    }
   } catch (error) {
     console.error('获取推荐图集失败:', error)
     galleryError.value = error.message || '获取推荐图集失败'
+    recommendedGalleries.value = []
   } finally {
     galleryLoading.value = false
   }
@@ -117,6 +145,7 @@ onMounted(() => {
 }
 
 .recommendation-section {
+  margin-top: 60px;
   margin-bottom: 40px;
 }
 
@@ -154,7 +183,7 @@ onMounted(() => {
   min-height: 200px;
 }
 
-.loading, .error {
+.loading, .error, .no-data {
   text-align: center;
   padding: 40px 20px;
   color: #666;
