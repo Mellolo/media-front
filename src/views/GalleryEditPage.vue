@@ -182,6 +182,7 @@
             </label>
           </div>
         </div>
+        <div v-if="imagesError" class="error-message">图集至少需要包含一张图片</div>
       </div>
       
       <div class="form-actions">
@@ -261,6 +262,7 @@ const form = ref({
 
 // 表单验证错误状态
 const nameError = ref(false);
+const imagesError = ref(false);
 
 // 显示演员预览
 const showActorPreview = (event, actor) => {
@@ -573,6 +575,7 @@ const resetForm = () => {
   actorSearchKeyword.value = '';
   actorSearchResults.value = [];
   nameError.value = false;
+  imagesError.value = false;
   
   // 重置文件输入
   if (fileInput.value) {
@@ -588,9 +591,10 @@ const resetForm = () => {
 const handleSubmit = async () => {
   // 重置错误状态
   nameError.value = !form.value.name.trim();
+  imagesError.value = galleryImages.value.length === 0;
   
-  // 如果有必填字段错误，不提交表单
-  if (nameError.value) {
+  // 如果有必填字段错误或没有图片，不提交表单
+  if (nameError.value || imagesError.value) {
     return;
   }
   
