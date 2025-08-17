@@ -79,8 +79,8 @@ const fetchRecommendedVideo = async () => {
         // 如果是单个对象，放入数组中
         videos = [response.data.data]
       }
-      // 限制最多显示4个推荐视频
-      recommendedVideos.value = videos.slice(0, 4)
+      // 限制最多显示10个推荐视频
+      recommendedVideos.value = videos.slice(0, 10)
     } else {
       recommendedVideos.value = []
     }
@@ -109,8 +109,8 @@ const fetchRecommendedGallery = async () => {
         // 如果是单个对象，放入数组中
         galleries = [response.data.data]
       }
-      // 限制最多显示4个推荐图集
-      recommendedGalleries.value = galleries.slice(0, 4)
+      // 限制最多显示10个推荐图集
+      recommendedGalleries.value = galleries.slice(0, 10)
     } else {
       recommendedGalleries.value = []
     }
