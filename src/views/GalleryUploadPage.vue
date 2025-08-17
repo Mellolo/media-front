@@ -863,16 +863,11 @@ onMounted(() => {
 }
 
 .remove-image-button:hover {
-  background: #ff6b81;
-  transform: scale(1.05);
-}
-
-.remove-image-button:active {
-  transform: scale(0.95);
+  background: #ff4757;
 }
 
 .remove-image-button:disabled {
-  background: #ff7f7f;
+  background: #ff4757;
   cursor: not-allowed;
 }
 
