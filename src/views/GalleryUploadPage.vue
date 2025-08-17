@@ -143,10 +143,8 @@
                   @click="removeFile(index)" 
                   class="remove-image-button"
                   title="移除图片"
-                  :disabled="isDeleting"
                 >
-                  <span v-if="!isDeleting">删除</span>
-                  <span v-else>删除中...</span>
+                  删除
                 </button>
               </div>
             </div>
@@ -438,12 +436,10 @@ const triggerFileSelect = () => {
 
 // 移除选定的文件
 const removeFile = (index) => {
-  isDeleting.value = true; // 设置删除状态
-  
   // 给要删除的图片添加视觉效果
   dragState.draggingIndex = index;
   
-  // 添加延迟让用户能看到视觉效果
+  // 添加短暂延迟让用户能看到视觉效果，然后执行删除
   setTimeout(() => {
     try {
       // 清理预览URL以释放内存
@@ -456,8 +452,6 @@ const removeFile = (index) => {
       // 确保响应式更新
       form.value.files = [...form.value.files];
     } finally {
-      isDeleting.value = false; // 重置删除状态
-      
       // 清理所有拖拽相关的样式类，防止显示异常
       setTimeout(() => {
         // 重置拖拽状态
@@ -466,7 +460,7 @@ const removeFile = (index) => {
         dragState.dragOverIndex = null;
       }, 0);
     }
-  }, 300); // 延迟300毫秒执行实际删除操作
+  }, 150); // 缩短延迟到150毫秒
 };
 
 // 移动图片到新位置
