@@ -239,6 +239,11 @@ export default {
   background-color: #000;
 }
 
+/* 调整图片放大后的背景透明度 */
+:deep(.vel-modal) {
+  background-color: rgba(0, 0, 0, 0.95) !important; /* 更高的透明度 */
+}
+
 .no-images {
   display: flex;
   align-items: center;
@@ -260,7 +265,7 @@ export default {
   align-items: center;
   justify-content: center;
   position: relative;
-  min-height: 400px;
+  height: 500px;
 }
 
 .current-image {
@@ -412,5 +417,12 @@ export default {
     width: 60px;
     height: 60px;
   }
+}
+</style>
+
+<!-- 全局样式，用于修改VueEasyLightbox的背景透明度 -->
+<style>
+.vel-modal {
+  background: rgba(0, 0, 0, 0.9) !important; /* 更低的透明度（更暗） */
 }
 </style>
