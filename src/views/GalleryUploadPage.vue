@@ -377,7 +377,7 @@ const drop = (index, event) => {
   dragState.targetIndex = index;
   
   // 移除所有拖拽样式
-  const previewItems = document.querySelectorAll('.image-preview-item');
+  const previewItems = document.querySelectorAll('.gallery-image-item');
   previewItems.forEach(item => {
     item.classList.remove('drag-over');
     item.classList.remove('dragging');
@@ -388,12 +388,17 @@ const drop = (index, event) => {
       dragState.draggingIndex !== dragState.targetIndex) {
     moveFile(dragState.draggingIndex, dragState.targetIndex);
   }
+  
+  // 重置拖拽状态
+  dragState.draggingIndex = null;
+  dragState.targetIndex = null;
+  dragState.dragOverIndex = null;
 };
 
 // 拖拽结束
 const dragEnd = (event) => {
   // 移除所有拖拽样式
-  const previewItems = document.querySelectorAll('.image-preview-item');
+  const previewItems = document.querySelectorAll('.gallery-image-item');
   previewItems.forEach(item => {
     item.classList.remove('drag-over');
     item.classList.remove('dragging');
