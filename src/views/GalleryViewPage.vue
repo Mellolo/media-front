@@ -14,7 +14,7 @@
       <div class="gallery-header">
         <h1 class="gallery-name">{{ galleryData.name }}</h1>
         <!-- 编辑和删除按钮 -->
-        <div class="header-actions">
+        <div class="header-actions" v-if="userLoginStatus.loggedIn">
           <button @click="editGallery" class="edit-button">编辑图集</button>
           <button @click="deleteGallery" class="delete-button">删除图集</button>
         </div>
@@ -98,6 +98,22 @@ export default {
     const images = ref([]);
     const initialIndex = ref(0);
     const currentIndex = ref(0);
+    
+    // 用户登录状态
+    const userLoginStatus = ref({
+      loggedIn: false
+    });
+    
+    // 检查用户登录状态
+    const checkLoginStatus = async () => {
+      try {
+        const response = await api.get('/user/login/status');
+        userLoginStatus.value.loggedIn = response.data.data.loggedIn;
+      } catch (error) {
+        console.error('检查登录状态失败:', error);
+        userLoginStatus.value.loggedIn = false;
+      }
+    };
     
     // 演员封面预览状态
     const actorPreview = reactive({
@@ -195,6 +211,7 @@ export default {
     
     onMounted(() => {
       fetchGalleryData();
+      checkLoginStatus(); // 检查用户登录状态
     });
     
     return {
@@ -211,7 +228,8 @@ export default {
       showActorPreview,
       clearActorPreview,
       deleteGallery,
-      editGallery
+      editGallery,
+      userLoginStatus // 暴露用户登录状态给模板
     };
   }
 };

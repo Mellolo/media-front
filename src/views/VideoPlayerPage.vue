@@ -14,7 +14,7 @@
       <div class="video-header">
         <h1 class="video-name">{{ videoData.name }}</h1>
         <!-- 编辑和删除按钮 -->
-        <div class="header-actions">
+        <div class="header-actions" v-if="userLoginStatus.loggedIn">
           <button @click="editVideo" class="edit-button">编辑视频</button>
           <button @click="deleteVideo" class="delete-button">删除视频</button>
         </div>
@@ -93,6 +93,22 @@ export default {
     const loading = ref(true);
     const error = ref(null);
     
+    // 用户登录状态
+    const userLoginStatus = ref({
+      loggedIn: false
+    });
+    
+    // 检查用户登录状态
+    const checkLoginStatus = async () => {
+      try {
+        const response = await api.get('/user/login/status');
+        userLoginStatus.value.loggedIn = response.data.data.loggedIn;
+      } catch (error) {
+        console.error('检查登录状态失败:', error);
+        userLoginStatus.value.loggedIn = false;
+      }
+    };
+    
     // 演员封面预览状态
     const actorPreview = reactive({
       visible: false,
@@ -168,6 +184,7 @@ export default {
     
     onMounted(() => {
       fetchVideoData();
+      checkLoginStatus(); // 检查用户登录状态
     });
     
     return {
@@ -182,7 +199,8 @@ export default {
       showActorPreview,
       clearActorPreview,
       editVideo,
-      deleteVideo
+      deleteVideo,
+      userLoginStatus // 暴露用户登录状态给模板
     };
   }
 };
