@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  media-front:
+    build: .
+    ports:
+      - "9980:9980"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    # 如果需要挂载卷以支持热更新，可以取消下面的注释
+    # volumes:
+    #   - ./dist:/app/dist
