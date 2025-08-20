@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # 安装所有依赖（包括开发依赖）
-RUN npm ci --registry https://registry.npmmirror.com
+RUN npm ci
 
 # 复制项目源代码
 COPY . .
