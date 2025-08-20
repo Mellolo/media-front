@@ -33,11 +33,17 @@
                   placeholder="搜索演员"
                   class="filter-input"
                 />
-                <div v-if="actorSearchResults.length > 0" class="search-results">
+                <div 
+                  v-if="actorSearchResults.length > 0" 
+                  class="search-results"
+                  ref="searchResultsRef"
+                >
                   <div
                     v-for="actor in actorSearchResults"
                     :key="actor.id"
                     class="search-result-item"
+                    @mouseenter="event => showActorPreview(event, actor)"
+                    @mouseleave="hideActorPreview"
                     @click="selectActor(actor)"
                   >
                     {{ actor.name }}
@@ -89,14 +95,22 @@
     </div>
     
     <GalleryList :galleries="galleries" :loading="loading" />
+    
+    <!-- 演员封面预览 -->
+    <ActorCoverPreview
+      v-model:visible="actorPreview.visible"
+      :actor-id="actorPreview.actorId"
+      :position="actorPreview.position"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import api from '@/utils/api.js'
 import GalleryList from '@/components/GalleryList.vue'
 import { debounce } from 'lodash-es'
+import ActorCoverPreview from '@/components/ActorCoverPreview.vue'
 
 const searchKeyword = ref('')
 const galleries = ref([])
@@ -110,10 +124,35 @@ const actorSearchKeyword = ref('')
 const actorSearchResults = ref([])
 const selectedActors = ref([])
 const searchingActors = ref(false)
+const searchResultsRef = ref(null)
+
+// 演员封面预览状态
+const actorPreview = reactive({
+  visible: false,
+  actorId: null,
+  position: {
+    top: '0px',
+    left: '0px'
+  }
+})
 
 // 标签相关
 const tagInput = ref('')
 const selectedTags = ref([])
+
+// 显示演员预览
+const showActorPreview = (event, actor) => {
+  const rect = event.target.getBoundingClientRect();
+  actorPreview.position.top = `${rect.top}px`;
+  actorPreview.position.left = `${rect.right + 10}px`;
+  actorPreview.actorId = actor.id;
+  actorPreview.visible = true;
+};
+
+// 隐藏演员预览
+const hideActorPreview = () => {
+  actorPreview.visible = false;
+};
 
 // 切换高级搜索展开/收起状态
 const toggleAdvancedSearch = () => {
@@ -155,6 +194,7 @@ const selectActor = (actor) => {
   }
   actorSearchKeyword.value = ''
   actorSearchResults.value = []
+  hideActorPreview();
 }
 
 // 移除演员
@@ -224,9 +264,16 @@ const resetSearch = () => {
   fetchGalleries()
 }
 
-// 组件挂载时获取所有图集列表
+// 点击其他地方关闭搜索结果
+const handleClickOutside = (event) => {
+  if (searchResultsRef.value && !searchResultsRef.value.contains(event.target)) {
+    actorSearchResults.value = [];
+  }
+};
+
 onMounted(() => {
   fetchGalleries()
+  document.addEventListener('click', handleClickOutside);
 })
 </script>
 
@@ -246,6 +293,7 @@ onMounted(() => {
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-sizing: border-box;
+  position: relative;
 }
 
 .gallery-list-header {
@@ -394,20 +442,35 @@ onMounted(() => {
   background: white;
   border: 1px solid #e1e1e1;
   border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   z-index: 100;
-  max-height: 200px;
+  max-height: 300px;
   overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  padding: 10px;
+  margin-top: 5px;
 }
 
 .search-result-item {
   padding: 10px 15px;
   cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
+  color: #000;
+  position: relative;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  transition: all 0.2s ease;
 }
 
 .search-result-item:hover {
   background-color: #f8f9fa;
+  border-color: #43d6b4;
 }
 
 .search-result-item:last-child {
