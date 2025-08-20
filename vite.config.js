@@ -11,9 +11,11 @@ export default defineConfig({
     }
   },
   server: {
+    host: '0.0.0.0', // 允许外部IP访问
+    port: 9980,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080/api',
+        target: 'http://192.168.5.178:18080/api',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
