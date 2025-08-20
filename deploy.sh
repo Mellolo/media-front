@@ -8,7 +8,7 @@ echo "开始部署 media-front 应用..."
 
 # 构建Docker镜像
 echo "1. 构建Docker镜像..."
-docker build -t media-front .
+docker build -f Dockerfile.nginx -t media-front .
 
 # 检查是否已经运行着同名容器
 echo "2. 检查现有容器..."
@@ -23,6 +23,7 @@ echo "3. 运行容器..."
 docker run -d \
   --name media-front \
   -p 9980:9980 \
+  -e API_BASE_URL=http://192.168.5.178:18080/api \
   media-front
 
 echo "4. 验证容器运行状态..."
