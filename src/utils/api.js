@@ -21,6 +21,11 @@ api.interceptors.request.use(
       config.headers.Authorization = `${token}`;
     }
     
+    // 为上传接口设置更长的超时时间
+    if (config.url && (config.url.includes('/video/upload') || config.url.includes('/gallery/upload'))) {
+      config.timeout = 60000; // 60秒超时时间用于上传接口
+    }
+    
     return config;
   },
   (error) => {
