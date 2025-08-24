@@ -23,7 +23,7 @@ echo "3. 运行容器..."
 docker run -d \
   --name media-front \
   -p 9980:9980 \
-  -e API_BASE_URL=http://192.168.5.178:18080/api \
+  -e API_BASE_URL=http://localhost:18080/api \
   media-front
 
 echo "4. 验证容器运行状态..."
