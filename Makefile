@@ -1,13 +1,13 @@
-.PHONY: build-push upload-deploy-script
+.PHONY: deploy build-push
 
-# Docker Registry 部署（Registry已安装）
+# 一键部署到NAS（本地构建 + 上传 + 运行）
+deploy:
+	@echo "一键部署到 NAS..."
+	chmod +x deploy-to-nas.sh
+	./deploy-to-nas.sh
+
 # 构建并推送镜像到Registry
 build-push:
 	@echo "构建并推送镜像..."
 	chmod +x build-and-push.sh
 	./build-and-push.sh
-
-# 上传部署脚本到NAS
-upload-deploy-script:
-	@echo "上传部署脚本到NAS..."
-	scp deploy-on-nas.sh mellolo@192.168.5.178:~/deploy-on-nas-front.sh
