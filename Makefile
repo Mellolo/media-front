@@ -1,12 +1,11 @@
 .PHONY: deploy build-push
 
-# 一键部署到NAS（本地构建 + 上传 + 运行）
+# 在NAS上部署（拉取镜像 + 运行容器）- 在NAS服务器上执行
 deploy:
-	@echo "一键部署到 NAS..."
-	chmod +x deploy-to-nas.sh
+	@chmod +x deploy-to-nas.sh
 	./deploy-to-nas.sh
 
-# 构建并推送镜像到Registry
+# 构建并推送镜像到Registry - 在本地执行
 build-push:
 	@echo "构建并推送镜像..."
 	chmod +x build-and-push.sh
