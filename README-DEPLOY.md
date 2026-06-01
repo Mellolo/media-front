@@ -6,7 +6,7 @@
 ```bash
 ./build-and-push.sh
 ```
-将镜像推送到NAS Registry (192.168.5.178:5000)
+将镜像推送到NAS Registry (http://192.168.5.178:5000)
 
 ### 步骤2: NAS上部署
 
@@ -14,15 +14,15 @@
 ```bash
 scp deploy-on-nas.sh mellolo@192.168.5.178:~/deploy-on-nas-front.sh
 ssh mellolo@192.168.5.178
-chmod +x ~/deploy-on-nas-front.sh && ./deploy-on-nas-front.sh
+chmod +x ~/deploy-on-nas-front.sh && sudo ./deploy-on-nas-front.sh
 ```
 
 #### 方式B: 手动执行
 ```bash
 ssh mellolo@192.168.5.178
-docker pull 192.168.5.178:5000/media-front:latest
-docker stop media-front || true && docker rm media-front || true
-docker run -d -p 9980:9980 --name media-front --restart=always 192.168.5.178:5000/media-front:latest
+sudo docker pull 192.168.5.178:5000/media-front:latest
+sudo docker stop media-front || true && sudo docker rm media-front || true
+sudo docker run -d -p 9980:9980 --name media-front --restart=always 192.168.5.178:5000/media-front:latest
 ```
 
 ---
@@ -35,8 +35,9 @@ docker run -d -p 9980:9980 --name media-front --restart=always 192.168.5.178:500
 
 ---
 
-## 前置配置
+## 前置配置（重要）
 
+### 1. 本地Docker客户端配置
 Docker Desktop → Settings → Docker Engine，添加:
 ```json
 {
@@ -45,3 +46,36 @@ Docker Desktop → Settings → Docker Engine，添加:
   ]
 }
 ```
+点击 "Apply & Restart"
+
+### 2. NAS Docker配置（必须）
+Registry使用HTTP协议，需要在NAS上配置Docker允许HTTP连接：
+
+```bash
+ssh mellolo@192.168.5.178
+
+# 配置Docker daemon
+sudo vi /etc/docker/daemon.json
+```
+
+添加内容：
+```json
+{
+  "insecure-registries": [
+    "192.168.5.178:5000"
+  ]
+}
+```
+
+重启Docker：
+```bash
+sudo systemctl restart docker
+# 或 sudo service docker restart
+```
+
+验证配置：
+```bash
+sudo docker info | grep -A 5 "Insecure Registries"
+```
+
+**配置完成后**，才能正常拉取镜像：http://192.168.5.178:5000/v2/
