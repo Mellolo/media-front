@@ -187,7 +187,6 @@ export default {
     return {
       route,
       videoData,
-      videoSrc,
       loading,
       error,
       fetchVideoData,
