@@ -41,7 +41,9 @@ export default {
       nativeSrc: '',
       hlsSrc: '',
       loading: true,
-      loadingMessage: '准备视频中...'
+      loadingMessage: '准备视频中...',
+      retryCount: 0,
+      maxRetries: 3
     };
   },
   async mounted() {
@@ -61,7 +63,7 @@ export default {
         });
         
         if (!response.ok) {
-          throw new Error('获取视频信息失败');
+          throw new Error(`获取视频信息失败: ${response.status}`);
         }
         
         const data = await response.json();
@@ -74,22 +76,38 @@ export default {
         } else {
           // 播放 HLS 流
           this.videoType = 'hls';
-          this.loadingMessage = '正在转码，请稍候...';
-          this.hlsSrc = data.playlist_url;
+          this.loadingMessage = '正在转码,请稍候...';
+          // 为HLS playlist URL添加认证token
+          this.hlsSrc = this.addTokenToUrl(data.playlist_url);
           this.loading = false;
         }
-        
+                
         // 初始化播放器
         this.initVideoJS();
         
+        // 监听播放器错误
+        this.setupErrorHandlers();
+        
       } catch (error) {
         console.error('初始化播放器失败:', error);
-        this.loadingMessage = '加载失败，请重试';
-        this.loading = true;
+        this.retryCount++;
+        
+        if (this.retryCount <= this.maxRetries) {
+          this.loadingMessage = `加载失败，${3 - this.retryCount + 1}秒后重试 (${this.retryCount}/${this.maxRetries})...`;
+          setTimeout(() => {
+            this.initializePlayer();
+          }, 3000);
+        } else {
+          this.loadingMessage = '加载失败，请刷新页面重试';
+          this.loading = true;
+        }
       }
     },
     
     initVideoJS() {
+      // 获取认证token
+      const token = localStorage.getItem('authToken');
+      
       this.player = videojs(this.$refs.videoPlayer, {
         controls: true,
         preload: 'auto',
@@ -98,9 +116,19 @@ export default {
         html5: {
           hls: {
             enableLowInitialPlaylist: true,
-            smoothQualityChange: true
+            smoothQualityChange: true,
+            // 配置HLS请求携带认证头
+            xhrSetup: (xhr, url) => {
+              if (token) {
+                xhr.setRequestHeader('Authorization', token);
+              }
+            }
           }
-        }
+        },
+        // 根据视频类型设置源
+        sources: this.videoType === 'native' 
+          ? [{ src: this.nativeSrc, type: 'video/mp4' }]
+          : [{ src: this.hlsSrc, type: 'application/x-mpegURL' }]
       });
       
       // 禁用右键菜单
@@ -121,6 +149,50 @@ export default {
       if (!token) return url;
       const separator = url.includes('?') ? '&' : '?';
       return `${url}${separator}token=${encodeURIComponent(token)}`;
+    },
+    
+    setupErrorHandlers() {
+      if (!this.player) return;
+      
+      // 监听播放器错误
+      this.player.on('error', () => {
+        const error = this.player.error();
+        console.error('播放器错误:', error);
+        
+        if (error) {
+          let errorMessage = '视频播放失败';
+          
+          switch (error.code) {
+            case 1:
+              errorMessage = '视频加载被中止';
+              break;
+            case 2:
+              errorMessage = '网络错误，请检查网络连接';
+              break;
+            case 3:
+              errorMessage = '视频解码失败，格式可能不受支持';
+              break;
+            case 4:
+              errorMessage = '视频格式不支持或文件损坏';
+              break;
+            default:
+              errorMessage = error.message || '未知错误';
+          }
+          
+          this.loadingMessage = errorMessage;
+          this.loading = true;
+        }
+      });
+      
+      // 监听加载完成
+      this.player.on('loadeddata', () => {
+        this.loading = false;
+      });
+      
+      // 监听可以播放
+      this.player.on('canplay', () => {
+        this.loading = false;
+      });
     }
   },
   beforeUnmount() {
